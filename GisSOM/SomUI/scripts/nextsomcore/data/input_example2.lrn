@@ -1,0 +1,11 @@
+# this is comment
+# % 3 = three rows
+# % 4 = four columns
+# 9 = unique value, 0 = not used for som calculations, 1 = used in som calculation
+%3 
+%4
+1	1	1	1
+data1	data2	data3	data4
+1.0	1.0	1.0	1.0
+2.0	2.0	2.0	2.0
+3.0	3.0	3.0	3.0

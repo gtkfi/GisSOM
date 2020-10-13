@@ -1,0 +1,31 @@
+﻿<UserControl x:Class="SomUI.View.InteractiveResultsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SomUI.View"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Button Name="BindingHelperButton" Visibility="Collapsed" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding OpenPlotCommand}"></Button>
+        <StackPanel>
+            <TextBlock Margin="0,20,0,0" Width="200" FontSize="16">Selection mode:</TextBlock>
+            <ComboBox Width="200" FontSize="16" SelectedIndex="0" Text="{Binding Model.InteractiveType, Mode=OneWayToSource}" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}">
+                <ComboBoxItem>Cluster</ComboBoxItem>
+                <ComboBoxItem>Som Cell</ComboBoxItem>
+            </ComboBox>
+            <WebBrowser Grid.Column="0" Height="600" Width="550" Name="myWebBrowser" Source="http://localhost:8050/" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" ToolTip="{Binding BrowserToolTip,NotifyOnTargetUpdated=True}"  TargetUpdated="ToolTip_SourceUpdated"></WebBrowser>
+            <Button Width="200" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Content="Open in web browser" Command="{Binding LaunchInWebBrowserCommand}"></Button>
+        </StackPanel>
+        <StackPanel  Grid.Column="1" >
+            <Button HorizontalAlignment="Left" Width="200" Margin="0,50,0,0" Command="{Binding SaveFileCommand}" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}">Save Image</Button>
+            <Button Padding="2" BorderThickness="0" BorderBrush="AliceBlue" Background="White" Margin="0" HorizontalAlignment="Center" Command="{Binding OpenPlotCommand}" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" CommandParameter="{Binding Model.InteractiveResultSomPlot}">
+                <Image HorizontalAlignment="Left" VerticalAlignment="Top"  DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Source="{Binding Path=Model.InteractiveResultSomPlot}" Grid.Column="1" Width="500"></Image>
+                </Button>
+        </StackPanel>
+        </Grid>
+</UserControl>

@@ -1,0 +1,257 @@
+﻿<mah:MetroWindow x:Class="SomUI.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:SomUI"
+        xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+        xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
+        xmlns:Views="clr-namespace:SomUI.View"
+        mc:Ignorable="d"
+        Title="GisSOM 1.0.0" Height="900" Width="1200"
+        GlowBrush="{DynamicResource AccentColorBrush}"
+        TitleCaps="False"
+        ResizeMode="CanResizeWithGrip" 
+        FontSize="16"
+        Closing="MainWindow_Closing"
+                 xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
+        DataContext="{Binding Source={StaticResource Locator}, Path=Main}" >
+    <!--<i:Interaction.Triggers DataContext="{Binding Source={StaticResource Locator},Path=SomViewModel}">
+        <i:EventTrigger EventName="Loaded" >
+            <i:InvokeCommandAction Command="{Binding }" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>-->
+    <mah:MetroWindow.RightWindowCommands>
+        <mah:WindowCommands>
+            <Button DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" x:Name="helpButton" Command="{Binding OpenManualCommand}">
+                <TextBlock  FontFamily="{StaticResource FontAwesome}" FontSize="16" Text=" " Grid.Column="0"></TextBlock></Button>
+            <!--<Button DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" x:Name="button" Command="{Binding ShowSettingsFlyOutCommand}">--><!--Commandiin bindi joka asetaa jotain trueksi/avaa flyoutin.--> <!--Tämä on sitä varten jos sitä pythonPathia ei näy! --><!--
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                        <ColumnDefinition Width="*"></ColumnDefinition>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock FontFamily="/Resources/fontawesome/otfs/#Font Awesome 5 Free Regular 400" FontSize="16" Text=" " Grid.Column="0"></TextBlock>
+                    <TextBlock Grid.Column="1">Settings</TextBlock>
+                </Grid>
+            </Button>-->
+            <!--<Button Click="ShowMessageDialog"> MessageDialog Test</Button>-->
+        </mah:WindowCommands>
+    </mah:MetroWindow.RightWindowCommands>
+    <mah:MetroWindow.Flyouts>
+        <mah:FlyoutsControl>
+            <mah:Flyout DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}"  x:Name="StatusFlyout" IsAutoCloseEnabled="False" AutoCloseInterval="5000" Header="Error" Position="Bottom" Theme="Dark" IsOpen="{Binding StatusFlyOutOpen, Mode=TwoWay}">
+                <TextBlock HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,20,0">
+                <TextBlock FontSize="24"  FontFamily="{StaticResource FontAwesome}" Text="" Foreground="Red"></TextBlock>    
+                <TextBlock Text="{Binding FlyOutText}"></TextBlock><!--Jos tuo fonttiviittaus resurssiin ei lähde toimiin tai ympyröity design ei miellytä niin tälle voi tehdä oman valueconverterin(myös sen joka käyttää Windings 2:ta ja P symbolia (ja vastaavaa fail symbolia)-->
+                    <!--<TextBlock Text="Deposit Density"></TextBlock>-->
+                    <!--<TextBlock  Text="{Binding RunStatus, Converter={StaticResource ToolStatusToStringConverter}}"></TextBlock>-->
+                </TextBlock>
+            </mah:Flyout>
+            <mah:Flyout DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Position="Right" x:Name="settingsFlyout" Header="Settings" Theme="Dark" IsOpen="{Binding ShowSettingsFlyOut, Mode=TwoWay}">
+                <!--Muokkaa tän sisältö kuntoon! viewi täähn ja tuleen oikialta jne.-->
+                <Views:SettingsView></Views:SettingsView>
+            </mah:Flyout>
+
+        </mah:FlyoutsControl>
+    </mah:MetroWindow.Flyouts>
+    <Window.Resources>
+        <!--<Style x:Key="PythonScrollStyle" TargetType="{x:Type TextBlock}">
+            <EventSetter RoutedEvent="MouseLeftButtonDown" 
+                 Handler="{Binding TextBlockMouseLeftButtonDownCommand, 
+                           RelativeSource={RelativeSource Self}}"/>
+        </Style>-->
+        <DataTemplate x:Key="InstallingEnvironment">
+            <StackPanel DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}">
+                <TextBlock Text="Configuring Python environment. This may take a few minutes, please wait."></TextBlock>
+                <ScrollViewer Name="PythonLogViewer" MinHeight="100" MaxHeight="400" >
+                    <TextBlock Text="{Binding PythonLogText,NotifyOnTargetUpdated=True}" TextWrapping="Wrap" SourceUpdated="TextBlock_SourceUpdated" TargetUpdated="TextBlock_SourceUpdated">
+                        
+                        <!--<TextBlock.Triggers>
+                            <EventTrigger RoutedEvent="Binding.TargetUpdated">
+                                
+                            </EventTrigger>-->
+                            <!--<i:Interaction.Triggers>
+                                <i:EventTrigger EventName="">
+                                    <i:InvokeCommandAction Command="ScrollDown" />
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>-->
+                    </TextBlock>
+                </ScrollViewer>
+                <mah:ProgressRing Foreground="{DynamicResource AccentColorBrush}" IsActive="{Binding IsBusy}"/>
+                
+            </StackPanel>
+        </DataTemplate>
+        <DataTemplate x:Key="SomContent">
+            <StackPanel DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}">
+                <!--<ComboBox Name="cmbx"                 ItemsSource="{Binding Path =ModelNames}"                                                      
+                                                      FocusManager.FocusedElement="{Binding RelativeSource={RelativeSource Mode=Self}}"
+                                                      SelectedIndex="{Binding SelectedModelIndex, Mode=TwoWay}">
+                </ComboBox>-->
+                <!--<RadioButton Name="YesButton" Margin="10" Padding="0">Yes</RadioButton>-->
+                <!--<RadioButton Margin="10,0,10,10" Padding="0" IsChecked="True">No</RadioButton>-->
+                <WrapPanel>
+                    <!--<CheckBox Name="YesButton" DataContext="{Binding Source={StaticResource Locator}, Path=GradeTonnageViewModel}" IsChecked="{Binding SaveToDepositModels}" Margin="10,20,5,10"></CheckBox>-->
+                    <!--<TextBlock Text="Save model for further use?" Margin="0,20,10,10"></TextBlock>-->
+
+                </WrapPanel>
+                <!--<UniformGrid Margin="0,5,0,20" IsEnabled="{Binding ElementName=YesButton, Path=IsChecked}" Visibility="{Binding ElementName=YesButton, Path=IsChecked, Converter={StaticResource BoolToVisibilityConverter}}">-->
+                    <!--<TextBox mah:TextBoxHelper.Watermark="Type model name" DataContext="{Binding Source={StaticResource Locator}, Path=GradeTonnageViewModel}" Text="{Binding DepositModelsExtension}" MinWidth="120"></TextBox>-->
+                    <!--AAAAA tilalle esim. viewmodeliin joku muuttuja, tai sitten Model.ExtensionFolder-->
+                <!--</UniformGrid>-->
+
+                <!--<UniformGrid Margin="0,5,0,20"  IsEnabled="{Binding ElementName=YesButton, Path=IsChecked}" Visibility="{Binding ElementName=YesButton, Path=IsChecked, Converter={StaticResource BoolToVisibilityConverter}}">
+                    --><!--Visibility bindi viewmodeliin.--><!--
+                    <TextBlock Foreground="Red" Text="Please insert model name." DataContext="{Binding Source={StaticResource Locator}, Path=GradeTonnageViewModel}" Visibility="{Binding NoFolderNameGiven, Converter={StaticResource BoolToVisibilityConverter}}"></TextBlock>
+                    --><!--AAAAA tilalle esim. viewmodeliin joku muuttuja, tai sitten Model.ExtensionFolder--><!--
+                </UniformGrid>-->
+                <Button Margin="20"  Width="180" HorizontalAlignment="Left" Style="{StaticResource AccentedSquareButtonStyle}" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding SelectPythonFileCommand}">
+                    <TextBlock>Choose python path</TextBlock>
+                </Button>
+                <!--Eli Nyt tämä tarvii vielä buttonin jonka commandina on relaycommand(jonka commandina on selectModel, joka käyttää sitten tuotabindattua DepositModelsExtensionia DepositModels kansion alle kopiointiin. -->
+                <!--SelectModelCommand on jo olemassa.-->
+            </StackPanel>
+        </DataTemplate>
+
+        <Style TargetType="{x:Type Dialog:MessageDialog}"
+        x:Key="NewCustomDialogStyle"
+        BasedOn="{StaticResource {x:Type Dialog:BaseMetroDialog}}">
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type Dialog:MessageDialog}">
+                        <ControlTemplate.Resources>
+                            <Storyboard x:Key="DialogShownStoryboard">
+                                <DoubleAnimation AccelerationRatio=".9"
+                                            BeginTime="0:0:0"
+                                            Duration="0:0:0.2"
+                                            Storyboard.TargetProperty="Opacity"
+                                            To="1" />
+                            </Storyboard>
+                            <!--<Style x:Key="AccentedDialogSquareButton"
+                BasedOn="{StaticResource MetroFlatButton}"
+                TargetType="{x:Type Button}">
+                                <Setter Property="Background" Value="{DynamicResource AccentColorBrush}" />
+                                <Setter Property="Foreground" Value="DarkCyan" />
+                                <Setter Property="mah:ControlsHelper.ContentCharacterCasing" Value="Upper" />
+                            </Style>
+
+                            <Style x:Key="AccentedDialogHighlightedSquareButton"
+                BasedOn="{StaticResource MetroFlatButton}"
+                TargetType="{x:Type Button}">
+                                <Setter Property="Background" Value="{DynamicResource HighlightBrush}" />
+                                <Setter Property="Foreground" Value="DarkCyan" />
+                                <Setter Property="mah:ControlsHelper.ContentCharacterCasing" Value="Upper" />
+                            </Style>-->
+
+                        </ControlTemplate.Resources>
+
+                        <Grid Background="{TemplateBinding Background}">
+                            <!--<Grid Background="DarkBlue">-->
+                            <Border FocusVisualStyle="{x:Null}"
+                            Focusable="False">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="Auto" />
+                                        <RowDefinition Height="*" />
+                                        <RowDefinition Height="Auto" />
+                                    </Grid.RowDefinitions>
+                                    <ContentPresenter Grid.Row="0"
+                                                Content="{TemplateBinding DialogTop}" />
+                                    <Grid Grid.Row="1" DataContext="{Binding Source={StaticResource Locator}, Path=Main}">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="10*" />
+                                            <ColumnDefinition Width="80*" />
+                                            <ColumnDefinition Width="10*" />
+                                        </Grid.ColumnDefinitions>
+                                        <!--Content area-->
+                                        <Grid Grid.Column="1"
+                                        Margin="0 10 0 0">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto" />
+                                                <RowDefinition Height="*" />
+                                            </Grid.RowDefinitions>
+                                            <StackPanel DataContext="{Binding Source={StaticResource Locator}, Path=Main}">
+                                                <TextBlock Grid.Row="0"
+                                                FontSize="{DynamicResource DialogTitleFontSize}"
+                                                Foreground="{TemplateBinding Foreground}"
+                                                Text="{TemplateBinding Title}"
+                                                TextWrapping="Wrap" />
+
+                                                <ContentControl DataContext="{Binding Source={StaticResource Locator}, Path=Main}" Content="{Binding}">
+                                                    <ContentControl.Style>
+                                                        <Style TargetType="ContentControl">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding DialogContentSource, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Value="SomViewModel" >
+                                                                    <Setter Property="ContentTemplate" Value="{StaticResource InstallingEnvironment}" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </ContentControl.Style>
+                                                </ContentControl>
+                                            </StackPanel>
+                                            <ContentPresenter Grid.Row="1"
+                                                        Content="{TemplateBinding Content}" />
+                                        </Grid>
+                                    </Grid>
+
+                                    <ContentPresenter Grid.Row="2"
+                                                Content="{TemplateBinding DialogBottom}" />
+                                </Grid>
+                            </Border>
+                        </Grid>
+                        <ControlTemplate.Triggers>
+
+                            <!--<Trigger Property="FocusManager.FocusedElement" Value="true">
+                                <Setter Property="FocusManager.FocusedElement" Value="cbx"/>
+                            </Trigger>-->
+                            <!--Niin.. eihän nää varmaan toimi kun sitä buttonia ei määritetä tässä?-->
+                            <Trigger Property="IsKeyboardFocused" Value="true">
+                                <Setter Property="BorderBrush" Value="Red" />
+                                <Setter Property="BorderThickness" Value="100" />
+                                <Setter Property="Background" Value="DarkCyan" />
+
+                            </Trigger>
+                            <!--<Trigger Property="IsKeyboardFocusWithin" Value="true">
+                                <Setter Property="BorderBrush" Value="Red" />
+                                <Setter Property="BorderThickness" Value="100" />
+                                <Setter Property="Background" Value="DarkCyan" />
+                            </Trigger>-->
+                            <!--<i:Interaction.Triggers>
+                                <i:EventTrigger EventName="Loaded">
+                                    <i:InvokeCommandAction Command="{Binding LoadedCommand}" />
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>-->
+                            <!--<i:Interaction.Triggers>
+                                <i:EventTrigger EventName="MouseDoubleClick">
+                                    <i:InvokeCommandAction Command="{Binding CommandToBindTo}" 
+                                CommandParameter="{Binding CommandParameterToBindTo}" />
+                                </i:EventTrigger>
+                            </i:Interaction.Triggers>-->
+                            <EventTrigger RoutedEvent="Loaded">
+                                <EventTrigger.Actions>
+                                    <BeginStoryboard Storyboard="{StaticResource DialogShownStoryboard}" />
+                                </EventTrigger.Actions>
+                            </EventTrigger>
+
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!--<Style TargetType="Button">
+            <Style.Triggers>
+                <Trigger Property="IsKeyboardFocusWithin" Value="true">
+                    <Setter Property="Background" Value="DarkCyan"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>-->
+        <!--set previously defined dialog style as global template-->
+        <Style TargetType="{x:Type Dialog:MessageDialog}" BasedOn="{StaticResource NewCustomDialogStyle}" />
+    </Window.Resources>
+    <ContentPresenter x:Name="MainArea" 
+                      DataContext="{Binding Source={StaticResource Locator}, Path=Main}"  
+                      Content="{Binding ActiveView, Mode=TwoWay}"/>
+    
+</mah:MetroWindow>

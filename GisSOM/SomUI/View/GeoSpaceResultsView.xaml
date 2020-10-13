@@ -1,0 +1,61 @@
+﻿<UserControl x:Class="SomUI.View.GeoSpaceResultsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:SomUI.View"
+             mc:Ignorable="d" 
+             xmlns:service="clr-namespace:SomUI.Service"           
+             xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <service:CollectionCountToVisibilityConverter x:Key="CollectionCountToVisibilityConverter" />
+    </UserControl.Resources>
+    <Grid>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" >
+            <StackPanel>
+                <Button Name="BindingHelperButton" Visibility="Collapsed" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding OpenPlotCommand}"></Button>
+                <mah:MetroProgressBar DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsIndeterminate="True" Width="400" Margin="40" Visibility="{Binding GeoSpaceImageList.Count, Converter={StaticResource CollectionCountToVisibilityConverter}}"></mah:MetroProgressBar>
+                <ItemsControl DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" ItemsSource="{Binding Path=GeoSpaceImageList}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <!-- use the ItemsPerRow attached property to dynamically add rows -->
+                            <UniformGrid/>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Margin="0" HorizontalAlignment="Center"  Command="{Binding ElementName=BindingHelperButton, Path=Command}" CommandParameter="{Binding}">
+                                <!--Binding=path-->
+                                <Button.Template>
+                                    <ControlTemplate>
+                                        <Border x:Name="theBorder"
+                        BorderBrush="Transparent"
+                        BorderThickness="2">
+                                            <Image Source="{Binding}" ToolTipService.ShowDuration="0">
+                                                <Image.ToolTip>
+                                                    <ToolTip DataContext="{Binding PlacementTarget, 
+            RelativeSource={RelativeSource Self}}">
+                                                        <Border BorderBrush="Black" BorderThickness="1" Margin="5,7,5,5">
+                                                            <Image Source="{Binding Source}" Stretch="None"  />
+                                                        </Border>
+                                                    </ToolTip>
+                                                </Image.ToolTip>
+                                            </Image>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="BorderBrush" TargetName="theBorder"
+                                Value="LightSkyBlue"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Button.Template>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>
