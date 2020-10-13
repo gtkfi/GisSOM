@@ -1,0 +1,39 @@
+Flask>=1.0.2
+flask-compress
+plotly
+dash_renderer==1.0.1
+dash-core-components==1.1.2
+dash-html-components==1.0.1
+dash-table==4.2.0
+future
+
+[dev]
+dash_flow_example==0.0.5
+dash-dangerously-set-inner-html
+six
+mock
+flake8
+PyYAML>=5.1.1
+fire
+coloredlogs
+
+[dev:python_version < "3.7"]
+pylint==1.9.4
+
+[dev:python_version == "2.7"]
+virtualenv
+
+[dev:python_version == "3.7"]
+pylint==2.3.1
+astroid==2.2.5
+
+[testing]
+pytest
+pytest-sugar
+pytest-mock
+lxml
+selenium
+percy
+requests[security]
+beautifulsoup4
+waitress
