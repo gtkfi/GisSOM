@@ -1,0 +1,3 @@
+include nextsomcore/somoclu/_somoclu_wrap.pyd
+include nextsomcore/somoclu/vcomp90.dll
+include test/testdata/*.*

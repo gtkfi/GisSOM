@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29728.190
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SomUI", "SomUI\SomUI.csproj", "{2EEED364-B45C-46A4-A203-59B1648B6379}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "GisSOM_Installer", "GisSOM_Installer\GisSOM_Installer.vdproj", "{02BB9425-4E81-4BB5-97ED-15CCFDD5A9FF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{2EEED364-B45C-46A4-A203-59B1648B6379}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2EEED364-B45C-46A4-A203-59B1648B6379}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2EEED364-B45C-46A4-A203-59B1648B6379}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2EEED364-B45C-46A4-A203-59B1648B6379}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02BB9425-4E81-4BB5-97ED-15CCFDD5A9FF}.Debug|Any CPU.ActiveCfg = Debug
+		{02BB9425-4E81-4BB5-97ED-15CCFDD5A9FF}.Release|Any CPU.ActiveCfg = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {BC4DC74B-B765-4E58-A494-58E2543547E3}
+	EndGlobalSection	
+EndGlobal
