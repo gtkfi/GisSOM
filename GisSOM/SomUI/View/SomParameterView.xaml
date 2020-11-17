@@ -395,7 +395,7 @@
                     </WrapPanel>
                 </UniformGrid>
                 <UniformGrid VerticalAlignment="Top">
-                    <TextBlock  VerticalAlignment="Top" Margin="20,30,20,20" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Text="{Binding PythonLogText,NotifyOnTargetUpdated=True}"/>
+                    <TextBlock TextWrapping="Wrap" VerticalAlignment="Top" Margin="20,30,20,20" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Text="{Binding PythonLogText,NotifyOnTargetUpdated=True}"/>
                 </UniformGrid>
             </StackPanel>
             <!--<StackPanel Grid.Column="1" Grid.Row="1" Visibility="Hidden" Width="Auto"> -->

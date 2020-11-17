@@ -9,12 +9,12 @@ If input contains --xmlfile parameter, other command line parameters will be ign
 If Initial codebook parameter is given, Initialization parameter is ignored, and the given som x and som y dimensions must match those of the existing codebook.
 @author: Janne Kallunki, Sakari Hautala
 """
-import warnings
-with warnings.catch_warnings():
-    import argparse
-    import xml.etree.ElementTree as ET
-    from nextsomcore import NxtSomCore
-    import pickle
+#import warnings
+#with warnings.catch_warnings():
+import argparse
+import xml.etree.ElementTree as ET
+from nextsomcore import NxtSomCore
+import pickle
 #import time
 
 
@@ -56,6 +56,9 @@ def parse_command_line():
     parser.add_argument('--xmlfile', type=str, default='none',dest='xmlfile',help='SOM inputs as an xml file')
     parser.add_argument('--output_folder', type=str, default="",dest='output_folder',help='Folder to save som dictionary and cluster dictionary')
     parser.add_argument('--geotiff_input', type=str, default=None, dest='geotiff_input')
+    parser.add_argument('--normalized', type=str, default="False", dest='normalized',help='Whether the data has been normalized or not')
+    parser.add_argument('--minN', type=str, default=0, dest='minN',help='Minimum value for normalization')
+    parser.add_argument('--maxN', type=str, default=1, dest='maxN',help='Maximum value for normalization')
     return parser.parse_args()
 
 """Run SOM training using command line input, and save the results. Uses NxtSomCore package to do the actual work.
@@ -97,9 +100,11 @@ def run_commandLine(args):
         som['clusters']=nxtsomcore.clusters(som,args.kmeans_min,args.kmeans_max,args.kmeans_init,output_folder)     
     #print("Clustering took: --- %s seconds ---" % (time.time() - start_time))
     #start_time = time.time()
+    
     if args.outgeofile is not None:
-        nxtsomcore.save_geospace_result(args.outgeofile, header, som, output_folder)  #save geospace results
-    nxtsomcore.save_somspace_result(args.output_file_somspace, header, som)                 #save somspace results
+        nxtsomcore.save_geospace_result(args.outgeofile, header, som, output_folder, args.normalized,args.minN, args.maxN)  #save geospace results
+    
+    nxtsomcore.save_somspace_result(args.output_file_somspace, header, som, output_folder, args.normalized,args.minN, args.maxN)                 #save somspace results
     #print("saving som and geo results took: --- %s seconds ---" % (time.time() - start_time))
     #start_time = time.time()
     if(args.geotiff_input is not None):

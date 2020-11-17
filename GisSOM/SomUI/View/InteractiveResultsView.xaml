@@ -18,7 +18,7 @@
                 <ComboBoxItem>Cluster</ComboBoxItem>
                 <ComboBoxItem>Som Cell</ComboBoxItem>
             </ComboBox>
-            <WebBrowser Grid.Column="0" Height="600" Width="550" Name="myWebBrowser" Source="http://localhost:8050/" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" ToolTip="{Binding BrowserToolTip,NotifyOnTargetUpdated=True}"  TargetUpdated="ToolTip_SourceUpdated"></WebBrowser>
+            <WebBrowser Grid.Column="0" Height="600" Width="400" Name="myWebBrowser" Source="http://localhost:8050/" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" ToolTip="{Binding BrowserToolTip,NotifyOnTargetUpdated=True}"  TargetUpdated="ToolTip_SourceUpdated"></WebBrowser>
             <Button Width="200" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Content="Open in web browser" Command="{Binding LaunchInWebBrowserCommand}"></Button>
         </StackPanel>
         <StackPanel  Grid.Column="1" >

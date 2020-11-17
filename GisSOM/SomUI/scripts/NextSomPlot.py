@@ -16,26 +16,26 @@ inputs:
 7)Model.NorthingColumnIndex
 8)Model.Working_Folder
 """
-import warnings
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore")
-    import numpy as np
-    import matplotlib as mpl
-    import matplotlib.pyplot as plt
-    import argparse
-    import seaborn as sns
-    import sys
-    import pickle
-    from sklearn.model_selection import train_test_split
-    import pandas as pd
-    from matplotlib.offsetbox import AnchoredOffsetbox, TextArea, HPacker, VPacker
-    from matplotlib.ticker import FormatStrFormatter
-    from loadfile import read_lrn_header
-    from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
-    import math
-    import os
-    from mpl_toolkits.axes_grid1 import make_axes_locatable
-    from matplotlib.collections import RegularPolyCollection
+#import warnings
+#with warnings.catch_warnings():
+#    warnings.filterwarnings("ignore")
+import numpy as np
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import argparse
+import seaborn as sns
+import sys
+import pickle
+from sklearn.model_selection import train_test_split
+import pandas as pd
+from matplotlib.offsetbox import AnchoredOffsetbox, TextArea, HPacker, VPacker
+from matplotlib.ticker import FormatStrFormatter
+from loadfile import read_lrn_header
+from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
+import math
+import os
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+from matplotlib.collections import RegularPolyCollection
 #print("Start plotting")
 #start_time2 = time.time()
 
@@ -64,11 +64,12 @@ parser.add_argument('--input_file',nargs='?', help='Input file(*.lrn)')
 parser.add_argument('--dir',nargs='?', help='Input file(*.lrn)')
 parser.add_argument('--original_data_dir', default=None, dest="original_data_dir", help='location of input columns with original data')
 parser.add_argument('--grid_type',nargs='?', help='grid type (square or hexa)')
-parser.add_argument('--redraw',nargs='?', help=' #whether to draw all plots, or only those required for clustering (true: draw all. false:draw only for clustering). TODO: rename to redraw_all or some such')
+parser.add_argument('--redraw',nargs='?', help=' #whether to draw all plots, or only those required for clustering (true: draw all. false:draw only for clustering).')
 parser.add_argument('--outgeofile', default=None, dest="outgeofile", help='#som geospace results txt file')
 parser.add_argument('--eastingIndex', default=None, dest="eastingIndex", help='index of easting column')
 parser.add_argument('--northingIndex', default=None, dest="northingIndex", help='index of northing column')
 parser.add_argument('--labelIndex', default=None, dest="labelIndex", help='index of label column')
+parser.add_argument('--dataType', default=None, dest="dataType", help='index of label column')
 args=parser.parse_args()
 
 outsomfile=args.outsomfile  #som results txt file
@@ -79,6 +80,7 @@ input_file=args.input_file  #original input file
 dir=args.dir                #output directory of GisSOM
 grid_type=args.grid_type    #grid type 
 redraw=args.redraw          #whether to draw all plots, or only those required for clustering (true: draw all. false:draw only for clustering)
+dataType=args.dataType
 outgeofile=None
 eastingIndex=None
 northingIndex=None
@@ -91,6 +93,7 @@ if args.northingIndex is not None:
 if args.labelIndex is not None:
     labelIndex=args.labelIndex
 
+    
 
 
 
@@ -106,7 +109,7 @@ dataPrepDir=dir+"/DataPreparation"
 dataPrepDir2=dir+"/DataForOriginalPlots/DataPreparation"
 
 som=pd.read_csv(outsomfile, delimiter=' ', header=None)
-som_headers=som.iloc[0] #get headers from original input file. could this be skipped or at least changed so that the whole file is not read? this is unnecessary work. TODO HOX TODO FIX
+som_headers=som.iloc[0] 
 if outgeofile is not None:
     geo_data=np.genfromtxt(outgeofile, skip_header=(1), delimiter=' ')
 som_table=np.zeros((somx,somy))#empty somx*somy sized table for som plots
@@ -120,30 +123,11 @@ columns=[]
 firstFileName=""
 index=0
 
-for filename in os.listdir(dataPrepDir2): #load individual columns for scatterplots and boxplots
-    index=index+1
-    if(filename!="EditedData.lrn"):
-        column=np.load(dataPrepDir2+"/"+filename,allow_pickle=True)[4:]
-        column=column.reshape(-1,1)
-        header=str(column[1])
-        header=header.replace("[", "")
-        header=header.replace("]", "")
-        header=header.replace("\'", "")   
-        if(header.lower()!="x" and header.lower()!="y" and header.lower()!="z"):    
-            columns=column 
-            firstFileName=filename
-            break;
-for filename in os.listdir(dataPrepDir2):
-    if(filename!="EditedData.lrn"):
-        column=np.load(dataPrepDir2+"/"+filename,allow_pickle=True)[4:]
-        if(str(column[1]).lower()!="x" and str(column[1]).lower()!="y" and str(column[1]).lower()!="z" and filename!=firstFileName): #rather: if type=1? hmm. but this accesses the unedited ones. you could pass northingIndex and eastingIndex, but if the user goes messing with the original inputs, this gets sorta messed up.
-            column=column.reshape(-1,1)
-            columns=np.hstack((columns,column))
 if(input_file[-3:].lower()=="lrn"):     #if input is lrn file
     header=read_lrn_header(input_file)  
     actualNumberOfColumns=header['cols']-1         
 else:
-    actualNumberOfColumns=len(som_headers)-3#this is really not the actual number of columns...should be renamed...
+    actualNumberOfColumns=len(som_headers)-3#this is really not the actual number of columns...should be renamed.
 
 #Generate colormaps and ticks for clustering
 clusters=int(max(som_data[:,len(som_data[0])-1])+1)
@@ -234,7 +218,8 @@ def plot_hexa(grid,
              w=1080,
             dpi=72.,
             title='SOM Hit map',
-            colmap='jet'):
+            colmap='jet',
+            ptype='scatter'):
     n_centers = grid['centers']
     x, y = grid['x'], grid['y']
     if(somx<somy):
@@ -259,46 +244,64 @@ def plot_hexa(grid,
     ypix = height - ypix
     
     # discover radius and hexagon
-    apothem = 1.8 * (xpix[1] - xpix[0]) / math.sqrt(3)#.9 
-    area_inner_circle = math.pi * (apothem ** 2)
-    collection_bg = RegularPolyCollection(
-        numsides=6,  
-        rotation=0,
-        sizes=(area_inner_circle,),
-        edgecolors = (0, 0, 0, 1),
-        array= d_matrix,
-        cmap = colmap,
-        offsets = n_centers,
-        transOffset = ax.transData,
-    )
+    #apothem = 1.8 * (xpix[1] - xpix[0]) / math.sqrt(3)#.9 
+    if(ptype=='scatter'): #if the data type is csv with gaps
+        apothem=(xpix[1] - xpix[0]) 
+        area_inner_circle = abs(apothem) 
+        collection_bg = RegularPolyCollection(
+            numsides=4,  
+            rotation=150,
+            sizes=(area_inner_circle,),
+            edgecolor="none",
+            #edgecolors = (0, 0, 0, 1),
+            array= d_matrix,
+            cmap = colmap,
+            offsets = n_centers,
+            transOffset = ax.transData,
+        )
+    else: #regular hexa plot
+        apothem = 1.8 * (xpix[1] - xpix[0]) / math.sqrt(3)#.9 oli
+        area_inner_circle = math.pi * (apothem ** 2)
+        collection_bg = RegularPolyCollection(
+            numsides=6,  # a hexagon
+            rotation=0,
+            sizes=(area_inner_circle,),
+            edgecolors = (0, 0, 0, 1),
+            array= d_matrix,
+            cmap = colmap,
+            offsets = n_centers,
+            transOffset = ax.transData,
+        )
     ax.add_collection(collection_bg, autolim=True)
     
     ax.axis('off')
     ax.autoscale_view()
     ax.set_title(title)
     divider = make_axes_locatable(ax)
-    cax = divider.append_axes("right", size="10%", pad=0.05)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
     #plt.colorbar(collection_bg, cax=cax)#cm.ScalarMappable(norm=norm, cmap=cmap)
     if(colmap=='jet'):
-        cbar=plt.colorbar(collection_bg, cax=cax)
+        cbar=plt.colorbar(collection_bg, cax=cax,ticklocation='right', aspect=10)
         cbar.ax.invert_yaxis()
+        cbar.ax.tick_params(axis='y', direction='out', pad=30)
     else:
         colmap2=colmap
         bounds = np.linspace(0, clusters, clusters+1)
         bounds2 = np.linspace(0.5, clusters+0.5, clusters+1.5)
         norm = mpl.colors.BoundaryNorm(bounds, colmap2.N)
         cbar=mpl.colorbar.ColorbarBase(cax, cmap=colmap2, norm=norm,
-        spacing='proportional', ticks=bounds2, boundaries=bounds, format='%1i')
+        spacing='proportional',ticklocation='right', ticks=bounds2, boundaries=bounds, format='%1i')
         cbar.ax.invert_yaxis()
+        cbar.ax.tick_params(axis='y', direction='out', pad=30)
     plt.gca().invert_yaxis()
     return ax
 
 
 
 """
-Plot geospace plots & q-error 
+Plot geospace plots & q-error if type is grid
 """
-def plot_geospace_results():
+def plot_geospace_results_grid():
     global geo_data
     global geo_headers
     global som_data
@@ -310,6 +313,7 @@ def plot_geospace_results():
         df.columns = ['X_value','Y_value','Z_value']
         df['Z_value'] = pd.to_numeric(df['Z_value'])
         pivotted= df.pivot('Y_value','X_value','Z_value')
+        #pivotted=pivotted.fillna(value='nan')
         sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
         ax=sns.heatmap(pivotted,cmap='jet', square=True, linewidths=0, xticklabels="auto", yticklabels="auto")
         scalebar = AnchoredSizeBar(ax.transData, 3.4, str(geo_data[4][0] - geo_data[0][0]), 1, pad=0.4,
@@ -356,6 +360,78 @@ def plot_geospace_results():
         plt.cla()
         plt.close()
 
+"""
+Plot geospace plots & q-error if type is scatter
+"""
+def plot_geospace_results_scatter():
+    global geo_data
+    global geo_headers
+    global som_data
+    #x=max(geo_data[:,0])-min(geo_data[:,0])
+    #y=max(geo_data[:,1])-min(geo_data[:,1])
+
+    centers=[]     
+    for i in range(0, len(geo_data)):	
+        centers.append([geo_data[i][0],geo_data[i][1]])
+    grid={'centers':np.array(centers), 
+          'x':np.array([len(geo_data)]),
+          'y':np.array([len(geo_data)])}
+
+    for i in range(0, len(som_data[0])-3): 
+        x=geo_data[:,0]
+        y=geo_data[:,1]
+        z=geo_data[:,(len(som_data[0])+1+i)]
+        sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
+        mpl.rcParams.update({'font.size': 30})
+        ax = plot_hexa(grid, z,title=som_headers[i], ptype='scatter')   
+        
+        #scalebar = AnchoredSizeBar(ax.transData, 3.4, str(geo_data[4][0] - geo_data[0][0]), 1, pad=0.4,
+        #                            sep=5, borderpad=0.1,
+        #                            size_vertical=0.2)
+        #ax.add_artist(scalebar)
+        # Set tick labels to integers:
+        """
+        fmt = '{:0.0f}'
+        xticklabels = []
+        for item in ax.get_xticklabels():
+            item.set_text(fmt.format(float(item.get_text())))
+            xticklabels += [item]
+        yticklabels = []
+        for item in ax.get_yticklabels():
+            item.set_text(fmt.format(float(item.get_text())))
+            yticklabels += [item]
+        ax.set_xticklabels(xticklabels)
+        ax.set_yticklabels(yticklabels)
+
+        every_nth = round((len(ax.xaxis.get_ticklabels()))/2)
+        if(every_nth==0):#temp solution, for data sets with only 1 x coordinate
+            every_nth=1
+        every_nth_y = round((len(ax.yaxis.get_ticklabels()))/2)
+        if(every_nth_y==0):#temp solution, for data sets with only 1 x coordinate
+            every_nth_y=1
+        for n, label in enumerate(ax.xaxis.get_ticklabels()):
+            if n % every_nth != 0:
+                label.set_visible(False)
+        for n, label in enumerate(ax.yaxis.get_ticklabels()):
+            if n % every_nth_y != 0:
+                label.set_visible(False)
+        ax.xaxis.get_ticklabels()[-1].set_visible(True)
+        ax.yaxis.get_ticklabels()[-1].set_visible(True)
+        """
+        plt.yticks(rotation=90)
+        plt.yticks(ha='right')
+        plt.yticks(va='bottom')
+        plt.xticks(rotation=0)
+        plt.xticks(ha='left')
+        ax.invert_yaxis()
+        ax.set_title(geo_headers[len(som_data[0])+i+2])
+        plt.tight_layout()
+        ax.figure.savefig(working_dir+'/Geo/geoplot_'+str(i+2)+'.png', dpi=300)
+        plt.clf()
+        plt.cla()
+        plt.close()
+        mpl.rcParams.update({'font.size': 12})  
+
 
 """
 Draw Som result plots
@@ -375,7 +451,7 @@ def draw_som_results():
         else:
             hits=som_data[:,j]
             mpl.rcParams.update({'font.size': 30})
-            ax = plot_hexa(grid, hits,title=som_headers[j+1])   
+            ax = plot_hexa(grid, hits,title=som_headers[j+1], ptype='grid')   
             mpl.rcParams.update({'font.size': 12})
             ax.set_title(som_headers[j]) 
         ax.figure.savefig(working_dir+'/Som/somplot_' +str(j-1)+'.png')#Creating the folder is done in C# side of things.    
@@ -399,7 +475,7 @@ def draw_som_clusters():
     else:
         hits=som_data[:,len(som_data[0])-1]
         mpl.rcParams.update({'font.size': 30})
-        ax = plot_hexa(grid, hits,colmap=discrete_cmap_2)
+        ax = plot_hexa(grid, hits,colmap=discrete_cmap_2, ptype='grid')
     ax.set_title(som_headers[len(som_headers)-1])
     ax.figure.savefig(working_dir+'/Som/somplot_' + str(len(som_data[0])-2) + '.png')
     plt.clf()
@@ -433,15 +509,13 @@ def draw_som_clusters():
         headers = ["label", "som", "datapoint"]
         df.to_csv(working_dir+'/labels.csv', index=False, header=headers)
 
-#if !redraw #in case the function was called for redrawing after selecting a different clustering result. so that we can skip stuff we don't have to redraw to speed things up
-if(redraw!="false"):
-    draw_som_results()
+
 
 
 """
 Plot geospace clusters, if there is more than 1 cluster
 """
-def plot_geospace_clusters():
+def plot_geospace_clusters_grid():
     global geo_data
     x=geo_data[:,0]
     y=geo_data[:,1]
@@ -499,65 +573,101 @@ def plot_geospace_clusters():
     plt.cla()
     plt.close()       
     
+    
+def plot_geospace_clusters_scatter():
+    global geo_data
+    x=geo_data[:,0]
+    y=geo_data[:,1]
+    z=geo_data[:,(4)]  
+    
+    centers=[]     
+    for i in range(0, len(geo_data)):	
+        centers.append([geo_data[i][0],geo_data[i][1]])
+    grid={'centers':np.array(centers), 
+          'x':np.array([len(geo_data)]),
+          'y':np.array([len(geo_data)])}    
+    mpl.rcParams.update({'font.size': 30})
+    ax = plot_hexa(grid, z,title="clusters",colmap=discrete_cmap_2, ptype='scatter')   
+    # Set tick labels to integers:
+    """
+    fmt = '{:0.0f}'
+    xticklabels = []
+    for item in ax.get_xticklabels():
+        item.set_text(fmt.format(float(item.get_text())))
+        xticklabels += [item]
+    yticklabels = []
+    for item in ax.get_yticklabels():
+        item.set_text(fmt.format(float(item.get_text())))
+        yticklabels += [item]
+    ax.set_xticklabels(xticklabels)
+    ax.set_yticklabels(yticklabels)
+
+    every_nth = round((len(ax.xaxis.get_ticklabels()))/2)
+    if(every_nth==0):#temp solution, for data sets with only 1 x coordinate
+        every_nth=1
+    every_nth_y = round((len(ax.yaxis.get_ticklabels()))/2)
+    if(every_nth_y==0):#temp solution, for data sets with only 1 y coordinate
+        every_nth_y=1
+    for n, label in enumerate(ax.xaxis.get_ticklabels()):
+        if n % every_nth != 0:
+            label.set_visible(False)
+    for n, label in enumerate(ax.yaxis.get_ticklabels()):
+        if n % every_nth_y != 0:
+            label.set_visible(False)
+    ax.xaxis.get_ticklabels()[-1].set_visible(True)
+    ax.yaxis.get_ticklabels()[-1].set_visible(True)
+    """
+    
+    #ax.yaxis.set_major_formatter(ticker.FormatStrFormatter('%5.0d'))
+    #ax.xaxis.set_major_formatter(ticker.ScalarFormatter(useMathText=True))
+    plt.yticks(rotation=90)
+    plt.yticks(ha='right')
+    plt.yticks(va='bottom')
+    plt.xticks(rotation=0)
+    plt.xticks(ha='left')
+    ax.invert_yaxis()
+    ax.set_title('cluster')
+    plt.tight_layout()
+    ax.figure.savefig(working_dir+'/Geo/geoplot_'+str(1)+'.png', dpi=300)
+    plt.clf()
+    plt.cla()
+    plt.close()   
+    mpl.rcParams.update({'font.size': 12})  
 
 """
-Plot boxplots and scatterplots using original non-edited data.
+Plot boxplots using som data.
 """
 
 def draw_box_andscatterplots():
-    global columns
+    
     global som_dict
-    global geo_data
+    global geo_data #som_data
     counter=0
     mpl.rcParams.update({'font.size': 12})  
-    sampleSize=4000
-    clusters_2d=som_dict['clusters']
-    bmus=som_dict['bmus']
+    #sampleSize=4000
+    #clusters_2d=som_dict['clusters']
+    #bmus=som_dict['bmus']
     cluster_col=[]
-    for x in range (len(bmus)):
-        cluster_col.append(clusters_2d[bmus[x][1]][bmus[x][0]])
-    cluster_nparray=np.asarray(cluster_col)   
 
-    if(len(columns)<=sampleSize*2):
-        clusters_unique=np.unique(cluster_nparray)
-        for k in range(len(discrete_cmap)-1,-1,-1):
-            if(k not in clusters_unique):
-                discrete_cmap.pop(k)
-    for i in range(0, len(columns[0])):             
-              
-        z=columns[2:,i]
+    for i in range(0,len(som_data)): 
+        cluster_col.append(som_data[i][len(som_data[0])-1]);
+    cluster_nparray=np.asarray(cluster_col)   
+    clusters_unique=np.unique(cluster_nparray)
+    for k in range(len(discrete_cmap)-1,-1,-1):
+        if(k not in clusters_unique):
+            discrete_cmap.pop(k)  
+    for i in range(3,len(som_data[0])-1):#3 to skip x y and cluster col            
+        z=som_data[:,i]      
         ax=sns.boxplot(x=cluster_nparray.astype(float), y=z.astype(float), hue=cluster_nparray.astype(float) ,dodge=False, palette=discrete_cmap)       
-        ax.set_title(columns[1,i])    
+        ax.set_title(som_headers[i-1])
         ax.xaxis.set_major_formatter(FormatStrFormatter('%.0f')) 
         ax.legend(bbox_to_anchor=(1.05, 1),loc=0,handlelength=2,fontsize=8 ,borderaxespad=0.)   
         plt.tight_layout()           
-        ax.figure.savefig(working_dir+'/Boxplot/boxplot_' +str(i+2)+'.png')   
+        ax.figure.savefig(working_dir+'/Boxplot/boxplot_' +str(i)+'.png')   
         plt.clf()
         plt.cla()
         plt.close()        
         
-        if(len(columns)>sampleSize*2):
-            inputForStratify=np.hstack((columns[2:], np.reshape(geo_data[:,(4)],(-1, 1))))
-            stratifiedData=train_test_split(inputForStratify, test_size=sampleSize, stratify=geo_data[:,(4)])
-            clusters_unique=np.unique(stratifiedData[1][0:,len(stratifiedData[1][0])-1])
-            for k in range(len(discrete_cmap)-1,-1,-1):
-                if(float(k) not in clusters_unique.astype(float)):
-                    discrete_cmap.pop(k)#if a cluster is unrepresented after stratifying input, pop it out of the color palette.
-        for j in range(i, len(columns[0])-1):   #Draw Scatterplots:  
-            counter=counter+1            
-            if(len(columns)>sampleSize*2):                          
-                ax=sns.scatterplot(x=stratifiedData[1][0:,i].astype(float), y=stratifiedData[1][0:,j+1].astype(float), hue=stratifiedData[1][0:,len(stratifiedData[1][0])-1].astype(float), palette=discrete_cmap,legend="full")   #, legend="full"          
-            else: 
-                ax=sns.scatterplot(x=columns[2:,i].astype(float), y=columns[2:,j+1].astype(float), hue=cluster_nparray.astype(float), palette=discrete_cmap,legend="full")   #, legend="full"             
-            ax.set_xlabel(columns[1,i])
-            ax.set_ylabel(columns[1,j+1])     
-            lgd=ax.legend(bbox_to_anchor=(1, 1),loc=0,fontsize=8 ,borderaxespad=0.8)
-            ax.figure.savefig(working_dir+'/Scatterplot/scatterplot_' +str(counter)+'.png', bbox_extra_artists=(lgd,), bbox_inches='tight')    
-            plt.clf()
-            plt.cla()
-            plt.close()
-            if(counter>30): #Temp solution: if over 30 plots break. maybe put this behind a switch in the UI?
-                break   
 
 """
 Draw number of hits
@@ -575,7 +685,7 @@ def draw_number_of_hits():
             ax = sns.heatmap(hits, cmap="binary", linewidth=0)   
         else: #if grid type is hexagonal
             mpl.rcParams.update({'font.size': 30})
-            ax = plot_hexa(grid, hits.flatten(order='F'))    
+            ax = plot_hexa(grid, hits.flatten(order='F'), ptype='grid')    
         ax.set_title("Number of hits per SOM cell")    
         ax.figure.savefig(working_dir+'/Som/somplot_' +str(len(som_data[0])+1)+'.png')
         mpl.rcParams.update({'font.size': 12})
@@ -590,17 +700,24 @@ def draw_number_of_hits():
 
 
 """
-Script "Base". mitenhän tän nyt pistäis enklanniksi. Runko tms. kuitenki niin että tässä tehään data preparation ja kutsutaan funkkarit oikeassa järestyksessä ja ehdoilla.
+Script "Base". 
 """
-                   
+           
+
 #start_time_0 = time.time()
 if outgeofile is not None: #if spatial, draw geo plots
-    if(max(geo_data[:,(4)])>0):
-        plot_geospace_clusters()
-    if(redraw!="false"):
-        plot_geospace_results()
-    print("GeoSpace plots finished")
-
+    if(dataType=='scatter'):
+        if(max(geo_data[:,(4)])>0):#if clusters
+            plot_geospace_clusters_scatter()
+        if(redraw!="false"):
+            plot_geospace_results_scatter()
+        print("GeoSpace plots finished")
+    else:
+        if(max(geo_data[:,(4)])>0):#if clusters
+            plot_geospace_clusters_grid()
+        if(redraw!="false"):
+            plot_geospace_results_grid()
+        print("GeoSpace plots finished")
 if(int(max(som_data[:,len(som_data[0])-1]))>0): #draw som cluster plot if there is more than 1 cluster
     draw_som_clusters()
 
@@ -610,9 +727,10 @@ if(redraw!="false"):
 draw_number_of_hits()
 print("SomSpace plots finshed")
 #start_time = time.time()
+
 if(som_dict['clusters'] is not None):
     draw_box_andscatterplots()
-print("Boxplots and scatterplots finished")
+print("Boxplots finished")
 #print("Scatterplot: --- %s seconds ---" % (time.time() - start_time))
 
 

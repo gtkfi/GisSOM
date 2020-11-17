@@ -19,7 +19,7 @@ with warnings.catch_warnings():
     import matplotlib.pyplot as plt
     from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
     import numpy as np; np.random.seed(0)
-
+import os.path
 
 """
 inputs:
@@ -66,26 +66,26 @@ header_line = geofile.readline()
 geo_headers=['#']
 geo_headers = geo_headers +header_line.split(" ")
 pivotted=[]
+if(os.path.exists(output_folder+"/clickData2.txt")):
+    with open (output_folder+"/clickData2.txt", "r") as clickData:
+        selected_x=clickData.readline()
+        selected_y=clickData.readline()
+        selected_z=clickData.readline()
+    selected_x=selected_x.replace("\n","")
+    selected_y=selected_y.replace("\n","")
+    selected_z=selected_z.replace("\n","")
+    if(len(selected_x)==0):
+        selected_x="0"
+    if(len(selected_y)==0):
+        selected_y="0"
+    selected_x=float(selected_x)
+    selected_y=float(selected_y)
+    selected_z=selected_z.replace("\n","")
 
-with open (output_folder+"/clickData2.txt", "r") as clickData:
-    selected_x=clickData.readline()
-    selected_y=clickData.readline()
-    selected_z=clickData.readline()
-selected_x=selected_x.replace("\n","")
-selected_y=selected_y.replace("\n","")
-selected_z=selected_z.replace("\n","")
-if(len(selected_x)==0):
-    selected_x="0"
-if(len(selected_y)==0):
-    selected_y="0"
-selected_x=float(selected_x)
-selected_y=float(selected_y)
-selected_z=selected_z.replace("\n","")
-
-if(interactive_type!="Cluster"):
-    for i in range(0, len(geo_data)):
-        if(geo_data[i][2]==selected_x and geo_data[i][3]==selected_y):
-            geo_data[i][4]=clusters 
+    if(interactive_type!="Cluster"):
+        for i in range(0, len(geo_data)):
+            if(geo_data[i][2]==selected_x and geo_data[i][3]==selected_y):
+                geo_data[i][4]=clusters 
 
 if(max(geo_data[:,(4)])>0):     #create dataframe for geospace clusters, if there is more than 1 cluster. 
     x=geo_data[:,0]

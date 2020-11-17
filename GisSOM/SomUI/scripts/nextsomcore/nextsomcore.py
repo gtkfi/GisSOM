@@ -15,6 +15,8 @@ with warnings.catch_warnings():
     from .loadfile import load_input_file, read_coordinate_columns, read_data_columns
     import heapq
     import pickle
+    from pathlib import Path
+    import xml.etree.ElementTree as ET
     from sklearn.metrics import davies_bouldin_score
 
 class NxtSomCore(object):
@@ -127,7 +129,7 @@ class NxtSomCore(object):
         
         print("Clustering progress:")
         for a in range(cluster_min, cluster_max+1):                                   
-            min=2
+            min=float("inf")
             min_dict={}
             for j in range(0, cluster_init):
                 algorithm = sklearn.cluster.KMeans(n_clusters=a,init='random')
@@ -156,7 +158,7 @@ class NxtSomCore(object):
         return smallest_3[0]["cluster"]     
                 
 
-    def save_geospace_result(self, output_file, header, som, output_folder):
+    def save_geospace_result(self, output_file, header, som, output_folder, normalized=False,minN=0, maxN=1):
         """Write SOM results with header line and input columns to disk in geospace
 
         Output file columns:
@@ -183,14 +185,36 @@ class NxtSomCore(object):
         f=open(output_folder+"/RunStats.txt", "a+")         #write mean q error to runstats file
         f.write("Quantization error: "+str(mean_q_error))   #write mean q error to runstats file     
         f.close                                             #write mean q error to runstats file
+        xml_file = Path(output_folder+"/RunStats.xml")
+        if xml_file.is_file():
+            tree = ET.parse(output_folder+"/RunStats.xml")
+            root = tree.getroot()
+            q_error_mean = ET.Element("q_error")
+            q_error_mean.text=str(mean_q_error)
+            root.append(q_error_mean)
+            tree.write(output_folder+"/RunStats.xml")
+        
         header_line = '{} {} {} {}'.format(str(coord_cols['colnames']),
 										str(som_cols['colnames']),
 										str(data_cols['colnames']),'q_error').replace('[','').replace(']','').replace(',','').replace('\'','')#.translate(None, "[]',") replaced by a lower level solution that works in both 2.x and 3.x python
+        if(normalized=="True"):
+            #data_cols_modified=data_cols["data"]
+            tree = ET.parse(output_folder+"/DataStats.xml")
+            root = tree.getroot()
+            for i in range(0,len(data_cols["data"][0])):
+                maxD=float(tree.find(data_cols["colnames"][i]).find("max").text)
+                minD=float(tree.find(data_cols["colnames"][i]).find("min").text)
+                for j in range(0,len(data_cols["data"])):
+                        N=data_cols["data"][j][i]
+                        data_cols["data"][j][i]=(maxD-minD)*(N-float(minN))/(float(maxN)-float(minN))+minD
+                        N=som_cols["data"][j][i+3]
+                        som_cols["data"][j][i+3]=(maxD-minD)*(N-float(minN))/(float(maxN)-float(minN))+minD
+           # combined_cols = np.c_[coord_cols['data'], som_cols['data'], data_cols_modified, q_error]    
         combined_cols = np.c_[coord_cols['data'], som_cols['data'], data_cols['data'], q_error]     
         fmt_combined = '{} {} {} {}'.format(coord_cols['fmt'], som_cols['fmt'], data_cols['fmt'], '%.5f') 
         np.savetxt(output_file, combined_cols,fmt=fmt_combined, header=header_line, comments='')
 
-    def save_somspace_result(self, output_file, header, som):
+    def save_somspace_result(self, output_file, header, som, output_folder, normalized=False, minN=0, maxN=1):
         """Write SOM results with header line and input columns to disk in somspace.
 
         Output file columns:
@@ -208,14 +232,23 @@ class NxtSomCore(object):
         """
         col_names = read_data_columns(header)['colnames']
         som_cols = self._extract_som_cols_somspace(som, col_names)
+        if(normalized=="True"):
+            data_cols = read_data_columns(header)
+            tree = ET.parse(output_folder+"/DataStats.xml")
+            for i in range(2,len(som_cols["data"][0])-2):               	
+                	maxD=float(tree.find(data_cols["colnames"][i-2]).find("max").text)
+                	minD=float(tree.find(data_cols["colnames"][i-2]).find("min").text)
+                	for j in range(0,len(som_cols["data"])):
+                		N=som_cols["data"][j][i]
+                		som_cols["data"][j][i]=(maxD-minD)*(N-float(minN))/(float(maxN)-float(minN))+minD               
         header_line = '{}'.format(str(som_cols['colnames'])).replace('[','').replace(']','').replace(',','').replace('\'','')#.translate(None, "[]',") replaced by a lower level solution that works in both 2.x and 3.x python
         np.savetxt(output_file, som_cols['data'], fmt=som_cols['fmt'], header=header_line, comments='')
 
     def _extract_som_cols_geospace(self, som, col_names):
         """Internal function to combine geospace output file columns together
         """
-        x_col = som['bmus'][:, 1]#alunperin nää oli 0
-        y_col = som['bmus'][:, 0]# ja 1     
+        x_col = som['bmus'][:, 1]
+        y_col = som['bmus'][:, 0]    
         data = som['codebook'][x_col, y_col]
         if (som['clusters'] is not None):            
             clusters = som['clusters'][x_col, y_col]

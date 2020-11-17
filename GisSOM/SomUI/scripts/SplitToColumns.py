@@ -11,14 +11,12 @@ python scripts.
 Input type is either .lrn file or GeoTIFF file.
 """
 
-import warnings
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore")
-    import numpy as np
-    import ast
-    from loadfile import load_input_file, read_coordinate_columns, read_data_columns, read_lrn_header
-    import pandas as pd
-    import sys
+
+import numpy as np
+import ast
+from loadfile import load_input_file, read_coordinate_columns, read_data_columns, read_lrn_header
+import pandas as pd
+import sys
 
 inputFile=sys.argv[1]
 output_folder=sys.argv[2]
@@ -108,7 +106,9 @@ if(inputType=="csv"):
     colnames=header['colnames']
     falses=[]   #create a row of "false" values, will be used to initialize data transformation values (no transformations done by default)             
     for i in range(0, len(colnames)):
-        falses.append("false")         
+        falses.append("false")   
+        if(len(colnames[i].replace('\"', '').replace('%', '').replace(" ", "") )==0):
+            sys.exit("Error: Empty column headers")
     coltypes=[] #create coltypes for data. 0 for coords, 1 for others (all columns are given as individual files so there should be no need to exclude data at this stage)
     for i in range(0, len(colnames)):
         if i<=1:

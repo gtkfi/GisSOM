@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Jul 25 11:50:45 2019
-
-@author: shautala
+Old version of the script, current version directly under /scripts 
 """
 import numpy as np
     

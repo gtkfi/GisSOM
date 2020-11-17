@@ -5,8 +5,7 @@ Python script to save new clustering to som and geospace result files.
 @author: shautala
 """
 
-import warnings
-warnings.filterwarnings("ignore")
+
 import pickle
 from nextsomcore import NxtSomCore
 import sys
@@ -54,6 +53,6 @@ som['clusters'] = selected_cluster['cluster']
 header = nxtsomcore.load_data(input_file)
 if(outgeofile is not None):
     nxtsomcore.save_geospace_result(outgeofile, header, som, working_dir)
-nxtsomcore.save_somspace_result(output_file_somspace, header, som)
+nxtsomcore.save_somspace_result(output_file_somspace, header, som, working_dir)
 with open(working_dir+'/som.dictionary', 'wb') as som_dictionary_file:
     pickle.dump(som, som_dictionary_file) 
