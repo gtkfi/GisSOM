@@ -8,6 +8,7 @@ Script for reading geotiff input data files.
 import numpy as np
 from osgeo import gdal
 import os
+import sys
 
 def load_geotiff_files(input_file_list):
     
@@ -15,6 +16,7 @@ def load_geotiff_files(input_file_list):
     height_0 = None
     gt_0 = None
     prj_0=None
+    path_0=None
     geotiff_list_as_string=input_file_list # At this points the assumption is made that the coordinates of separate files are identical. So the coordinates can just be taken from any one of the individual files.
     returndata=[]
     colnames=[]
@@ -29,14 +31,17 @@ def load_geotiff_files(input_file_list):
             height_0 = src_ds.RasterYSize
             gt_0 = src_ds.GetGeoTransform()
             prj_0=src_ds.GetProjection()
+            path_0=geotiffpath
         width = src_ds.RasterXSize
         height = src_ds.RasterYSize
         gt = src_ds.GetGeoTransform()
         prj=src_ds.GetProjection()
         if(gt!=gt_0):
-            print("Warning: Geotransform does not match")
+            print("Warning: Geotransform of "+geotiffpath+" does not match with "+path_0)
         if(prj!=prj_0):
-            print("Warning: Projection does not match")
+            print("Warning: Projection of "+geotiffpath+" does not match with "+path_0)
+        if(width!=width_0 or height!=height_0):
+            sys.exit("Error: Grid of "+geotiffpath+" does not match."+path_0)
         data = src_ds.ReadAsArray()
         testi=data.flatten(order='C')
         if(len(returndata)>0):

@@ -10,8 +10,7 @@ from osgeo import gdal
 import os
 
 """
-Handle the loading of multiple geotiff files. return one 2d numpy array i think? or was it the
-dictionary with coords, data and fmt? i think the latter
+Old version of the script, current version directly under /scripts 
 """
 def load_geotiff_files(input_file_list):
     
@@ -28,11 +27,11 @@ def load_geotiff_files(input_file_list):
         print(geotiffpath)
         src_ds = gdal.Open(geotiffpath)
         data = src_ds.ReadAsArray()
-        testi=data.flatten(order='C')
+        temp=data.flatten(order='C')
         if(len(returndata)>0):
-            returndata=np.column_stack((returndata,testi))
+            returndata=np.column_stack((returndata,temp))
         else:
-            returndata=testi
+            returndata=temp
         colnames.append(os.path.basename(geotiffpath))            
     rows=len(returndata)   
     if("," in geotiff_list_as_string):
@@ -61,9 +60,8 @@ def read_geotiff_coordinate_columns(geotiff_header):
         for j in range(0,len(data[i])):
             coordinates_x.append(j)
             coordinates_y.append(i)
-    coordinates=np.column_stack((coordinates_x,coordinates_y))   #these coordinates are still table indices, not actual real world coordinates. figure out where you should do the transformation!
+    coordinates=np.column_stack((coordinates_x,coordinates_y))   #these coordinates are still table indices, not actual real world coordinates.
 
-    #WHAT ABOUT FMT???? format? i think it is format.
     return {'data': coordinates, 'colnames':["x","y"], 'fmt': '%f %f'}    
 
 """
@@ -73,23 +71,3 @@ def read_geotiff_data_columns(geotiff_header):
     data_cols = [i for i, x in enumerate(geotiff_header['colnames']) if 0 == 0] #   replace this kludge with something sensible
     fmt = ('%f ' * len(data_cols)).rstrip()
     return {'data': geotiff_header['data'], 'colnames': geotiff_header['colnames'], 'fmt': fmt}
-
-
-
-
-"""
-This is not required
-
-def _read_columns(lrn_header, columns, fmt=''):
-    if not type(columns) in (list, tuple):
-        raise TypeError('Invalid type: columns must be a list or tuple')
-    colnames = ([lrn_header['colnames'][i] for i in columns])
-    data = np.loadtxt(
-                lrn_header['file'],
-                dtype='float32', 
-                delimiter='\t',
-                skiprows=lrn_header['headerlength'] , 
-                usecols=(columns))
-    return {'data': data, 'colnames': colnames, 'fmt': fmt}
-    """
-    

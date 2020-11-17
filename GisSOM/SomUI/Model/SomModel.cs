@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using GalaSoft.MvvmLight;
+using SomUI.Service;
 
 namespace SomUI.Model
 {
@@ -18,11 +20,13 @@ namespace SomUI.Model
         private string outputFolderTimestamped;
         private int som_x;
         private int som_y;
-        private int epochs; 
+        private int epochs;
         private List<string> inrasterlist = new List<string> { "" };
+        private ObservableCollection<BoolStringHelper> scatterPlotList = new ObservableCollection<BoolStringHelper> { };
+        private ObservableCollection<BoolStringHelper> boxPlotList = new ObservableCollection<BoolStringHelper> { };
         private string interactiveType;
         private string isLogTransformed;
-        private string isWinsorized; 
+        private string isWinsorized;
         private string winsorMin;
         private string winsorMax;
         private string isExcluded;
@@ -37,7 +41,7 @@ namespace SomUI.Model
         private int kmeans_min;
         private int kmeans_min_last_calculation;
         private int kmeans_max_last_calculation;
-        private int kmeans_max;     
+        private int kmeans_max;
         private int kmeans_initializations;
         private string noDataValue;
         private string neighborhood;
@@ -47,12 +51,14 @@ namespace SomUI.Model
         private string trainingRateFunction;
         private double trainingRateInitial;
         private double trainingRateFinal;
-
+        private string dataShape;
         private string gridShape; //squqre or hexa
         private string initialization;
 
         private bool isSpatial;
         private bool isNormalized;
+        private int normalizationMin;
+        private int normalizationMax;
 
         public string NoDataValue
         {
@@ -190,7 +196,7 @@ namespace SomUI.Model
             get { return output_folder; }
             set
             {
-                Set<string>(()=>this.Output_Folder, ref this.output_folder,value);
+                Set<string>(() => this.Output_Folder, ref this.output_folder, value);
             }
         }
         public string OutputFolderTimestamped
@@ -247,7 +253,7 @@ namespace SomUI.Model
                 Set<int>(() => this.KMeans_initializations, ref kmeans_initializations, value);
             }
         }
-        
+
 
         public string KMeans
         {
@@ -285,7 +291,7 @@ namespace SomUI.Model
             }
             set
             {
-                Set<ImageSource>(() => this.DataHistogram, ref dataHistogram, value);                             
+                Set<ImageSource>(() => this.DataHistogram, ref dataHistogram, value);
             }
         }
 
@@ -320,7 +326,7 @@ namespace SomUI.Model
                 }
             }
         }
-        public bool IsSpatial 
+        public bool IsSpatial
         {
             get
             {
@@ -353,7 +359,8 @@ namespace SomUI.Model
             set
             {
                 Set<string>(() => this.IsWinsorized, ref isWinsorized, value);
-                if (value== "True"){
+                if (value == "True")
+                {
                     IsLogTransformed = "False";
                 }
 
@@ -368,7 +375,7 @@ namespace SomUI.Model
             set
             {
                 Set<string>(() => this.InputFile, ref inputFile, value);
-                
+
             }
         }
 
@@ -458,5 +465,49 @@ namespace SomUI.Model
                 Set<string>(() => this.ClusterFilePath, ref clusterFilePath, value);
             }
         }
+        public string DataShape
+        {
+            get { return dataShape; }
+            set
+            {
+                Set<string>(() => this.DataShape, ref dataShape, value);
+            }
+        }
+
+        public int NormalizationMin
+        {
+            get { return normalizationMin; }
+            set { Set<int>(() => this.NormalizationMin, ref normalizationMin, value); }
+
+        }
+        public int NormalizationMax
+        {
+            get { return normalizationMax; }
+            set { Set<int>(() => this.NormalizationMax, ref normalizationMax, value); }
+
+        }
+        public ObservableCollection<BoolStringHelper> ScatterPlotList
+        {
+            get
+            {
+                return scatterPlotList;
+            }
+            set
+            {
+                Set(() => ScatterPlotList, ref scatterPlotList, value);
+            }
+        }
+        public ObservableCollection<BoolStringHelper> BoxPlotList
+        {
+            get
+            {
+                return boxPlotList;
+            }
+            set
+            {
+                Set(() => BoxPlotList, ref boxPlotList, value);
+            }
+        }
+
     }
-}
+    }

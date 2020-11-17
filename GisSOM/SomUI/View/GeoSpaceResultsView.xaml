@@ -13,14 +13,14 @@
     </UserControl.Resources>
     <Grid>
         <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" >
-            <StackPanel>
+            <VirtualizingStackPanel VirtualizationMode="Recycling" VirtualizingStackPanel.IsVirtualizing="True">
                 <Button Name="BindingHelperButton" Visibility="Collapsed" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding OpenPlotCommand}"></Button>
                 <mah:MetroProgressBar DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsIndeterminate="True" Width="400" Margin="40" Visibility="{Binding GeoSpaceImageList.Count, Converter={StaticResource CollectionCountToVisibilityConverter}}"></mah:MetroProgressBar>
                 <ItemsControl DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" ItemsSource="{Binding Path=GeoSpaceImageList}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <!-- use the ItemsPerRow attached property to dynamically add rows -->
-                            <UniformGrid/>
+                            <UniformGrid Columns="4"/>
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
@@ -55,7 +55,7 @@
                         </DataTemplate>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
-            </StackPanel>
+            </VirtualizingStackPanel>
         </ScrollViewer>
     </Grid>
 </UserControl>

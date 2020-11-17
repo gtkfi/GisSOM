@@ -8,7 +8,7 @@
         xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
         xmlns:Views="clr-namespace:SomUI.View"
         mc:Ignorable="d"
-        Title="GisSOM 1.0.0" Height="900" Width="1200"
+        Title="GisSOM 1.0.1" Height="900" Width="1200"
         GlowBrush="{DynamicResource AccentColorBrush}"
         TitleCaps="False"
         ResizeMode="CanResizeWithGrip" 
