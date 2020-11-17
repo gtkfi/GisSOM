@@ -5,13 +5,9 @@ Created on Tue Feb 11 08:38:34 2020
 @author: shautala
 """
 
-import warnings
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore")
-    import matplotlib.pyplot as plt
-    import sys
-    import pickle    
-    warnings.filterwarnings("ignore",".*MATPLOTLIBDATA")
+import matplotlib.pyplot as plt
+import sys
+import pickle    
 
 working_dir=sys.argv[1]
 cluster_dict=sys.argv[2]

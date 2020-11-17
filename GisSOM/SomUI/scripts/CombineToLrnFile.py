@@ -17,6 +17,7 @@ with warnings.catch_warnings():
     warnings.filterwarnings("ignore")
     import matplotlib.pyplot as plt
     from loadfile import load_input_file, read_coordinate_columns,  read_lrn_header
+    import xml.etree.ElementTree as ET
     import numpy as np
     import pandas as pd
     import os
@@ -38,6 +39,8 @@ parser.add_argument('--northingIndex', default=None, dest="northingIndex", help=
 parser.add_argument('--output_folder',nargs='?', help=' #output folder path, also reads the columns used to build the result file form this directory.')
 parser.add_argument('--na_value', default="", dest="na_value", help='#NA/null value to remove if data contains them')
 parser.add_argument('--normalized', default=None, dest="normalized", help='#if data should be normalized')
+parser.add_argument('--min_N', default=None, dest="min_N",help="minimum value used for normalization scale")
+parser.add_argument('--max_N' , default=None,dest="max_N",help="maximum value used for normalization scale") 
 
 
 args=parser.parse_args()    
@@ -53,6 +56,16 @@ output_folder=args.output_folder
 na_value=""
 if(len(args.na_value)>0):
     na_value=args.na_value    
+
+if(args.max_N is not None):
+    maxN=float(args.max_N)
+else:
+    maxN=0.0
+
+if(args.min_N is not None):
+    minN=float(args.min_N)
+else:
+    minN=1.0
 fileType=inputFile[-3:].lower()
 
 
@@ -102,7 +115,7 @@ if(fileType=="lrn"):
             data_max= max(columns_included[i][2:].astype(float))
             for j in range(2, len(columns_included[i])):
                 if(columns_included[i][j]!=na_value):
-                    columns_included[i][j]=(columns_included[i][j].astype(float)-data_min)/(data_max-data_min) 
+                    columns_included[i][j]=(maxN-minN)*(columns_included[i][j].astype(float)-data_min)/(data_max-data_min) + minN
     #normalize columns_in! for loop col by col
     df_in=pd.DataFrame(np.squeeze(np.stack(columns_included, axis=1)))
     if(na_value is not ""):
@@ -126,6 +139,7 @@ if(fileType=="tif"):
     id_col=[]
     for i in range(0, len(header['data'])):
         id_col.append(i)
+      
     header['rows']="%"+str(header['rows'])
     header['cols']="%"+str(header['cols'])
     coltypes=[]#create coltypes, %9 for id col, 0 for x and y, 1 for the rest
@@ -133,30 +147,48 @@ if(fileType=="tif"):
         if i<2:
             coltypes.append(0)
         else:
-            coltypes.append(1)                                    
+            coltypes.append(1)           
     coltypes=np.append("%9",coltypes)
     header['colnames']=np.append(("id","x","y"),header['colnames']) #add id x and y to column names 
-    print(header['colnames'])
+    #print(header['colnames'])
     firstColumn=np.load(output_folder+"/DataPreparation/outfile0.npy")[4:].reshape(-1,1) 
     id_col_with_header=np.vstack((coltypes[0],header['colnames'][0],np.c_[id_col]))  #create id column #
     columns=np.hstack((id_col_with_header,firstColumn)) #stack id column and first column
     secondColumn=np.load(output_folder+"/DataPreparation/outfile1.npy")[4:].reshape(-1,1) #get x and y out of the way, because we don't wont to apply transforms to coordinate data
     columns=np.hstack((columns,secondColumn)) 
+
+
+
+        
+    
+
+
+    root = ET.Element("data")
     for i in range(2, (len(header['colnames'])-1)):       
         if(os.path.isfile(output_folder+"/DataPreparation/outfile"+str(i)+"_edited.npy")):
             column=np.load(output_folder+"/DataPreparation/outfile"+str(i)+"_edited.npy")[4:]
         else:
             column=np.load(output_folder+"/DataPreparation/outfile"+str(i)+".npy")[4:]
         column=column.reshape(-1,1)
-        if(args.normalized is not None): 
-            array_for_minmax= np.delete(column[2:], np.where(column[2:] == na_value))
-            data_min= min(array_for_minmax.astype(float))
-            data_max= max(array_for_minmax.astype(float))
+        column[1][0]=column[1][0].replace("%", "").replace(" ","")
+        array_for_minmax= np.delete(column[2:], np.where(column[2:] == na_value))
+        data_min= min(array_for_minmax.astype(float))
+        data_max= max(array_for_minmax.astype(float))#min and max for normalization and writing datastats xml
+        newElement=ET.Element(column[1][0].replace('%', '').replace(" ",""))	
+        minElement=ET.Element("min")
+        minElement.text=str(data_min)
+        maxElement=ET.Element("max")
+        maxElement.text=str(data_max)
+        newElement.append(minElement)
+        newElement.append(maxElement)
+        root.append(newElement)
+        if(args.normalized is not None):            
             for i in range(2, len(column)):
                  if(column[i]!=na_value):
-                     column[i]=(column[i].astype(float)-data_min)/(data_max-data_min)              
+                     column[i]=(maxN-minN)*(column[i].astype(float)-data_min)/(data_max-data_min)+minN              
         columns=np.hstack((columns,column))   
-    
+    tree = ET.ElementTree(root)
+    tree.write(output_folder+"/DataStats.xml")
     df=pd.DataFrame(columns)
     df.apply(pd.to_numeric,errors='coerce')
     
@@ -164,6 +196,9 @@ if(fileType=="tif"):
         na_value=float(na_value)
         df=df.replace(str(na_value),np.nan)
         df=df.dropna()    
+
+    
+
     columns=df.values             
     np.savetxt(output_folder+"/DataPreparation/EditedData.lrn", columns, delimiter="\t",header=(header['rows']+"\n"+str(header['cols'])), fmt="%s",comments='')  #add lrn header to stacked columns, save to file.
     print("Saved to .lrn File")
@@ -177,6 +212,9 @@ if(fileType=="csv"):
     unformattedRows=header['rows']
     header['rows']="%"+str(header['rows'])
     header['cols']="%"+str(header['cols'])  
+    header['colnames'] = [s.replace('\"', '') for s in header['colnames']]
+    header['colnames'] = [s.replace('%', '') for s in header['colnames']]
+    header['colnames'] = [s.replace(" ", "") for s in header['colnames']]
     coltypes=[]    #create coltypes, %9 for id col, 0 for x and y, 1 for the rest
     for i in range(0, (len(header['colnames'])+2)):
         if i<2:
@@ -188,7 +226,6 @@ if(fileType=="csv"):
     columns_sorted=[]   
   #Is there a function that can add vectors as well as 2d arrays? this seems silly.
     if eastingIndex is not None:
-
         for i in range(0, actualNumberOfColumns):      
             if(os.path.isfile(output_folder+"/DataPreparation/outfile"+str(i)+"_edited.npy")): 
                 column=np.load(output_folder+"/DataPreparation/outfile"+str(i)+"_edited.npy")[4:]
@@ -221,18 +258,43 @@ if(fileType=="csv"):
                 columns_excluded.append(columns_sorted[i])
             else:
                 columns_included.append(columns_sorted[i])
-         
+        
+                
+        
+        
         df_ex=pd.DataFrame(np.squeeze(np.stack(columns_excluded, axis=1)))        #replace exluded columns' NA values with 'NaN' string so they won't cause deletion of rows.        
         df_ex = df_ex.replace('nan', 'NA', regex=True)      
-        columns_ex=df_ex.values
+        columns_ex=df_ex.values      
+            #write data stats to xml file
+        df_in=pd.DataFrame(np.squeeze(np.stack(columns_included, axis=1)))
+        if(na_value is not ""):
+            df_in_for_xml=df_in[df_in!=na_value]
+        else:
+            df_in_for_xml=df_in
+        root = ET.Element("data") 
+        for i in range(0,len(df_in.columns)):
+            data_min= min(df_in_for_xml[i][2:].astype(float))
+            data_max= max(df_in_for_xml[i][2:].astype(float))
+            newElement=ET.Element(df_in[i][1])	
+            minElement=ET.Element("min")
+            minElement.text=str(data_min)
+            maxElement=ET.Element("max")
+            maxElement.text=str(data_max)
+            newElement.append(minElement)
+            newElement.append(maxElement)
+            root.append(newElement)
+        tree = ET.ElementTree(root)
+        tree.write(output_folder+"/DataStats.xml")
+
         if(args.normalized is not None):
             for i in range(0,len(columns_included)):
                 data_min= min(columns_included[i][2:].astype(float))
                 data_max= max(columns_included[i][2:].astype(float))
                 for j in range(2, len(columns_included[i])):
                     if(columns_included[i][j]!=na_value):
-                        columns_included[i][j]=(columns_included[i][j].astype(float)-data_min)/(data_max-data_min)
+                        columns_included[i][j]=(maxN-minN)*(columns_included[i][j].astype(float)-data_min)/(data_max-data_min)+minN
         df_in=pd.DataFrame(np.squeeze(np.stack(columns_included, axis=1)))
+        
         if(na_value is not ""):
             na_value=float(na_value)
             df_in=df_in.replace(str(na_value),np.nan)
@@ -295,13 +357,34 @@ if(fileType=="csv"):
         df_ex = df_ex.replace('nan', 'NA', regex=True)     
         columns_ex=df_ex.values
         
+            #write data stats to xml file
+        df_in=pd.DataFrame(np.squeeze(np.stack(columns_included, axis=1)))
+        if(na_value is not ""):
+            df_in_for_xml=df_in[df_in!=na_value]
+        else:
+            df_in_for_xml=df_in
+        root = ET.Element("data") 
+        for i in range(0,len(df_in.columns)):
+            data_min= min(df_in[i][2:].astype(float))
+            data_max= max(df_in[i][2:].astype(float))
+            newElement=ET.Element(df_in[i][1])	
+            minElement=ET.Element("min")
+            minElement.text=str(data_min)
+            maxElement=ET.Element("max")
+            maxElement.text=str(data_max)
+            newElement.append(minElement)
+            newElement.append(maxElement)
+            root.append(newElement)
+        tree = ET.ElementTree(root)
+        tree.write(output_folder+"/DataStats.xml")
+
         if(args.normalized is not None):
             for i in range(0,len(columns_included)):
                 data_min= min(columns_included[i][2:].astype(float))
                 data_max= max(columns_included[i][2:].astype(float))
                 for j in range(2, len(columns_included[i])):
                     if(columns_included[i][j]!=na_value):
-                        columns_included[i][j]=(columns_included[i][j].astype(float)-data_min)/(data_max-data_min) 
+                        columns_included[i][j]=(maxN-minN)*(columns_included[i][j].astype(float)-data_min)/(data_max-data_min)+minN
         df_in=pd.DataFrame(np.squeeze(np.stack(columns_included, axis=1)))
         if(na_value is not ""):
             na_value=float(na_value)
@@ -317,7 +400,7 @@ if(fileType=="csv"):
             id_col.append(i)
         id_col_with_header=np.vstack((["%9"],["id"],np.c_[id_col]))  #create id column        #'comment' rows are not copied, because this is not an output file, and comments are not needed for som calculation.                  
         columns=np.hstack((id_col_with_header, columns))   
-        
+       
     # Remove linebreaker.
     for i in range(0, len(columns[1])): 
         if (columns[1][i]== "label\n"):

@@ -12,7 +12,7 @@
         <service:CollectionCountToVisibilityConverter x:Key="CollectionCountToVisibilityConverter" />
     </UserControl.Resources>
     <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" >
-        <StackPanel>
+        <VirtualizingStackPanel VirtualizationMode="Recycling" VirtualizingStackPanel.IsVirtualizing="True">
             <Button Name="BindingHelperButton" Width="100" HorizontalAlignment="Right" Visibility="Collapsed" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding OpenPlotCommand}"></Button>
             <!--<WrapPanel Margin="5" HorizontalAlignment="Right">
                 <TextBox Name="ResultFolderTextBox" ToolTip="Path to the Som result folder." DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}"  Text="{Binding Model.SomResultsFolder, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" FontSize="20" Width="300" />
@@ -35,7 +35,7 @@
                 <ItemsControl.ItemsPanel >
                     <ItemsPanelTemplate >
                         <!-- use the ItemsPerRow attached property to dynamically add rows -->
-                        <UniformGrid />
+                        <UniformGrid Columns="4"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
@@ -77,6 +77,6 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
-        </StackPanel>
+        </VirtualizingStackPanel>
     </ScrollViewer>
 </UserControl>

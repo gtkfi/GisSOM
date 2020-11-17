@@ -29,6 +29,7 @@ import numpy as np
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 from matplotlib.collections import RegularPolyCollection
 import threading
+import os.path
 """
 inputs:
 1)outSomFile
@@ -287,50 +288,52 @@ def display_hoverdata(hoverData, clickData,pathname):
         with open(output_folder+'/clickData.txt', 'w') as f:
             for item in clickData["points"]:
                 f.write("%s\n" % item)    
-    with open (output_folder+"/clickData.txt", "r") as myfile:
-        data=myfile.readline()
-        dataDict=eval(data)
-        dataDict.pop('pointIndex',None)
-        data=str(dataDict)
-        indexOfX=data.find('x')
-        stringFromX=data[indexOfX:]
-        endOfX=stringFromX.find(',')        
-        if(gridshape!='hexagonal'):
-            ValueOfX=data[indexOfX+4:indexOfX+endOfX]
-        else:
-            ValueOfX=math.floor(float(data[indexOfX+4:indexOfX+endOfX]))
-        indexOfY=data.find('y')
-        stringFromY=data[indexOfY:]
-        endOfY=stringFromY.find(',')        
-        if(gridshape!='hexagonal'):
-            ValueOfY=data[indexOfY+4:indexOfY+endOfY]
-        else:
-            ValueOfY=math.floor(float(data[indexOfY+4:indexOfY+endOfY])*((math.sqrt(3)/2)))
-        indexOfZ=data.find('z')
-        if(indexOfZ>-1):
-            stringFromZ=data[indexOfZ:]
-            endOfZ=stringFromZ.find('}')
-            ValueOfZ=data[indexOfZ+4:indexOfZ+endOfZ]
-        else:
-            if(clickData is not None):              
-                points=clickData["points"]
-                ValueOfZ=points[0]["text"]
-    with open (output_folder+"/clickData2.txt", "r") as clickData2:
-        x=clickData2.readline()
-        x=x.replace("\n","")
-        y=clickData2.readline()
-        y=y.replace("\n","")
-        z=clickData2.readline()
-        z=z.replace("\n","")
-        if(z!=ValueOfZ or x!=ValueOfX or y!=ValueOfY):
-            with open(output_folder+'/clickData2.txt', 'w') as f:
-                f.write("%s\n" % ValueOfX)
-                f.write("%s\n" % ValueOfY)
-                f.write("%s\n" % ValueOfZ)
-            with open(interactive_folder+'/clickData2.txt', 'w') as f:
-                f.write("%s\n" % ValueOfX)
-                f.write("%s\n" % ValueOfY)
-                f.write("%s\n" % ValueOfZ)                                                     
+    if(os.path.isfile(output_folder+'/clickData.txt')):
+        with open (output_folder+"/clickData.txt", "r") as myfile:
+            data=myfile.readline()
+            dataDict=eval(data)
+            dataDict.pop('pointIndex',None)
+            data=str(dataDict)
+            indexOfX=data.find('x')
+            stringFromX=data[indexOfX:]
+            endOfX=stringFromX.find(',')        
+            if(gridshape!='hexagonal'):
+                ValueOfX=data[indexOfX+4:indexOfX+endOfX]
+            else:
+                ValueOfX=math.floor(float(data[indexOfX+4:indexOfX+endOfX]))
+            indexOfY=data.find('y')
+            stringFromY=data[indexOfY:]
+            endOfY=stringFromY.find(',')        
+            if(gridshape!='hexagonal'):
+                ValueOfY=data[indexOfY+4:indexOfY+endOfY]
+            else:
+                ValueOfY=math.floor(float(data[indexOfY+4:indexOfY+endOfY])*((math.sqrt(3)/2)))
+            indexOfZ=data.find('z')
+            if(indexOfZ>-1):
+                stringFromZ=data[indexOfZ:]
+                endOfZ=stringFromZ.find('}')
+                ValueOfZ=data[indexOfZ+4:indexOfZ+endOfZ]
+            else:
+                if(clickData is not None):              
+                    points=clickData["points"]
+                    ValueOfZ=points[0]["text"]
+        if(os.path.isfile(output_folder+'/clickData2.txt')):
+            with open (output_folder+"/clickData2.txt", "r") as clickData2:
+                x=clickData2.readline()
+                x=x.replace("\n","")
+                y=clickData2.readline()
+                y=y.replace("\n","")
+                z=clickData2.readline()
+                z=z.replace("\n","")
+                if(z!=ValueOfZ or x!=ValueOfX or y!=ValueOfY):
+                    with open(output_folder+'/clickData2.txt', 'w') as f:
+                        f.write("%s\n" % ValueOfX)
+                        f.write("%s\n" % ValueOfY)
+                        f.write("%s\n" % ValueOfZ)
+                    with open(interactive_folder+'/clickData2.txt', 'w') as f:
+                        f.write("%s\n" % ValueOfX)
+                        f.write("%s\n" % ValueOfY)
+                        f.write("%s\n" % ValueOfZ)                                                     
     return [
         json.dumps(hoverData, indent=2),
         html.Br(),
