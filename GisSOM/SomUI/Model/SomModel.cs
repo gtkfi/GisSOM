@@ -24,6 +24,8 @@ namespace SomUI.Model
         private List<string> inrasterlist = new List<string> { "" };
         private ObservableCollection<BoolStringHelper> scatterPlotList = new ObservableCollection<BoolStringHelper> { };
         private ObservableCollection<BoolStringHelper> boxPlotList = new ObservableCollection<BoolStringHelper> { };
+        private ObservableCollection<DataColumn> columnDataList = new ObservableCollection<DataColumn> { };
+        private ObservableCollection<string> interactiveResultColumnList = new ObservableCollection<string> { };
         private string interactiveType;
         private string isLogTransformed;
         private string isWinsorized;
@@ -32,6 +34,8 @@ namespace SomUI.Model
         private string isExcluded;
         private ImageSource dataHistogram;
         private ImageSource interactiveResultSomPlot;
+        private ImageSource newLabelPlot;
+        private ImageSource newLabelLegend;
         private int eastingColumnIndex;
         private int northingColumnIndex;
         private int labelColumnIndex;
@@ -54,12 +58,13 @@ namespace SomUI.Model
         private string dataShape;
         private string gridShape; //squqre or hexa
         private string initialization;
-
+        private string runId;
         private bool isSpatial;
         private bool isNormalized;
         private int normalizationMin;
         private int normalizationMax;
-
+        private int selectedInteractiveColumn;
+        private string newLabelData;
         public string NoDataValue
         {
             get { return noDataValue; }
@@ -295,6 +300,30 @@ namespace SomUI.Model
             }
         }
 
+        public ImageSource NewLabelPlot
+        {
+            get
+            {
+                return newLabelPlot;
+            }
+            set
+            {
+                Set<ImageSource>(() => this.NewLabelPlot, ref newLabelPlot, value);
+            }
+        }
+
+        public ImageSource NewLabelLegend
+        {
+            get
+            {
+                return newLabelLegend;
+            }
+            set
+            {
+                Set<ImageSource>(() => this.NewLabelLegend, ref newLabelLegend, value);
+            }
+        }
+
         public string WinsorMin
         {
             get { return winsorMin; }
@@ -506,6 +535,55 @@ namespace SomUI.Model
             set
             {
                 Set(() => BoxPlotList, ref boxPlotList, value);
+            }
+        }
+        public ObservableCollection<DataColumn> ColumnDataList
+        {
+            get
+            {
+                return columnDataList;
+            }
+            set
+            {
+                Set(() => ColumnDataList, ref columnDataList, value);
+            }
+        }
+
+        public string RunId
+        {
+            get { return runId; }
+            set
+            {
+                Set<string>(() => this.RunId, ref runId, value);
+            }
+        }
+        public string NewLabelData
+        {
+            get { return newLabelData; }
+            set
+            {
+                Set<string>(() => this.NewLabelData, ref newLabelData, value);
+            }
+        }
+        public int SelectedInteractiveColumn
+        {
+            get { return selectedInteractiveColumn; }
+            set
+            {
+                Set<int>(() => this.SelectedInteractiveColumn, ref selectedInteractiveColumn, value);
+            }
+        }
+
+
+        public ObservableCollection<string> InteractiveResultColumnList
+        {
+            get
+            {
+                return interactiveResultColumnList;
+            }
+            set
+            {
+                Set (() => InteractiveResultColumnList, ref interactiveResultColumnList, value);
             }
         }
 

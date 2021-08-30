@@ -59,13 +59,16 @@ def parse_command_line():
     parser.add_argument('--normalized', type=str, default="False", dest='normalized',help='Whether the data has been normalized or not')
     parser.add_argument('--minN', type=str, default=0, dest='minN',help='Minimum value for normalization')
     parser.add_argument('--maxN', type=str, default=1, dest='maxN',help='Maximum value for normalization')
+    parser.add_argument('--label', type=str, default=None, dest='label', help='Whether data contains label column, true or false')
+    #parser.add_argument('--scale_min_list',default=None, dest="scale_min_list", help="List of floats for scaling minimum values") 
+    #parser.add_argument('--scale_max_list',default=None, dest="scale_max_list", help="List of floats for scaling maximum values") 
     return parser.parse_args()
 
 """Run SOM training using command line input, and save the results. Uses NxtSomCore package to do the actual work.
 :param args: Command line arguments passed to script
 :type args: args
 """
-def run_commandLine(args):
+def run_command_line(args):
     nxtsomcore = NxtSomCore()
     if args.initialcodebook is not None: #if initial codebook was provided (in the form of som.dictionary), open the file, and load som codebook from it.
         with open(args.initialcodebook, 'rb') as som_dictionary_file:
@@ -102,9 +105,9 @@ def run_commandLine(args):
     #start_time = time.time()
     
     if args.outgeofile is not None:
-        nxtsomcore.save_geospace_result(args.outgeofile, header, som, output_folder, args.normalized,args.minN, args.maxN)  #save geospace results
+        nxtsomcore.save_geospace_result(args.outgeofile, header, som, output_folder, args.input_file, args.normalized, args.label)  #save geospace results
     
-    nxtsomcore.save_somspace_result(args.output_file_somspace, header, som, output_folder, args.normalized,args.minN, args.maxN)                 #save somspace results
+    nxtsomcore.save_somspace_result(args.output_file_somspace, header, som, output_folder, args.input_file, args.normalized)                 #save somspace results
     #print("saving som and geo results took: --- %s seconds ---" % (time.time() - start_time))
     #start_time = time.time()
     if(args.geotiff_input is not None):
@@ -292,7 +295,7 @@ def run_xml(args):
     if(som_params.find('kMeans') is not None):   
         som['clusters']=nxtsomcore.clusters(som,int(kmeans_min),int(kmeans_max),int(kmeans_init),output_folder) 
     if output_file_geospace is not None:
-        nxtsomcore.save_geospace_result(output_file_geospace, header, som, output_folder) 
+        nxtsomcore.save_geospace_result(output_file_geospace, header, som, output_folder,input_file) 
     nxtsomcore.save_somspace_result(output_file_somspace, header, som)
 
 
@@ -315,7 +318,7 @@ def main():
     args = parse_command_line()
 
     if(args.xmlfile=='none'): #Normal run with all input params as command line arguments
-        run_commandLine(args)
+        run_command_line(args)
 
     else:
         run_xml(args) #run with xml input

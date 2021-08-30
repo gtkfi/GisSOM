@@ -84,9 +84,9 @@
                          IsEnabled="False"
                          ItemTemplate="{StaticResource DefaultTemplate}" 
                          DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" 
-                         ItemsSource="{Binding Path=ClusterPlotList, UpdateSourceTrigger=PropertyChanged}"
-                         SelectedIndex="{Binding SelectedClusterIndex}"
+                         ItemsSource="{Binding Path=ClusterPlotList, UpdateSourceTrigger=PropertyChanged}"                         
                          HorizontalAlignment="Center">
+<!--SelectedIndex="{Binding SelectedClusterIndex}"-->
                     <ListBox.ItemsPanel>
                         <ItemsPanelTemplate>
                             <UniformGrid/> <!--Merkittäkööt muistiin jälkipolville, että tässä oli StackPanel Horizontal Alignmentilla/Orientationilla.-->

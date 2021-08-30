@@ -10,8 +10,9 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <service:CollectionCountToVisibilityConverter x:Key="CollectionCountToVisibilityConverter" />
+        <service:InverseCollectionCountToVisibilityConverter x:Key="InverseCollectionCountToVisibilityConverter" />
     </UserControl.Resources>
-    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" >
+    <ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" >
         <VirtualizingStackPanel VirtualizationMode="Recycling" VirtualizingStackPanel.IsVirtualizing="True">
             <Button Name="BindingHelperButton" Width="100" HorizontalAlignment="Right" Visibility="Collapsed" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding OpenPlotCommand}"></Button>
             <!--<WrapPanel Margin="5" HorizontalAlignment="Right">
@@ -30,6 +31,9 @@
                 </Button>
             </WrapPanel>-->
             <mah:MetroProgressBar DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsIndeterminate="True" Width="400" Margin="40" Visibility="{Binding SomImageList.Count, Converter={StaticResource CollectionCountToVisibilityConverter}}"></mah:MetroProgressBar>
+            <Button FontSize="14" Content="Show results in filesystem" FontWeight="Normal" mah:ButtonHelper.PreserveTextCase="True" Background="LightGray" BorderBrush="Black"
+                                Margin="5" Width="auto"  HorizontalAlignment="right" VerticalAlignment="Center"  DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Visibility="{Binding SomImageList.Count, Converter={StaticResource InverseCollectionCountToVisibilityConverter}}"
+                                Command="{Binding ShowResultsInFileSystemCommand}" CommandParameter="Som" IsDefault="True"/>
 
             <ItemsControl DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" ItemsSource="{Binding Path=SomImageList}" >
                 <ItemsControl.ItemsPanel >
@@ -77,6 +81,7 @@
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
+            <Button Width="200" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding AddLabelDataCommand}" Visibility="{Binding SomImageList.Count, Converter={StaticResource InverseCollectionCountToVisibilityConverter}}">Add label data</Button>
         </VirtualizingStackPanel>
     </ScrollViewer>
 </UserControl>

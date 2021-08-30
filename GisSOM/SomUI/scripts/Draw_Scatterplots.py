@@ -2,6 +2,8 @@
 """
 Created on Tue Nov 10 10:40:32 2020
 
+Draw scatterplots from selected columns of som result data.
+
 @author: shautala
 """
 
@@ -44,9 +46,14 @@ dir=args.dir                #output directory of GisSOM
 draw_list=args.draw_list    #list of columns to use in scatterplots
 
 draw_list=draw_list.split(",")
-"""Declare and initialize variables"""
 
-with open(dir+"/som.dictionary", 'rb') as som_dictionary_file:#Draw Boxplots:
+
+"""
+Declare and initialize variables
+"""
+
+
+with open(dir+"/som.dictionary", 'rb') as som_dictionary_file:
      som_dict = pickle.load(som_dictionary_file)
 som_data= np.genfromtxt(outsomfile,skip_header=(1), delimiter=' ')
 working_dir=dir#+"/somresults"
@@ -54,10 +61,9 @@ dataPrepDir=dir+"/DataPreparation"
 dataPrepDir2=dir+"/DataForOriginalPlots/DataPreparation"
 
 som=pd.read_csv(outsomfile, delimiter=' ', header=None)
-som_headers=som.iloc[0] #get headers from original input file. could this be skipped or at least changed so that the whole file is not read? this is unnecessary work. TODO HOX TODO FIX
+som_headers=som.iloc[0] 
 
-#Generate colormaps and ticks for clustering
-clusters=int(max(som_data[:,len(som_data[0])-1])+1)
+clusters=int(max(som_data[:,len(som_data[0])-2])+1)
 discrete_cmap=sns.cubehelix_palette(n_colors=clusters, start=1,rot=4, gamma=1.0, hue=3, light=0.77, dark=0.15, reverse=False, as_cmap=False)
 
 
@@ -65,7 +71,7 @@ discrete_cmap=sns.cubehelix_palette(n_colors=clusters, start=1,rot=4, gamma=1.0,
 
 
 """
-Plot bscatterplots using som data.
+Plot scatterplots using som data.
 """
 
     
@@ -74,26 +80,25 @@ mpl.rcParams.update({'font.size': 12})
 cluster_col=[]
 
 for i in range(0,len(som_data)): 
-    cluster_col.append(som_data[i][len(som_data[0])-1]);
+    cluster_col.append(som_data[i][len(som_data[0])-2]);
 cluster_nparray=np.asarray(cluster_col)   
 clusters_unique=np.unique(cluster_nparray)
 for k in range(len(discrete_cmap)-1,-1,-1):
     if(k not in clusters_unique):
         discrete_cmap.pop(k)
-#if(len(columns)<=sampleSize*2):
 counter=0
-for i in range(len(som_data[0])-3,1,-1): 
+for i in range(len(som_data[0])-4,1,-1): 
     if(draw_list[i-2]=="0"):
         som_data=np.delete(som_data,i,1)
         som_headers=som_headers.drop(i)
 som_headers=som_headers.reset_index(drop=True)
-for i in range(2,len(som_data[0])):
+for i in range(2,len(som_data[0]-1)):
     
-    for k in range(i, len(som_data[0])-3):   #Draw Scatterplots:  
+    for k in range(i, len(som_data[0])-4):   #Draw Scatterplots:  
         counter=counter+1   
         ax=sns.scatterplot(x=som_data[:,i].astype(float), y=som_data[:,k+1].astype(float), hue=cluster_nparray.astype(float), palette=discrete_cmap,legend="full")
-        ax.set_xlabel(som_headers[i])#(columns[1,i])
-        ax.set_ylabel(som_headers[k+1])#(columns[1,j+1])     
+        ax.set_xlabel(som_headers[i])
+        ax.set_ylabel(som_headers[k+1])    
         lgd=ax.legend(bbox_to_anchor=(1, 1),loc=0,fontsize=8 ,borderaxespad=0.8)
         ax.figure.savefig(working_dir+'/Scatterplot/scatterplot_' +str(counter)+'.png', bbox_extra_artists=(lgd,), bbox_inches='tight')    
         plt.clf()
