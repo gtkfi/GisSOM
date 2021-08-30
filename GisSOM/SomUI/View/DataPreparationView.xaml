@@ -21,6 +21,7 @@
         <service:InverseSelectedIndexToVisibilityConverter x:Key="InverseSelectedIndexToVisibilityConverter" />
         <service:InverseBooleanConverter x:Key="InverseBooleanConverter" />
         <service:IsPythonPathSetToVisibilityConverter x:Key="IsPythonPathSetToVisibilityConverter"/>
+        <service:IsInputFileTifToBooleanConverter x:Key="IsInputFileTifToBooleanConverter"/>
         <Style x:Key="CheckBoxStyle" TargetType="CheckBox">
             <Setter Property="Margin" Value="5"></Setter>
         </Style>
@@ -44,7 +45,6 @@
         </Grid.ColumnDefinitions>
 
         <Grid.RowDefinitions>
-             <RowDefinition Height="Auto"></RowDefinition>
             <RowDefinition Height="*"></RowDefinition>
         </Grid.RowDefinitions>
         <!--<StatusBar Background="WhiteSmoke" Grid.ColumnSpan="3" Grid.Row="0">
@@ -66,14 +66,20 @@
         
         <Button Visibility="Collapsed" x:Name="bindingHelperButton" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" 
                             Command="{Binding RemoveTifCommand}"></Button>
+        <Button Visibility="Collapsed" x:Name="eastingBindingHelperButton" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" 
+                            Command="{Binding UnCheckEastingCommand}"></Button>
+        <Button Visibility="Collapsed" x:Name="northingBindingHelperButton" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" 
+                            Command="{Binding UnCheckNorthingCommand}"></Button>
+        <Button Visibility="Collapsed" x:Name="labelBindingHelperButton" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" 
+                            Command="{Binding UnCheckLabelCommand}"></Button>
         <CheckBox x:Name="visibilityHelperCheckbox" Visibility="Collapsed" IsEnabled="False" IsChecked="{Binding IsGeoTiffFile, UpdateSourceTrigger=PropertyChanged}" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}"/>
-        <Grid HorizontalAlignment="Left" Width="200"  Grid.Column="0" Grid.Row="1" Background="#F9F9FE">
+        <Grid HorizontalAlignment="Left" Width="250" Grid.Column="0" Grid.Row="0" Background="#F9F9FE">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"></RowDefinition>
+                <RowDefinition Height="5*"></RowDefinition>
                 <RowDefinition Height="*"></RowDefinition>
-                <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
-            <ComboBox Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,10,0,0" mah:TextBoxHelper.Watermark="Input data" FontSize="16" Width="160" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}">
+            <ComboBox Grid.Row="0" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="20,10,0,0" mah:TextBoxHelper.Watermark="Input data" FontSize="16" Width="160" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBooleanConverter}}">
                 <!--Tälle Comboboxille itemit bindinä jostain listasta-->
                 <i:Interaction.Triggers>
                     <i:EventTrigger EventName="Loaded">
@@ -82,7 +88,7 @@
                 </i:Interaction.Triggers>
 
                 <ComboBoxItem Padding="0,0,0,0">
-                    <Button  FontSize="18" Content=".csv  grid " Width="160" BorderThickness="0" HorizontalAlignment="Center" VerticalAlignment="Center"  DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding SelectCsvFileCommand}" CommandParameter="grid" IsDefault="True">
+                    <Button  FontSize="18" Content=".csv  grid " Width="160" BorderThickness="0" HorizontalAlignment="Center" VerticalAlignment="Center"  DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding SelectCsvFileCommand}" CommandParameter="grid" IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBooleanConverter}}" IsDefault="True">
                         <Button.ToolTip>
                             <TextBlock Text="{Binding Model.InputFile}"></TextBlock>
                         </Button.ToolTip>
@@ -90,7 +96,7 @@
                 </ComboBoxItem>
 
                 <ComboBoxItem Padding="0,0,0,0">
-                    <Button  FontSize="18" Content=".csv  scatter " Width="160" BorderThickness="0" HorizontalAlignment="Center" VerticalAlignment="Center"  DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding SelectCsvFileCommand}" CommandParameter="scatter" IsDefault="True">
+                    <Button  FontSize="18" Content=".csv  scatter " Width="160" BorderThickness="0" HorizontalAlignment="Center" VerticalAlignment="Center"  DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding SelectCsvFileCommand}" CommandParameter="scatter" IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBooleanConverter}}" IsDefault="True">
                         <Button.ToolTip>
                             <TextBlock Text="{Binding Model.InputFile}"></TextBlock>
                         </Button.ToolTip>
@@ -131,13 +137,101 @@
 
             <!--Tähän väliin joku control mistä lisätään uusi geotiff filu.  TOISAALTA. voihan se kontrolli tulla myös listan alapuolelle? oikeaan alakulmaan plus nappi.
             Kun tavallaan tässä lisätään sinne sarake (koordinaatit pysyy muuttumattomana)-->
+            <Grid Grid.Row="0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="125"></ColumnDefinition>
+                    <ColumnDefinition Width="20" ></ColumnDefinition>
+                    <ColumnDefinition Width="20"></ColumnDefinition>
+                    <ColumnDefinition Width="20"></ColumnDefinition>
+                    <ColumnDefinition Width="20"></ColumnDefinition>
+                    <ColumnDefinition Width="20"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <StackPanel Grid.Column="0" Margin="5,50,0,5" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Visibility="{Binding SelectedColumnIndex, Converter={StaticResource SelectedIndexToVisibilityConverter}}">
+                    <CheckBox Name="SpatialCheckBox" Margin="15,0,0,5"  DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsEnabled="{Binding IsCsvFile, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CheckBoxStyle}" IsChecked="{Binding Model.IsSpatial, Mode=TwoWay}" Content="Spatial data">
+                    <CheckBox.ToolTip>Is the dataset spatial data</CheckBox.ToolTip>
+                </CheckBox>
+                    <WrapPanel Margin="15,0,0,20"  >
+                    <TextBlock Text="NoData value: ">
+                        <TextBlock.ToolTip>If data contains numeric values representing null values.</TextBlock.ToolTip>
+                    </TextBlock>
+                        <TextBox MinWidth="60" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Text="{Binding Model.NoDataValue}">
+                            <TextBox.ToolTip>If data contains numeric values representing null values.</TextBox.ToolTip>
+                        </TextBox>
+                        <!--<Button Content="Save changes to dataset" HorizontalAlignment="Left" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding SaveChangesCommand}"></Button>-->
+                    <!--Merge both buttons together and do one command that launches both commands.-->
+                </WrapPanel>
+                </StackPanel>
+                <TextBlock IsEnabled="{Binding ElementName=visibilityHelperCheckbox, Path=IsChecked, Converter={StaticResource IsInputFileTifToBooleanConverter}}" Text="x" Grid.Column="2" Margin="0,0,0,0"  Visibility="{Binding Model.InputFile, Converter={StaticResource IsInputFileSelectedConverter}, UpdateSourceTrigger=PropertyChanged}"  DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}">
+                    <TextBlock.LayoutTransform>
+                        <TransformGroup>
+                            <RotateTransform Angle="90" />
+                            <ScaleTransform ScaleX="-1" ScaleY="-1"/>
+                        </TransformGroup>
+                    </TextBlock.LayoutTransform>
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Style.Triggers>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Foreground"
+                            Value="{StaticResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                <TextBlock IsEnabled="{Binding ElementName=visibilityHelperCheckbox, Path=IsChecked, Converter={StaticResource IsInputFileTifToBooleanConverter}}" Text="y" Grid.Column="3" Margin="0,0,0,0" Visibility="{Binding Model.InputFile, Converter={StaticResource IsInputFileSelectedConverter}, UpdateSourceTrigger=PropertyChanged}"  DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}">
+                    <TextBlock.LayoutTransform>
+                        <TransformGroup>
+                            <RotateTransform Angle="90" />
+                            <ScaleTransform ScaleX="-1" ScaleY="-1"/>
+                        </TransformGroup>
+                    </TextBlock.LayoutTransform>
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Style.Triggers>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Foreground"
+                            Value="{StaticResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                <TextBlock IsEnabled="{Binding ElementName=visibilityHelperCheckbox, Path=IsChecked, Converter={StaticResource IsInputFileTifToBooleanConverter}}" Text="Label" Grid.Column="4" Margin="0,0,0,0" Visibility="{Binding Model.InputFile, Converter={StaticResource IsInputFileSelectedConverter}, UpdateSourceTrigger=PropertyChanged}"  DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}">
+                    <TextBlock.LayoutTransform>
+                        <TransformGroup >
+                            <RotateTransform Angle="90" />
+                            <ScaleTransform ScaleX="-1" ScaleY="-1"/>
+                        </TransformGroup>
+                    </TextBlock.LayoutTransform>
+                    <TextBlock.Style>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Style.Triggers>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Foreground"
+                            Value="{StaticResource {x:Static SystemColors.GrayTextBrushKey}}"/>
+                                </Trigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                <TextBlock Text="Exclude" Grid.Column="5" Margin="0,60,0,0"  Visibility="{Binding Model.InputFile, Converter={StaticResource IsInputFileSelectedConverter}, UpdateSourceTrigger=PropertyChanged}"  DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}">
+                    <TextBlock.LayoutTransform>
+                        <TransformGroup>
+                            <RotateTransform Angle="90" />
+                            <ScaleTransform ScaleX="-1" ScaleY="-1"/>
+                        </TransformGroup>
+                    </TextBlock.LayoutTransform>
+                </TextBlock>
 
-            <ListBox Grid.Row="1" Name="ListBox_Headers"  Background="#FCFCFF" Margin="20,10,0,0" HorizontalAlignment="Stretch" 
+            </Grid>
+            <ListBox Grid.Row="1" Name="ListBox_Headers"  Background="#F9F9FE" Margin="20,10,0,0" HorizontalAlignment="Stretch" 
                      VerticalAlignment="Top"
                      DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" 
                      SelectedIndex="{Binding SelectedColumnIndex, Mode=TwoWay}"  
-                     ItemsSource="{Binding Path=ColumnNames, UpdateSourceTrigger=PropertyChanged}"
-                     ScrollViewer.VerticalScrollBarVisibility="Visible" >
+                     ItemsSource="{Binding Path=Model.ColumnDataList, UpdateSourceTrigger=PropertyChanged}"
+                     ScrollViewer.VerticalScrollBarVisibility="Auto"
+                     >
                 <ListBox.ItemContainerStyle>
                     <Style TargetType="ListBoxItem">
                         
@@ -202,16 +296,28 @@
                 </ListBox.ItemContainerStyle>
                 <ListBox.ItemTemplate>
                     <DataTemplate>
-                        <WrapPanel>
-                            <TextBlock Margin="5,2,0,2" Text="{Binding}"/>
-                            <Button  Margin="5,2,5,2" 
+                        <Grid><!--eli anbout tämän tapaan tulisi nuo east north label ja exclude napit.-->
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="100"></ColumnDefinition>
+                                <ColumnDefinition Width="20"></ColumnDefinition>
+                                <ColumnDefinition Width="20"></ColumnDefinition>
+                                <ColumnDefinition Width="20"></ColumnDefinition>
+                                <ColumnDefinition Width="20"></ColumnDefinition>
+                                <ColumnDefinition Width="20"></ColumnDefinition>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Margin="5,2,0,2" Text="{Binding Path=Name}" Grid.Column="0"/>
+                            <Button Grid.Column="1" HorizontalAlignment="Right" Margin="0,2,5,2" 
                             Command="{Binding ElementName=bindingHelperButton, Path=Command}"
                                      Visibility="{Binding ElementName=visibilityHelperCheckbox, Path=IsChecked, Converter={StaticResource IsInputFileTifToVisibilityConverter}}"
                             CommandParameter="{Binding}"                                             
                             Style="{DynamicResource MahApps.Metro.Styles.MetroCircleButtonStyle}" Background="DarkGray" Foreground="White" Width="12" Height="12" >
                                 <TextBlock FontSize="12" HorizontalAlignment="Center" Margin="-0,-5,0,0" ToolTip="Remove column">x</TextBlock>
                             </Button>
-                        </WrapPanel>
+                            <CheckBox IsEnabled="{Binding ElementName=visibilityHelperCheckbox, Path=IsChecked, Converter={StaticResource IsInputFileTifToBooleanConverter}}" HorizontalAlignment="Right" Grid.Column="2" Command="{Binding ElementName=eastingBindingHelperButton, Path=Command}" CommandParameter="{Binding}" IsChecked="{Binding Path=IsEasting}"></CheckBox>
+                            <CheckBox IsEnabled="{Binding ElementName=visibilityHelperCheckbox, Path=IsChecked, Converter={StaticResource IsInputFileTifToBooleanConverter}}" HorizontalAlignment="Right" Grid.Column="3" Command="{Binding ElementName=northingBindingHelperButton, Path=Command}" CommandParameter="{Binding}" IsChecked="{Binding Path=IsNorthing}"></CheckBox>
+                            <CheckBox IsEnabled="{Binding ElementName=visibilityHelperCheckbox, Path=IsChecked, Converter={StaticResource IsInputFileTifToBooleanConverter}}" HorizontalAlignment="Right" Grid.Column="4" Command="{Binding ElementName=labelBindingHelperButton, Path=Command}" CommandParameter="{Binding}" IsChecked="{Binding Path=IsLabel}"></CheckBox>
+                            <CheckBox HorizontalAlignment="Right" Grid.Column="5" IsChecked="{Binding Path=IsExcluded}"></CheckBox>
+                        </Grid>
                         
                     </DataTemplate>
                 </ListBox.ItemTemplate>
@@ -237,10 +343,10 @@
                 </ListBox.ItemContainerStyle>-->
             </ListBox>
             <!--Data set list, eli columnit, tai img tapauksessa teidostot. tosin ehkä img:tkin kannattaisi tätä varten jo läntätä yhteen tiedostoon/numpy arrayhin.-->
-            <Button Grid.Row="2" Margin="20"  HorizontalAlignment="Right" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Visibility="{Binding IsGeoTiffFile, Converter={StaticResource BoolToCollapsedVisibilityConverter}}" Content="Add geotiff file" Command="{Binding SelectGeoTiffFileCommand}" mah:ButtonHelper.PreserveTextCase="False"></Button>
+            <Button Grid.Row="3" Margin="20"  HorizontalAlignment="Right" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Visibility="{Binding IsGeoTiffFile, Converter={StaticResource BoolToCollapsedVisibilityConverter}}" Content="Add geotiff file" Command="{Binding SelectGeoTiffFileCommand}" mah:ButtonHelper.PreserveTextCase="False"></Button>
         </Grid>
-        <ScrollViewer Grid.Row="1"  Grid.Column="1"  VerticalScrollBarVisibility="Visible" HorizontalAlignment="Left" VerticalAlignment="Top">
-            <Grid Grid.Column="1" Grid.Row="1">
+        <ScrollViewer Grid.Row="0"  Grid.Column="1"  VerticalScrollBarVisibility="Auto" HorizontalAlignment="Left" VerticalAlignment="Top">
+            <Grid Grid.Column="1" Grid.Row="0">
                 <!--Nyt ViewModeliin joku IsDataSelected-namikka **ON JO. FileSelected., ellei ole jo, ja sitten data preparation valikon visibility sen taakke. 
             Ois myös hyvä saada niin, että kuvan paikalla näkyy "please insert data" tms kunnes daatta on valittu.-->
                 <Grid.ColumnDefinitions>
@@ -263,26 +369,35 @@
 
                     <!--Tähän converter!-->
                     <!--Näihin sit value bindit-->
-                    <CheckBox Name="NormalizeCheckBox" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}"  Style="{StaticResource CheckBoxStyle}" IsChecked="{Binding Model.IsNormalized, Mode=TwoWay}" Content="Normalize data?">
+                    <!--<CheckBox Name="SpatialCheckBox" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsEnabled="{Binding IsCsvFile, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CheckBoxStyle}" IsChecked="{Binding Model.IsSpatial, Mode=TwoWay}" Content="Spatial data">
+                        <CheckBox.ToolTip>Is the dataset spatial data</CheckBox.ToolTip>
+                    </CheckBox>
+                    <WrapPanel Margin="0,5,0,5">
+                        <TextBlock Text="NoData value: ">
+                            <TextBlock.ToolTip>If data contains numeric values representing null values.</TextBlock.ToolTip>
+                        </TextBlock>
+                        <TextBox MinWidth="60" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Text="{Binding Model.NoDataValue}">
+                            <TextBox.ToolTip>If data contains numeric values representing null values.</TextBox.ToolTip>
+                        </TextBox>
+                    </WrapPanel>-->
+                    <CheckBox Name="NormalizeCheckBox" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}"  Style="{StaticResource CheckBoxStyle}" IsChecked="{Binding Model.IsNormalized, Mode=TwoWay}" Content="Scale data?">
                         <CheckBox.ToolTip>Scale data</CheckBox.ToolTip>
                     </CheckBox>
                     <WrapPanel>
-                        <TextBox DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsEnabled="{Binding Model.IsNormalized}"  HorizontalAlignment="Left" Margin="30,5,0,5" Text="{Binding Model.NormalizationMin , Mode=TwoWay}" MinWidth="50">
-                            <TextBox.ToolTip>Scale minimum value</TextBox.ToolTip>
+                        <TextBox DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsEnabled="{Binding Model.IsNormalized}"  HorizontalAlignment="Left" Margin="30,5,0,5" Text="{Binding NormalizationMin , Mode=TwoWay}" MinWidth="50">
+                            <TextBox.ToolTip>Scaling minimum value</TextBox.ToolTip>
                         </TextBox>
-                        <TextBlock Margin="5,0,0,0">Scale min value</TextBlock>
+                        <TextBlock Margin="5,0,0,0">Scaling min value</TextBlock>
                     </WrapPanel>
                     <WrapPanel>
-                        <TextBox DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsEnabled="{Binding Model.IsNormalized}"  HorizontalAlignment="Left" Margin="30,5,0,5" Text="{Binding Model.NormalizationMax , Mode=TwoWay}" MinWidth="50">
-                            <TextBox.ToolTip>Scale minimum value</TextBox.ToolTip>
+                        <TextBox DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsEnabled="{Binding Model.IsNormalized}"  HorizontalAlignment="Left" Margin="30,5,0,5" Text="{Binding NormalizationMax , Mode=TwoWay}" MinWidth="50">
+                            <TextBox.ToolTip>Scaling minimum value</TextBox.ToolTip>
                         </TextBox>
-                        <TextBlock Margin="5,0,0,0">Scale max value</TextBlock>
+                        <TextBlock Margin="5,0,0,0">Scaling max value</TextBlock>
                     </WrapPanel>
-                    <CheckBox Name="SpatialCheckBox" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsEnabled="{Binding IsCsvFile, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource CheckBoxStyle}" IsChecked="{Binding Model.IsSpatial, Mode=TwoWay}" Content="Spatial data">
-                        <CheckBox.ToolTip>Is the dataset spatial data</CheckBox.ToolTip>
-                    </CheckBox>
+                    
                     <StackPanel  DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Margin="26,0,0,0">
-                        <CheckBox DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Style="{StaticResource CheckBoxStyle}" Content="Easting" IsChecked="{Binding IsSelectedEasting}" >
+                        <!--<CheckBox DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Style="{StaticResource CheckBoxStyle}" Content="Easting" IsChecked="{Binding IsSelectedEasting}" >
                             <CheckBox.ToolTip>Use as x-coordinate</CheckBox.ToolTip>
                         </CheckBox>
                         <CheckBox DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Style="{StaticResource CheckBoxStyle}" Content="Northing" IsChecked="{Binding IsSelectedNorthing}" >
@@ -290,13 +405,14 @@
                         </CheckBox>
                         <CheckBox DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Style="{StaticResource CheckBoxStyle}" Content="Label" IsChecked="{Binding IsSelectedLabel}" >
                             <CheckBox.ToolTip>Use as label</CheckBox.ToolTip>
-                        </CheckBox>
+                        </CheckBox>-->
                     </StackPanel>
-                    <CheckBox DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Style="{StaticResource CheckBoxStyle}" Margin="5,10,5,5" Content="Exclude" IsChecked="{Binding Model.IsExcluded, Mode=TwoWay, Converter={StaticResource BoolToStringConverter}}" >
-                        <!--IsEnabled="{Binding IsGeoTiffFile, Converter={StaticResource InverseBooleanConverter}}"-->
+                    <!--<CheckBox DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Style="{StaticResource CheckBoxStyle}" Margin="5,10,5,5" Content="Exclude" IsChecked="{Binding Model.IsExcluded, Mode=TwoWay, Converter={StaticResource BoolToStringConverter}}" >
+                        --><!--IsEnabled="{Binding IsGeoTiffFile, Converter={StaticResource InverseBooleanConverter}}"--><!--
                         <CheckBox.ToolTip>Leave variable out of SOM calculation</CheckBox.ToolTip>
-                    </CheckBox>
-
+                    </CheckBox>-->
+                    
+                    <TextBlock Margin="0,20,0,0"  Text="Preprocessing:"></TextBlock>
                     <CheckBox DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Style="{StaticResource CheckBoxStyle}" Content="Log transform" Margin="5,10,5,5" IsChecked="{Binding Model.IsLogTransformed , Mode=TwoWay}" >
                         <CheckBox.ToolTip>Apply log transformation to variable values</CheckBox.ToolTip>
                     </CheckBox>
@@ -318,17 +434,7 @@
                     </WrapPanel>
 
                     <Button Margin="0,10,0,0" Content="Update Histogram"  HorizontalAlignment="Left" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding DrawCommand}"></Button>
-                    <WrapPanel Margin="0,10,0,0">
-                        <TextBlock Text="NoData value: ">
-                            <TextBlock.ToolTip>If data contains numeric values representing null values.</TextBlock.ToolTip>
-                        </TextBlock>
-                        <TextBox MinWidth="60" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Text="{Binding Model.NoDataValue}">
-                            <TextBox.ToolTip>If data contains numeric values representing null values.</TextBox.ToolTip>
-                        </TextBox>
-
-                        <!--<Button Content="Save changes to dataset" HorizontalAlignment="Left" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding SaveChangesCommand}"></Button>-->
-                        <!--Merge both buttons together and do one command that launches both commands.-->
-                    </WrapPanel>
+                    
 
                     <Button Margin="0,60,0,0" 
                         Style="{StaticResource AccentedSquareButtonStyle}"

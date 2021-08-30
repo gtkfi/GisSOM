@@ -10,13 +10,14 @@
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Resources>
         <service:CollectionCountToVisibilityConverter x:Key="CollectionCountToVisibilityConverter" />
+        <service:InverseCollectionCountToVisibilityConverter x:Key="InverseCollectionCountToVisibilityConverter" />
     </UserControl.Resources>
     <Grid>
-        
-        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" >
+
+        <ScrollViewer VerticalScrollBarVisibility="Visible" HorizontalScrollBarVisibility="Disabled" >
             <VirtualizingStackPanel VirtualizationMode="Recycling" VirtualizingStackPanel.IsVirtualizing="True">
-                <Button Width="100" Height="40"  DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding SelectAllCommand}" CommandParameter="{Binding Model.BoxPlotList}">Select all</Button>
-                <Button Width="100" Height="40" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding DeSelectAllCommand}" CommandParameter="{Binding Model.BoxPlotList}">Deselect all</Button>
+                <!--<Button Width="100" Height="40"  DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding SelectAllCommand}" CommandParameter="{Binding Model.BoxPlotList}">Select all</Button>-->
+                <!--<Button Width="100" Height="40" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding DeSelectAllCommand}" CommandParameter="{Binding Model.BoxPlotList}">Deselect all</Button>-->
                 <ItemsControl DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" ItemsSource="{Binding Model.BoxPlotList}">
                     <!--DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" ItemsSource="{Binding Model.BoxPlotList}"-->
                     <ItemsControl.ItemsPanel>
@@ -34,12 +35,15 @@
                 </ItemsControl>
                 <Button Name="BindingHelperButton" Visibility="Collapsed" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding OpenPlotCommand}"></Button>
                 <mah:MetroProgressBar DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsIndeterminate="True" Width="400" Margin="40" Visibility="{Binding BoxPlotList.Count, Converter={StaticResource CollectionCountToVisibilityConverter}}"></mah:MetroProgressBar>
+                <Button FontSize="14" Content="Show results in filesystem" FontWeight="Normal" mah:ButtonHelper.PreserveTextCase="True" Background="LightGray" BorderBrush="Black"
+                                Margin="5" Width="auto"  HorizontalAlignment="right" VerticalAlignment="Center"  DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Visibility="{Binding BoxPlotList.Count, Converter={StaticResource InverseCollectionCountToVisibilityConverter}}"
+                                Command="{Binding ShowResultsInFileSystemCommand}" CommandParameter="BoxPlot" IsDefault="True"/>
                 <ItemsControl DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" ItemsSource="{Binding BoxPlotList}">
                     <!--Tähän vaan sit eri imagelist-->
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <!-- use the ItemsPerRow attached property to dynamically add rows -->
-                            <UniformGrid Columns="4"/>
+                            <UniformGrid Columns="3"/>
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
