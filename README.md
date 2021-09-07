@@ -2,7 +2,7 @@
 
 GisSOM performs unsupervised self-organizing maps (SOM) clustering to a given dataset. Results are presented in the SOM coordinates, and also spatial coordinates if given. Also scatter and boxplots are used to visualize the per cluster data distribution.  
 
-<img src="screenshots/som_2.png" width="800" height="400">
+<img src="/Screenshots/som_2.png" width="800" height="400">
   
 <sup>Som results plotted in somspace</sup>
 
@@ -21,13 +21,13 @@ Results in SOM and geographic coordinates
 ## Screenshots
 
 Data preparation:  
-<img src="Screenshots/som_1.png" width="800" height="400">
+<img src="/Screenshots/som_1.png" width="800" height="400">
   
 Results in Geospace:  
-<img src="Screenshots/som_3.png" width="800" height="400">
+<img src="/Screenshots/som_3.png" width="800" height="400">
   
 Interactive plot:  
-<img src="Screenshots/interactive_plot.gif" width="800" height="400">  
+<img src="/Screenshots/interactive_plot.gif" width="800" height="400">  
 
 ## Installation
 
