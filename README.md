@@ -27,7 +27,7 @@ Results in Geospace:
 <img src="/Screenshots/som_3.png" width="800" height="400">
   
 Interactive plot:  
-<img src="/Screenshots/Interactive_plot.gif" width="400" height="200">  
+<img src="/Screenshots/Interactive_plot.gif" width="800" height="400">  
 
 ## Installation
 
