@@ -74,8 +74,7 @@ def run_command_line(args):
         with open(args.initialcodebook, 'rb') as som_dictionary_file:
             som_dictionary = pickle.load(som_dictionary_file)
             args.initialcodebook=som_dictionary['codebook']
-            args.initialization=None
-                
+            args.initialization=None           
     header = nxtsomcore.load_data(args.input_file) #load header
     som = nxtsomcore.train(#train som
         header['data'],

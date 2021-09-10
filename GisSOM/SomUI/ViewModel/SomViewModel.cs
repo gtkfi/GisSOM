@@ -57,7 +57,7 @@ namespace SomUI.ViewModel
         private bool isSelectedNorthing;
         private bool isSelectedLabel;
         private bool showSettingsFlyout;
-        private string pythonPath;
+        private string pythonPath; //Deprecated
         private string pythonLogText;
         private double normalizationMin;
         private double normalizationMax;
@@ -264,9 +264,9 @@ namespace SomUI.ViewModel
             UnCheckLabelCommand = new RelayCommand<DataColumn>((DataColumn d) => UnCheckLabel(d));
             AddLabelDataCommand = new RelayCommand(AddDataLabelColumn);
             DrawResultsInteractiveCommand = new RelayCommand(DrawResultsInteractive);
-            if (File.Exists(Path.Combine(Model.Output_Folder, "settingsFile.txt")))
+            if (File.Exists(Path.Combine(Model.Output_Folder, "settingsFile.txt"))) //Deprecated
             {
-                pythonPath = File.ReadAllText(Path.Combine(Model.Output_Folder, "settingsFile.txt"));
+                pythonPath = File.ReadAllText(Path.Combine(Model.Output_Folder, "settingsFile.txt"));//Deprecated
             }
         }
 
@@ -374,6 +374,7 @@ namespace SomUI.ViewModel
         {
             Model.InteractiveResultColumnList.Clear();
             Model.InteractiveResultColumnList.Add("Cluster");
+            Model.SelectedInteractiveColumn = 0;
             for (int i = 0; i < Model.ColumnDataList.Count(); i++)
             {
                 if (Model.ColumnDataList[i].IsExcluded.ToString() != "True")
@@ -381,7 +382,7 @@ namespace SomUI.ViewModel
                     Model.InteractiveResultColumnList.Add(Model.ColumnDataList[i].Name);
                 }
             }
-
+            BrowserToolTip = "";
             RunningProcessCount++;
             PythonLogText = "";
             ServiceLocator.SetLocatorProvider(() => SimpleIoc.Default);
@@ -431,11 +432,13 @@ namespace SomUI.ViewModel
                     f.CopyTo(Path.Combine(Model.OutputFolderTimestamped, "DataForOriginalPlots", "DataPreparation", f.Name), true);
                 }
                 */
-
+                SomTool.HttpPost("http://localhost:8050/shutdown", "message=shuts down interactive plots");
                 await Task.Run(async () =>
                 {
                     Task t = SomTool.RunTool(Model, SomImageList, GeoSpaceImageList, BoxPlotList, ScatterPlotList, ClusterPlotList, ScriptOutput, ScriptError);
                     await t;
+                    if(IsGeoTiffFile)
+                        WriteGeotif();
                     App.Current.Dispatcher.Invoke((Action)delegate         //delegate to access different thread
                     {
                         dialogService.ShowNotification("SOM run complete.", "Success");
@@ -916,7 +919,7 @@ namespace SomUI.ViewModel
         }
 
         /// <summary>
-        /// Select python exe path manually
+        /// Select python exe path manually. Deprecated.
         /// </summary>
         public void SelectPythonFile()
         {
@@ -1156,6 +1159,12 @@ namespace SomUI.ViewModel
                     string som_x = node.InnerText;
                     node = doc.DocumentElement.SelectSingleNode("som_y");
                     string som_y = node.InnerText;
+                    string dataType = "CSV";
+                    node = doc.DocumentElement.SelectSingleNode("dataType");
+                    if (node != null)
+                    {
+                    }
+                    dataType= node.InnerText; 
 
                     node = doc.DocumentElement.SelectSingleNode("isSacled");
                     string normalized = "False";                 
@@ -1179,6 +1188,15 @@ namespace SomUI.ViewModel
                     Model.IsNormalized = bool.Parse(normalized);
                     Model.Som_x = Int32.Parse(som_x);
                     Model.Som_y = Int32.Parse(som_y);
+                    if (dataType == "CSV") {
+                        IsGeoTiffFile = false;
+                        IsCsvFile = true;
+                    }
+                    else
+                    {
+                        IsGeoTiffFile = true;
+                        IsCsvFile = false;
+                    }
 
                     Model.ScatterPlotList.Clear();
                     string line1 = File.ReadLines(Path.Combine(Model.OutputFolderTimestamped, "result_som.txt")).First();
@@ -1359,37 +1377,35 @@ namespace SomUI.ViewModel
                 StatusFlyOutOpen = true;
             }
         }
-        /// <summary>
-        /// Method to create simple http post command, used to send shutdown message to interactive plot 
-        /// </summary>
-        /// <param name="URI"></param>
-        /// <param name="Parameters"></param>
-        /// <returns></returns>
-        private void HttpPost(string URI, string Parameters)//
-        {
-            try
-            {
-                System.Net.WebRequest req = System.Net.WebRequest.Create(URI);
-                req.Proxy = WebRequest.DefaultWebProxy;
-                //Add these, as we're doing a POST
-                req.ContentType = "application/x-www-form-urlencoded";
-                req.Method = "POST";      
-                byte[] bytes = System.Text.Encoding.ASCII.GetBytes(Parameters);
-                req.ContentLength = bytes.Length;
-                System.IO.Stream os = req.GetRequestStream();
-                os.Write(bytes, 0, bytes.Length); 
-                os.Close();
-                System.Net.WebResponse resp = req.GetResponse();
-                if (resp == null) return;
-                System.IO.StreamReader sr = new System.IO.StreamReader(resp.GetResponseStream());
-                resp.Close();
-                return;
-            }
-            catch (Exception)
-            {
-                return;
-            }
-        }
+        //For sending the shutdown message to the interactive plot.
+        //private void HttpPost(string URI, string Parameters)// async Task 
+        //{
+        //    try
+        //    {
+        //        System.Net.WebRequest req = System.Net.WebRequest.Create(URI);
+        //        req.Proxy = WebRequest.DefaultWebProxy;
+        //        req.Timeout = 10000;
+        //        req.ContentType = "application/x-www-form-urlencoded";
+        //        req.Method = "POST";
+        //        byte[] bytes = System.Text.Encoding.ASCII.GetBytes(Parameters);
+        //        req.ContentLength = bytes.Length;
+        //        System.IO.Stream os = req.GetRequestStream();
+        //        os.Write(bytes, 0, bytes.Length);
+        //        os.Close();
+        //        using (HttpWebResponse httpWebResponse = (HttpWebResponse)req.GetResponse())
+        //        {
+        //            if (httpWebResponse.StatusDescription == "OK")
+        //            {
+        //                Debug.Write("Ok");
+        //                logger.Trace("Shutting down interactive plot");
+        //            }
+        //        }
+        //    }
+        //    catch (Exception e)
+        //    {
+        //        var test = e;
+        //    }
+        //}
 
         /// <summary>
         /// Draw bitmap from file path. Bitmaps are used, so files used as image sources are not locked, and image elements can be updated in runtime.
@@ -1839,7 +1855,7 @@ namespace SomUI.ViewModel
                 OnPropertyChanged();
             }
         }
-        public string PythonPath //This is now deprecated? unnecessary? because of change into pre-packaged python exe files
+        public string PythonPath //Deprecated
         {
             get
             {
@@ -1863,7 +1879,7 @@ namespace SomUI.ViewModel
             }
         }
 
-        public double NormalizationMin//delete this from Model, as these are moved to DataColumns
+        public double NormalizationMin
         {  
             get { return normalizationMin; }
             set{ if (normalizationMin == value) return;
@@ -1873,7 +1889,7 @@ namespace SomUI.ViewModel
             }
         }
 
-        public double NormalizationMax//delete this from Model, as these are moved to DataColumns
+        public double NormalizationMax
         {
             get { return normalizationMax; }
             set
@@ -2060,16 +2076,6 @@ namespace SomUI.ViewModel
             });
         }
 
-        /// <summary>
-        /// Get script process error output.
-        /// </summary>
-        /// <param name="myProcess">Process</param>
-        //private void ScriptErrorForSplitToColumns(Process myProcess)
-        //{
-        //    myProcess.ErrorDataReceived += new DataReceivedEventHandler((sender, e) =>
-        //    {
-        //    });
-        //}
 
         private void SelectAll(ObservableCollection<BoolStringHelper> collection)
         {
@@ -2121,7 +2127,7 @@ namespace SomUI.ViewModel
             }
         }
 
-        public void ShowResultsInFileSystem(string s)
+        private void ShowResultsInFileSystem(string s)
         {
 
             try

@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import sys
 import numpy as np
 import seaborn as sns
-from random import sample
+#from random import sample
 """
 Inputs:
 1) Input file
