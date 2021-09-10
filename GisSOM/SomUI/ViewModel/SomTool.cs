@@ -35,17 +35,17 @@ namespace SomUI.ViewModel
         //public int runningProcessCount = 0;
         //public string flyOutText = "";
         //public bool statusFlyOutOpen = false;
-        public string pythonLogText = "";
+        private string pythonLogText = "";
         private readonly IDialogService dialogService;
         //public string browserToolTip = ""; 
-        public ImageSource dataHistogram;
-        public bool isBusy = false;
+        private ImageSource dataHistogram;
+        private bool isBusy = false;
         private readonly ILogger logger = NLog.LogManager.GetCurrentClassLogger();
-        public string pythonPath = "C:/Users/shautala/AppData/Local/Programs/Python/Python37/pythonw.exe"; // used for debugging.
-        public bool usePyExes = true;//for switching running of scripts between packed python executables and full python installation. used for debugging.
+        private string pythonPath = "C:/Users/shautala/AppData/Local/Programs/Python/Python37/pythonw.exe"; // used for debugging.
+        private bool usePyExes = true;//for switching running of scripts between packed python executables and full python installation. used for debugging.
                                      
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        private event PropertyChangedEventHandler PropertyChanged;
         public SomTool()
         {
             this.logger = NLog.LogManager.GetCurrentClassLogger();
@@ -57,7 +57,7 @@ namespace SomUI.ViewModel
         public async Task SplitLrnFile(SomModel Model, Action<Process> ScriptOutput, Action<Process> ScriptError) 
         {
                 
-                PythonLogText = "";
+                //PythonLogText = "";
 
                 var scriptPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "scripts", "split_to_columns.py");
                 var executablepath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "scripts", "executables", "split_to_columns.exe");
@@ -142,7 +142,8 @@ namespace SomUI.ViewModel
                     inputFile = Path.Combine(dataPrepFolder, "outfile2.npy"); //defaults to column index 2 (usually "first data column")                                                                        
                 if (!File.Exists(inputFile))
                 {
-                    PythonLogText += "Input file not found";
+                    //PythonLogText += "Input file not found";
+                    logger.Error("Input file not found");
                     logger.Trace("Input file not found");
                 }
                     //dialogService.ShowNotification("Input file not found", "Error");
@@ -176,9 +177,9 @@ namespace SomUI.ViewModel
                     myProcess.Close();
                     if (errors != "" && !errors.Contains("Warning")) //Make a more robust solution later
                     {
-                        PythonLogText += errors + "\r\n";
+                        //PythonLogText += errors + "\r\n";
                         //dialogService.ShowNotification("Failed to draw histogram. See the log file for details", "Error");   
-                        logger.Trace(errors);
+                        logger.Error(errors);
                         return null;
                     }
                     returnValue = returnValue.Replace("(", "");
@@ -555,7 +556,7 @@ namespace SomUI.ViewModel
                 using (var myProcess = new Process())
                 {
                     myProcess.StartInfo = myProcessStartInfo;
-                    PythonLogText = "";
+                    //PythonLogText = "";
                     ScriptOutput(myProcess);
                     ScriptError(myProcess);
                     myProcess.Start();
@@ -1189,35 +1190,13 @@ namespace SomUI.ViewModel
                 myProcess.Close();
             };
         }
-
-        //private void ShowErrorFlyout(string msg)
-        //{
-        //    if (msg.ToLower().Contains("error"))
-        //    {
-        //        if (StatusFlyOutOpen == false)
-        //        {
-        //            FlyOutText = msg;
-        //            StatusFlyOutOpen = true;
-        //        }
-        //    }
-        //}
-
-        //private void ShowErrorFlyoutAlways(string msg)
-        //{
-        //    if (StatusFlyOutOpen == false)
-        //    {
-        //        FlyOutText = msg;
-        //        StatusFlyOutOpen = true;
-        //    }
-        //}
-
-        
+       
 
         //For sending the shutdown message to the interactive plot.
-        private void HttpPost(string URI, string Parameters)// async Task 
+        public void HttpPost(string URI, string Parameters)
         {
             //await Task.Run(async () =>
-            //{
+            //{ HttpWebResponse httpWebResponse
                 try
                 {
                     System.Net.WebRequest req = System.Net.WebRequest.Create(URI);
@@ -1230,6 +1209,37 @@ namespace SomUI.ViewModel
                     System.IO.Stream os = req.GetRequestStream();
                     os.Write(bytes, 0, bytes.Length);
                     os.Close();
+
+
+
+                    using (HttpWebResponse httpWebResponse = (HttpWebResponse)req.GetResponse())
+                    {
+                    if (httpWebResponse.StatusDescription == "OK")
+                    {
+                        //Cef.GetGlobalCookieManager().DeleteCookies("", "");
+                        //CefSharp.WebBrowserExtensions.Reload(this.Browser, true);
+                        //return "OK";
+                        Debug.Write("Ok");
+                        logger.Trace("Shutting down interactive plot");
+
+                    }
+                }
+
+
+
+                //HttpWebResponse httpWebResponse = (HttpWebResponse)req.GetResponse();
+                    /*if (httpWebResponse.StatusDescription == "OK")
+                    {
+                        //Cef.GetGlobalCookieManager().DeleteCookies("", "");
+                        //CefSharp.WebBrowserExtensions.Reload(this.Browser, true);
+                        //return "OK";
+                        Debug.Write("Ok");
+                        logger.Trace("Shutting down interactive plot");
+                        
+                    }
+                    httpWebResponse.Close();
+                    */
+                /*
                     System.Net.WebResponse resp = req.GetResponse();
                     if (resp != null)
                     {
@@ -1237,11 +1247,14 @@ namespace SomUI.ViewModel
                         System.IO.StreamReader sr = new System.IO.StreamReader(resp.GetResponseStream());
                         resp.Close();
                     }
-                }
+                */
+            }
                 catch (Exception e)
                 {
                 //unable to connect to the remote server tulee jos ei oo plottia mitä pysäyttää?
-                }
+                var test = e;
+
+            }
             //});
         }
         public static ImageSource BitmapFromUri(Uri source)
@@ -1257,6 +1270,7 @@ namespace SomUI.ViewModel
             return bitmap;
         }
 
+        
         public static ImageSource BitmapWithCacheFromUri(Uri source)
         {
             var bitmap = new BitmapImage();
@@ -1289,16 +1303,16 @@ namespace SomUI.ViewModel
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
 
-        public string PythonLogText
-        {
-            get { return pythonLogText; }
-            set
-            {
-                if (pythonLogText == value) return;
-                pythonLogText = value;
-                OnPropertyChanged(); 
-            }
-        }
+        //public string PythonLogText
+        //{
+        //    get { return pythonLogText; }
+        //    set
+        //    {
+        //        if (pythonLogText == value) return;
+        //        pythonLogText = value;
+        //        OnPropertyChanged(); 
+        //    }
+        //}
 
         //public string FlyOutText
         //{
@@ -1343,35 +1357,35 @@ namespace SomUI.ViewModel
             }
         }
 
-        private void AddToImageCollection(ObservableCollection<ImageSource> ImageCollection, string PlotDirectory)
-        { 
-            ImageSource imageSrc;
-            DirectoryInfo d;
-            FileInfo[] Files;
-            string fullPath;
-            try
-            {
-                App.Current.Dispatcher.Invoke((Action)delegate         //delegate to access different thread
-                {
-                    ImageCollection.Clear();
-                });
-                d = new DirectoryInfo(PlotDirectory);
-                Files = d.GetFiles("*.png").OrderBy(p => p.CreationTime).ToArray(); //Getting png files
-                foreach (FileInfo file in Files)
-                {
-                    fullPath = Path.Combine(PlotDirectory, file.Name);
-                    imageSrc = BitmapFromUri(new Uri(fullPath)); 
-                    App.Current.Dispatcher.Invoke((Action)delegate
-                    {
-                        ImageCollection.Add(imageSrc);
-                    });
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex, "Failed to show output images");
-            }
-        }
+        //private void AddToImageCollection(ObservableCollection<ImageSource> ImageCollection, string PlotDirectory)
+        //{ 
+        //    ImageSource imageSrc;
+        //    DirectoryInfo d;
+        //    FileInfo[] Files;
+        //    string fullPath;
+        //    try
+        //    {
+        //        App.Current.Dispatcher.Invoke((Action)delegate         //delegate to access different thread
+        //        {
+        //            ImageCollection.Clear();
+        //        });
+        //        d = new DirectoryInfo(PlotDirectory);
+        //        Files = d.GetFiles("*.png").OrderBy(p => p.CreationTime).ToArray(); //Getting png files
+        //        foreach (FileInfo file in Files)
+        //        {
+        //            fullPath = Path.Combine(PlotDirectory, file.Name);
+        //            imageSrc = BitmapFromUri(new Uri(fullPath)); 
+        //            App.Current.Dispatcher.Invoke((Action)delegate
+        //            {
+        //                ImageCollection.Add(imageSrc);
+        //            });
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        logger.Error(ex, "Failed to show output images");
+        //    }
+        //}
         private void EditRunStatsXml( string xmlPath, string elementName, string elementText)
         {
             XmlDocument doc = new XmlDocument();
@@ -1478,6 +1492,16 @@ namespace SomUI.ViewModel
 
             xmlWriter.WriteStartElement("dataShape");
             xmlWriter.WriteString(model.DataShape);
+            xmlWriter.WriteEndElement();
+
+            string dataType;
+            if (model.InputFile.Substring(model.InputFile.Length - 4) == ".tif")
+                dataType = "GeoTiff";
+            else
+                dataType = "CSV";
+
+            xmlWriter.WriteStartElement("dataType");
+            xmlWriter.WriteString(dataType);
             xmlWriter.WriteEndElement();
 
             xmlWriter.WriteStartElement("output_folder");

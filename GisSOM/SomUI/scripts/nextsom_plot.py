@@ -262,10 +262,11 @@ def plot_geospace_results_grid():
     global geo_headers
     global som_data
     mpl.rcParams.update({'font.size': 14})
+
     for i in range(0, len(som_data[0])-4): 
         x=geo_data[:,0]
         y=geo_data[:,1]
-        z=geo_data[:,(len(som_data[0])+i)]
+        z=geo_data[:,(5+i)]
         df = pd.DataFrame.from_dict(np.array([x,y,z]).T)
         df.columns = ['X_value','Y_value','Z_value']
         df['Z_value'] = pd.to_numeric(df['Z_value'])
@@ -306,12 +307,66 @@ def plot_geospace_results_grid():
         plt.xticks(rotation=0)
         plt.xticks(ha='left')
         ax.invert_yaxis()
-        ax.set_title(geo_headers[len(som_data[0])+i+1])
+        ax.set_title(geo_headers[5+i+1])
         plt.tight_layout()
         ax.figure.savefig(working_dir+'/Geo/geoplot_'+str(i+2)+'.png', dpi=300)
         plt.clf()
         plt.cla()
         plt.close()
+        
+        
+    #q_error:
+    x=geo_data[:,0]
+    y=geo_data[:,1]
+    z=geo_data[:,(len(som_data[0])-5)*2 +5] 
+    df = pd.DataFrame.from_dict(np.array([x,y,z]).T)
+    df.columns = ['X_value','Y_value','Z_value']
+    df['Z_value'] = pd.to_numeric(df['Z_value'])
+    pivotted= df.pivot('Y_value','X_value','Z_value')
+    sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
+    ax=sns.heatmap(pivotted,cmap='jet', square=True, linewidths=0, xticklabels="auto", yticklabels="auto")
+    
+    # Set tick labels
+    fmt = '{:0.0f}'
+    xticklabels = []
+    for item in ax.get_xticklabels():
+        item.set_text(fmt.format(float(item.get_text())))
+        xticklabels += [item]
+    yticklabels = []
+    for item in ax.get_yticklabels():
+        item.set_text(fmt.format(float(item.get_text())))
+        yticklabels += [item]
+    ax.set_xticklabels(xticklabels)
+    ax.set_yticklabels(yticklabels)
+
+    every_nth = round((len(ax.xaxis.get_ticklabels()))/2)
+    if(every_nth==0):#for data sets with only 1 x coordinate
+        every_nth=1
+    every_nth_y = round((len(ax.yaxis.get_ticklabels()))/2)
+    if(every_nth_y==0):#for data sets with only 1 x coordinate
+        every_nth_y=1
+    for n, label in enumerate(ax.xaxis.get_ticklabels()):
+        if n % every_nth != 0:
+            label.set_visible(False)
+    for n, label in enumerate(ax.yaxis.get_ticklabels()):
+        if n % every_nth_y != 0:
+            label.set_visible(False)
+    ax.xaxis.get_ticklabels()[-1].set_visible(True)
+    ax.yaxis.get_ticklabels()[-1].set_visible(True)
+    plt.yticks(rotation=90)
+    plt.yticks(ha='right')
+    plt.yticks(va='bottom')
+    plt.xticks(rotation=0)
+    plt.xticks(ha='left')
+    ax.invert_yaxis()
+    ax.set_title(geo_headers[(len(som_data[0])-5)*2 +6])#(geo_headers[len(som_data[0])+i+1])#tähän sama 5     
+    plt.tight_layout()
+    ax.figure.savefig(working_dir+'/Geo/geoplot_'+str(i+2)+'.png', dpi=300)
+    plt.clf()
+    plt.cla()
+    plt.close()
+    
+    
 
 """
 Plot geospace plots & q-error if type is scatter
@@ -328,24 +383,47 @@ def plot_geospace_results_scatter():
           'x':np.array([len(geo_data)]),
           'y':np.array([len(geo_data)])}
 
-    for i in range(0, len(som_data[0])-4): 
-        z=geo_data[:,(len(som_data[0])+i)]
+    for i in range(0, len(som_data[0])-4):  
+        z=geo_data[:,(5+i)]   
         sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
         mpl.rcParams.update({'font.size': 30})
-        ax = plot_hexa(somx,somy,clusters,grid,z,cluster_tick_labels=cluster_tick_labels, title=som_headers[i], ptype='scatter')           
+        ax = plot_hexa(somx,somy,clusters,grid,z,cluster_tick_labels=cluster_tick_labels, title=geo_headers[5+i+1], ptype='scatter')           
         plt.yticks(rotation=90)
         plt.yticks(ha='right')
         plt.yticks(va='bottom')
         plt.xticks(rotation=0)
         plt.xticks(ha='left')
         ax.invert_yaxis()
-        ax.set_title(geo_headers[len(som_data[0])+i+1])
         plt.tight_layout()
         ax.figure.savefig(working_dir+'/Geo/geoplot_'+str(i+2)+'.png', dpi=300)
         plt.clf()
         plt.cla()
         plt.close()
         mpl.rcParams.update({'font.size': 12})  
+       
+        
+    #draw q_error:
+    z=geo_data[:,(len(som_data[0])-5)*2 +5]   
+    sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
+    mpl.rcParams.update({'font.size': 30})
+    ax = plot_hexa(somx,somy,clusters,grid,z,cluster_tick_labels=cluster_tick_labels, title=geo_headers[(len(som_data[0])-5)*2 +6], ptype='scatter')           
+    plt.yticks(rotation=90)
+    plt.yticks(ha='right')
+    plt.yticks(va='bottom')
+    plt.xticks(rotation=0)
+    plt.xticks(ha='left')
+    ax.invert_yaxis()
+    plt.tight_layout()
+    ax.figure.savefig(working_dir+'/Geo/geoplot_'+str(len(som_data[0])-2)+'.png', dpi=300)
+    plt.clf()
+    plt.cla()
+    plt.close()
+    mpl.rcParams.update({'font.size': 12})
+    
+
+
+
+
 
 
 """
@@ -492,9 +570,9 @@ def plot_geospace_clusters_grid():
     ax.yaxis.get_ticklabels()[-1].set_visible(True)
     colorbar = ax.collections[0].colorbar
     colorbar.set_ticklabels(cluster_tick_labels)
-    plt.yticks(rotation=90)
-    plt.yticks(ha='right')
-    plt.yticks(va='bottom')
+    plt.yticks(rotation=90)#, ha='right', va='bottom')
+    #plt.yticks(ha='right')
+    #plt.yticks(va='bottom')
     plt.xticks(rotation=0)
     plt.xticks(ha='left')
     ax.invert_yaxis()
@@ -550,7 +628,7 @@ def draw_boxplots():
     for k in range(len(discrete_cmap)-1,-1,-1):
         if(k not in clusters_unique):
             discrete_cmap.pop(k)  
-    for i in range(2,len(som_data[0])-3):#3 to skip x y and cluster col    #here's the error. this should be from 2 to -2, not from 3 to -1. in som data cluster col is in the end.         
+    for i in range(2,len(som_data[0])-3): 
         z=som_data[:,i]      
         ax=sns.boxplot(x=cluster_nparray.astype(float), y=z.astype(float), hue=cluster_nparray.astype(float) ,dodge=False, palette=discrete_cmap)       
         ax.set_title(som_headers[i])
@@ -598,15 +676,11 @@ def draw_number_of_hits():
 
 
 
-
-
-
-
 """
 Run plotting scripts
 """
            
-#start_time_0 = time.time()
+#start_time_0 = time.time(0)
 if outgeofile is not None: #if spatial, draw geo plots
     if(dataType=='scatter'):
         if(max(geo_data[:,(4)])>0):#if clusters

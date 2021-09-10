@@ -325,10 +325,14 @@ class NxtSomCore(object):
         from osgeo import gdal
         import pandas as pd
         dir=output_folder
-        inDs=gdal.Open(input_file)
+        inDs=gdal.Open(input_file.split(',')[0])
         som_data= np.genfromtxt(dir+"/result_som.txt",skip_header=(1), delimiter=' ')
-        geo_data=np.genfromtxt(dir+"/result_geo.txt", skip_header=(1), delimiter=' ')
-        for a in range(0, len(som_data[0])-2): 
+        geo_data=np.genfromtxt(dir+"/result_geo.txt",skip_header=(1), delimiter=' ') 
+        headers=[]
+        with open(dir+"/result_geo.txt") as gd:
+            line = gd.readline()
+            headers=line.split()
+        for a in range(0, len(som_data[0])-5): 
             x=geo_data[:,0]
             y=geo_data[:,1]
             z=geo_data[:,(len(som_data[0])-3+a)]
@@ -341,13 +345,13 @@ class NxtSomCore(object):
             rows=pivotted.shape[0]
     
             driver = gdal.GetDriverByName('GTiff')
-            outDs = driver.Create(dir+"/GeoTIFF/out_"+str(a)+".tif", cols, rows, 1, gdal.GDT_Float32)
+            outDs = driver.Create(dir+"/GeoTIFF/out_"+headers[len(som_data[0])-3+a]+".tif", cols, rows, 1, gdal.GDT_Float32)
             if outDs is None:
                 print ("Could not create tif file")
                 sys.exit(1) 
     
             outBand = outDs.GetRasterBand(1)
-            outData = np.zeros((rows,cols), np.float32)
+            outData = np.zeros((rows,cols), float)
             pivotted_np=pivotted.to_numpy()
             pivotted_np=np.flip(pivotted_np,0)
 
@@ -360,4 +364,41 @@ class NxtSomCore(object):
             outDs.SetGeoTransform(inDs.GetGeoTransform())
             outDs.SetProjection(inDs.GetProjection())
             outDs.FlushCache()
+            outDs=None
+            
+        #q_error. output columns should probably be rearranged, so these could be handled in a single for loop again. or split main code into a different function
+        x=geo_data[:,0]
+        y=geo_data[:,1]
+        z=geo_data[:,(len(som_data[0])-5)*2 +5]
+        df = pd.DataFrame.from_dict(np.array([x,y,z]).T)
+        df.columns = ['X_value','Y_value','Z_value']
+        df['Z_value'] = pd.to_numeric(df['Z_value'])
+        pivotted= df.pivot('Y_value','X_value','Z_value')
+    
+        cols=pivotted.shape[1] 
+        rows=pivotted.shape[0]
+
+        driver = gdal.GetDriverByName('GTiff')
+        outDs = driver.Create(dir+"/GeoTIFF/out_q_error.tif", cols, rows, 1, gdal.GDT_Float32)
+        if outDs is None:
+            print ("Could not create tif file")
+            sys.exit(1) 
+
+        outBand = outDs.GetRasterBand(1)
+        outData = np.zeros((rows,cols), float)
+        pivotted_np=pivotted.to_numpy()
+        pivotted_np=np.flip(pivotted_np,0)
+
+        for i in range(0, rows):
+            for j in range(0, cols):    
+                outData[i,j] = pivotted_np[i,j]    
+        outBand.WriteArray(outData, 0, 0)
+        outBand.FlushCache()
+        outBand.SetNoDataValue(-99)
+        outDs.SetGeoTransform(inDs.GetGeoTransform())
+        outDs.SetProjection(inDs.GetProjection())
+        outDs.FlushCache()
+        inDs=None
+        outDs=None
+            
     

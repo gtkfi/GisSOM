@@ -92,9 +92,9 @@ for i in range(len(som_data[0])-4,1,-1):
         som_data=np.delete(som_data,i,1)
         som_headers=som_headers.drop(i)
 som_headers=som_headers.reset_index(drop=True)
-for i in range(2,len(som_data[0]-1)):
+for i in range(2,len(som_data[0]-1)): 
     
-    for k in range(i, len(som_data[0])-4):   #Draw Scatterplots:  
+    for k in range(i, len(som_data[0])-4):   
         counter=counter+1   
         ax=sns.scatterplot(x=som_data[:,i].astype(float), y=som_data[:,k+1].astype(float), hue=cluster_nparray.astype(float), palette=discrete_cmap,legend="full")
         ax.set_xlabel(som_headers[i])

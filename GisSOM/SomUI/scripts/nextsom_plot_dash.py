@@ -277,36 +277,10 @@ def display_hoverdata(hoverData, clickData,pathname):
     if(clickData is not None):
         with open(output_folder+'/clickData.txt', 'w') as f:
             for item in clickData["points"]:
-                f.write("%s\n" % item)    
-    if(os.path.isfile(output_folder+'/clickData.txt')):
-        with open (output_folder+"/clickData.txt", "r") as myfile:
-            data=myfile.readline()
-            dataDict=eval(data)
-            dataDict.pop('pointIndex',None)
-            data=str(dataDict)
-            indexOfX=data.find('x')
-            stringFromX=data[indexOfX:]
-            endOfX=stringFromX.find(',')        
-            if(gridshape!='hexagonal'):
-                ValueOfX=data[indexOfX+4:indexOfX+endOfX]
-            else:
-                ValueOfX=math.floor(float(data[indexOfX+4:indexOfX+endOfX]))
-            indexOfY=data.find('y')
-            stringFromY=data[indexOfY:]
-            endOfY=stringFromY.find(',')        
-            if(gridshape!='hexagonal'):
-                ValueOfY=data[indexOfY+4:indexOfY+endOfY]
-            else:
-                ValueOfY=math.floor(float(data[indexOfY+4:indexOfY+endOfY])*((math.sqrt(3)/2)))
-            indexOfZ=data.find('z')
-            if(indexOfZ>-1):
-                stringFromZ=data[indexOfZ:]
-                endOfZ=stringFromZ.find('}')
-                ValueOfZ=data[indexOfZ+4:indexOfZ+endOfZ]
-            else:
-                if(clickData is not None):              
-                    points=clickData["points"]
-                    ValueOfZ=points[0]["text"]
+                f.write("%s\n" % item)       
+        ValueOfX=clickData["points"][0]['x']
+        ValueOfY=clickData["points"][0]['y']
+        ValueOfZ=clickData["points"][0]['z']          
         if(os.path.isfile(output_folder+'/clickData2.txt')):
             with open (output_folder+"/clickData2.txt", "r") as clickData2:
                 x=clickData2.readline()
@@ -315,7 +289,7 @@ def display_hoverdata(hoverData, clickData,pathname):
                 y=y.replace("\n","")
                 z=clickData2.readline()
                 z=z.replace("\n","")
-                if(z!=ValueOfZ or x!=ValueOfX or y!=ValueOfY): #TODO:sometimes throws errors? <- is this comment still relevant?
+                if(z!=ValueOfZ or x!=ValueOfX or y!=ValueOfY): 
                     with open(output_folder+'/clickData2.txt', 'w') as f:
                         f.write("%s\n" % ValueOfX)
                         f.write("%s\n" % ValueOfY)
@@ -330,7 +304,7 @@ def display_hoverdata(hoverData, clickData,pathname):
         json.dumps(clickData, indent=2)        
     ]
     
-timer = threading.Timer(1800.0, shutdown_server) #Half an hour timer for shutdown, so the process doesn't run forever in the background in case there are problems with sending the shutdown message.
+timer = threading.Timer(600.0, shutdown_server) #10 min timer for shutdown, so the process doesn't run forever in the background in case there are problems with sending the shutdown message.
 timer.start() 
 application = app.server    #Launch application. 
 if __name__ == '__main__':
