@@ -35,7 +35,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.1.0.%2a</ApplicationVersion>
+    <ApplicationVersion>1.2.0.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -303,6 +303,7 @@
     <Resource Include="fonts\fontawesome-webfont.ttf" />
     <None Include="Documents\Deliverable_4.11_Appendix_2_TechSpecOfGisSOM.docx" />
     <None Include="Documents\Deliverable_4.11_Appendix_3_UserManual_GisSOM.docx" />
+    <None Include="Documents\GisSOM open source licenses.docx" />
     <None Include="fonts\fontawesome-webfont.eot" />
     <None Include="fonts\fontawesome-webfont.woff" />
     <None Include="fonts\fontawesome-webfont.woff2" />
@@ -4151,21 +4152,45 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="libcef.dll" />
-    <Content Include="scripts\Executables\combine_to_lrn_file.exe" />
-    <Content Include="scripts\Executables\draw_histogram.exe" />
-    <Content Include="scripts\Executables\draw_scatterplots.exe" />
-    <Content Include="scripts\Executables\edit_column.exe" />
-    <Content Include="scripts\Executables\new_label_data.exe" />
-    <Content Include="scripts\Executables\nextsom_plot.exe" />
-    <Content Include="scripts\Executables\nextsom_plot_dash.exe" />
-    <Content Include="scripts\Executables\nextsom_plot_dash_draw.exe" />
-    <Content Include="scripts\Executables\nextsom_plot_dash_draw_scatter.exe" />
-    <Content Include="scripts\Executables\split_to_columns.exe" />
-    <Content Include="scripts\Executables\write_geotiff.exe" />
+    <Content Include="scripts\Executables\combine_to_lrn_file.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\Executables\draw_histogram.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\Executables\draw_scatterplots.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\Executables\edit_column.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\Executables\new_label_data.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\Executables\nextsom_plot.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\Executables\nextsom_plot_dash.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\Executables\nextsom_plot_dash_draw.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\Executables\nextsom_plot_dash_draw_scatter.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\Executables\split_to_columns.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="scripts\Executables\write_geotiff.exe">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="scripts\plotting_functions.py">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="scripts\write_geotiff.py" />
+    <Content Include="scripts\write_geotiff.py">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Resource Include="TestData\GeoTIFF\Lapland2\AEM_Im.tif" />
     <Resource Include="TestData\GeoTIFF\Lapland2\AEM_Im_norm.tif" />
     <Resource Include="TestData\GeoTIFF\Lapland2\AEM_Re.tif" />
@@ -4229,10 +4254,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="scripts\Executables\cluster_save.exe">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="scripts\Executables\cluster_wrap.exe">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="scripts\Executables\combinetolrnfile.exe">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
@@ -6168,9 +6193,6 @@
     <Content Include="scripts\Executables\VCRUNTIME140.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="scripts\loadfile.py">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="scripts\load_csv.py">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -6184,12 +6206,6 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="scripts\nextsomcore\loadfile.py">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="scripts\nextsomcore\load_csv.py">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="scripts\nextsomcore\load_geotiff.py">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="scripts\nextsomcore\lrnfile.py">
@@ -6219,15 +6235,6 @@
     <Resource Include="scripts\readme.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Resource>
-    <Resource Include="scripts\requirements.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
-    <Content Include="scripts\python_setup.py">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="scripts\setup.py">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="scripts\split_to_columns.py">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

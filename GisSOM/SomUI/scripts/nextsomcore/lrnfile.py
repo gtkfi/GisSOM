@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Old version of the script, current version directly under /scripts 
+The module contains  functions to read lrn-files
+
+@author: Janne Kallunki
 """
 
 import numpy as np
@@ -47,11 +49,10 @@ def read_lrn_header(input_file):
             if not 'colnames' in locals():
                 colnames = line.split()
                 break
-    required = ['rows', 'cols', 'colmap', 'colnames']
-    #missing = [var for var in required if not var in locals()]
-    #if len(missing) > 0:   
-    #    raise Exception("Failed to parse value {0}".format(str(missing).strip('[]')))
+
     if len(colnames) != len(colmap):
+        print(colnames)
+        print (colmap)
         raise Exception("Column names don't match with the column types.")
     return {'file': input_file, 'rows': rows, 'cols': cols, 'coltypes': colmap, 'colnames': colnames, 'headerlength': linenum, 'data': None, 'filetype': 'lrn'}
 

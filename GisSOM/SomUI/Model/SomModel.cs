@@ -13,6 +13,7 @@ namespace SomUI.Model
     public class SomModel : ObservableObject
     {
         private string inputFile;
+        private string originalData;
         private string somResultsFolder;
         private string output_file_geospace;
         private string output_file_somspace;
@@ -404,6 +405,19 @@ namespace SomUI.Model
             set
             {
                 Set<string>(() => this.InputFile, ref inputFile, value);
+
+            }
+        }
+
+        public string OriginalData
+        {
+            get
+            {
+                return originalData;
+            }
+            set
+            {
+                Set<string>(() => this.OriginalData, ref originalData, value);
 
             }
         }

@@ -2,30 +2,34 @@
 """
 Created on Fri Jul  5 14:10:46 2019
 
-Script that servers as launch point to loading geotiff or lrn files. Possibly more filetypes in the future
+Script that servers as launch point to loading geotiff, csv or lrn files. Possibly more filetypes in the future
 
 @author: shautala
 """
-from .lrnfile import load_lrn_file, read_lrn_coordinate_columns, read_lrn_data_columns 
-from .load_geotiff import load_geotiff_files, read_geotiff_coordinate_columns, read_geotiff_data_columns
-from .load_csv import load_csv_file, read_csv_coordinate_columns,read_csv_data_columns,read_csv_header
+
+from lrnfile import load_lrn_file, read_lrn_coordinate_columns, read_lrn_data_columns, read_lrn_header
+from load_geotiff import load_geotiff_files, read_geotiff_coordinate_columns, read_geotiff_data_columns
+from load_csv import load_csv_file, read_csv_coordinate_columns,read_csv_data_columns,read_csv_header
+
 """
-so in the end we only need to check the input file type at this point
+eli lopulta vasta täällä tarvii olla checki inputfilen tyypistä
 """
 
-def load_input_file(input_file):    #input file in case of lrn, input file list in case of geoTiff
-     if(input_file[-3:].lower()=="lrn"):
+
+#load input file
+def load_input_file(input_file):#input file in case of lrn, input file list in case of geoTiff
+     if(input_file[-3:].lower()=="lrn"):#if input is lrn
         lrn_header=load_lrn_file(input_file)
         return lrn_header
      elif(input_file[-3:].lower()=="csv"):
         csv_header=load_csv_file(input_file)
         return csv_header
-     else:            
+     else: 
         geotiff_header=load_geotiff_files(input_file)
         return geotiff_header
     
-    #read coordinate columns
-def read_coordinate_columns(header):
+
+def read_coordinate_columns(header):   
     if(header['filetype']=='lrn'):
         coords=read_lrn_coordinate_columns(header)    
         return coords
@@ -36,9 +40,8 @@ def read_coordinate_columns(header):
         coords=read_geotiff_coordinate_columns(header)
         return coords
 
-    #read data columns
+
 def read_data_columns(header):
-    #if(input_type==0):
     if(header['filetype']=='lrn'):
         data=read_lrn_data_columns(header)
         return data
@@ -46,16 +49,17 @@ def read_data_columns(header):
         data=read_csv_data_columns(header)
         return data
     else:
-        data=read_geotiff_data_columns(header)
+        data=read_geotiff_data_columns()
         return data
 
-    #read lrn file header
-def read_lrn_header(input_file):
+
+def read_header(input_file):
     if(input_file[-3:].lower()=="lrn"):
-        lrn_header=lrn_read_lrn_header(input_file)
+        lrn_header=read_lrn_header(input_file)
         return lrn_header
     elif(input_file[-3:].lower()=="csv"):
-        lrn_header=read_csv_header(input_file)
-        return lrn_header
+        csv_header=read_csv_header(input_file)
+        return csv_header
     else:
         return None
+    

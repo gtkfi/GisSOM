@@ -10,7 +10,8 @@ with x- and y- cols filled with zeroes, for internal use. Final program output w
 """
 
 import argparse
-from loadfile import load_input_file,  read_header
+#from loadfile import load_input_file,  read_header
+from nextsomcore.loadfile import load_input_file,  read_header
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 import numpy as np
@@ -372,13 +373,14 @@ def writeXmlTreeFromCsv(df_in,columns_included):
     root = ET.Element("data") 
     for i in range(0,len(df_in.columns)):
         if(na_value is not ''):
-            colForMinMax= list(filter(lambda x: x!=str(float(na_value)), columns_included[i][2:]))
-            colForMinMax=[float(i) for i in colForMinMax]
+            colForMinMax=columns_included[i][2:].astype(float)[~np.isnan(columns_included[i][2:].astype(float))]
+            colForMinMax= list(filter(lambda x: x!=float(na_value), colForMinMax))
             data_min= min(colForMinMax)
             data_max= max(colForMinMax)
         else:
-            data_min= min(columns_included[i][2:].astype(float))[0]
-            data_max= max(columns_included[i][2:].astype(float))[0]
+            colForMinMax=columns_included[i][2:].astype(float)[~np.isnan(columns_included[i][2:].astype(float))]
+            data_min= min(colForMinMax)
+            data_max= max(colForMinMax)
         newElement=ET.Element(df_in[i][1].replace('\"','')	)
         
 
@@ -432,13 +434,13 @@ def writeXmlTreeFromTif(header,columns):
            
        
         if(exclude_list[i]==False): 
-            column= columns[:,i+1].reshape(-1,1)#it's +1 because there's already an id col at this point   (skip id,x,y)
+            column= columns[:,i+1].reshape(-1,1)#+1 because there's already an id col at this point  
             array_for_minmax= np.delete(column[2:], np.where(column[2:] == na_value))
             data_min= min(array_for_minmax.astype(float))
-            data_max= max(array_for_minmax.astype(float))#min and max for normalization and writing datastats xml       
+            data_max= max(array_for_minmax.astype(float))    
             newElement=ET.Element(column[1][0].replace('%', '').replace(" ",""))	
                         
-                      
+                    
             minElement=ET.Element("min")
             minElement.text=str(data_min)
             maxElement=ET.Element("max")

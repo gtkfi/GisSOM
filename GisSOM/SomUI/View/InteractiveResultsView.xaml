@@ -21,22 +21,22 @@
                 <ComboBoxItem>Som Cell</ComboBoxItem>
             </ComboBox>
             <WrapPanel>
-                <Button Click="RefreshBrowser" HorizontalAlignment="Left" Margin="50,0,0,0" FontFamily="{StaticResource FontAwesome}" Content=""></Button>
+                <Button Click="RefreshBrowser" ToolTip="Refresh plot" HorizontalAlignment="Left" Margin="50,0,0,0" FontFamily="{StaticResource FontAwesome}" Content=""></Button>
                 <!--<Button DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding DrawResultsInteractiveCommand}" HorizontalAlignment="Left" Margin="50,0,0,0" FontFamily="{StaticResource FontAwesome}" Content=""></Button>--><!--Tää on muuten ViewModelille kamaa.-->
                 <!--<Button Click="ShutDownPlot" HorizontalAlignment="Left" Margin="50,0,0,0" FontFamily="{StaticResource FontAwesome}" Content=""></Button>-->
-                <Button Click="ZoomOut" HorizontalAlignment="Left" Margin="50,0,0,0" FontFamily="{StaticResource FontAwesome}" Content=""></Button>
-                <Button Click="ZoomIn" HorizontalAlignment="Left" Margin="50,0,0,0" FontFamily="{StaticResource FontAwesome}" Content=""></Button>
-                <Button DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding DrawResultsInteractiveCommand}" HorizontalAlignment="Left" Margin="50,0,0,0" FontFamily="{StaticResource FontAwesome}" Content="Run"></Button>
-                <Button Click="Stop" HorizontalAlignment="Left" Margin="50,0,0,0" FontFamily="{StaticResource FontAwesome}" Content="Stop"></Button><!--ViewModelista httpPost? vai codeBehindista-->
+                <Button Click="ZoomOut" ToolTip="Zoom out" HorizontalAlignment="Left" Margin="50,0,0,0" FontFamily="{StaticResource FontAwesome}" Content=""></Button>
+                <Button Click="ZoomIn" ToolTip="Zoom in" HorizontalAlignment="Left" Margin="50,0,0,0" FontFamily="{StaticResource FontAwesome}" Content=""></Button>
+                <Button ToolTip="Manually start the plot" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding DrawResultsInteractiveCommand}" HorizontalAlignment="Left" Margin="50,0,0,0" FontFamily="{StaticResource FontAwesome}" Content="Run"></Button>
+                <Button Click="Stop" ToolTip="Stop" HorizontalAlignment="Left" Margin="50,0,0,0" FontFamily="{StaticResource FontAwesome}" Content="Stop"></Button><!--ViewModelista httpPost? vai codeBehindista-->
             </WrapPanel>
             
             <!--<Border Grid.Row="1" BorderBrush="Gray" BorderThickness="0,1">-->
             <mah:MetroProgressBar DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsIndeterminate="True" Width="400" Margin="40,40,40,-45" Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"></mah:MetroProgressBar>
-            <wpf:ChromiumWebBrowser  x:Name="Browser" Height="600" MaxWidth="800" Address="http://localhost:8050/" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" ToolTipService.IsEnabled="False" ToolTip="{Binding BrowserToolTip,NotifyOnTargetUpdated=True}"  TargetUpdated="ToolTip_SourceUpdated"/>
+            <wpf:ChromiumWebBrowser 	Loaded="RefreshBrowser" x:Name="Browser" Height="600" MaxWidth="800" Address="http://localhost:8050/" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" ToolTipService.IsEnabled="False" ToolTip="{Binding BrowserToolTip,NotifyOnTargetUpdated=True}"  TargetUpdated="ToolTip_SourceUpdated"/>
             
             <!--</Border>-->
             <!--<WebBrowser Grid.Column="0" Height="600" Width="400" Name="myWebBrowser" Source="http://localhost:8050/" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" ToolTip="{Binding BrowserToolTip,NotifyOnTargetUpdated=True}"  TargetUpdated="ToolTip_SourceUpdated"></WebBrowser>-->
-            <Button Width="200" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Content="Open in web browser" Command="{Binding LaunchInWebBrowserCommand}"></Button>
+            <!--<Button Width="200" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Content="web browser" Command="{Binding LaunchInWebBrowserCommand}"></Button>-->
         </StackPanel>
         <StackPanel  Grid.Column="1" >
             <TextBlock Margin="0,20,0,0" Width="200" FontSize="16">Select Output:</TextBlock>

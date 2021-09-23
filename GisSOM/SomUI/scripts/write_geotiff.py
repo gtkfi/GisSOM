@@ -8,7 +8,7 @@ Created on Tue May 11 12:05:05 2021
 
 """
 inputs:
-1)som (som dictionary saved to file.=
+1)som (som dictionary saved to file.)
 2)Model.KMeans_min 
 3)Model.KMeans_max 
 4)Model.KMeans_initializations
