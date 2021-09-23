@@ -14,7 +14,6 @@ import matplotlib.pyplot as plt
 import sys
 import numpy as np
 import seaborn as sns
-#from random import sample
 """
 Inputs:
 1) Input file
@@ -30,7 +29,7 @@ columnForHistogram=column[6:]   # skip header
 if(len(sys.argv)>3): #if input contains optional nodata argument
     noDataValue=str(float(sys.argv[3]))
     columnForHistogram=columnForHistogram[(columnForHistogram!=noDataValue)]
-columnForHistogram=columnForHistogram.astype('float64')
+columnForHistogram=columnForHistogram.astype('double')
 columnForHistogram=columnForHistogram[~np.isnan(columnForHistogram)]
 if(len(columnForHistogram)>5000):#if len over threshold: sample
     columnForHistogram=np.random.choice(columnForHistogram, 5000)

@@ -290,8 +290,8 @@ namespace SomUI.ViewModel
             }
             catch (Exception ex)
             {
-                logger.Error("Failed to read data");
-                PythonLogText += "Failed to read data";
+                logger.Error("Failed to read data:" +ex);
+                PythonLogText += "Failed to read data:" +ex;
                 App.Current.Dispatcher.Invoke((Action)delegate         //delegate to access different thread
                 {
                     dialogService.ShowNotification("Failed to read data.", "Error");
@@ -625,6 +625,7 @@ namespace SomUI.ViewModel
                 PythonLogText = "";
                 string inputFile = dialogService.OpenFileDialog("", "CSV files|*.csv;", true, true);
                 if (inputFile != null) {
+                    Model.NoDataValue = "";
                     Model.DataShape = dataShape;
                     Model.LabelColumnIndex = -2;
                     Model.EastingColumnIndex = 0;
@@ -635,6 +636,7 @@ namespace SomUI.ViewModel
                     Model.ColumnDataList.Clear();
                     model.InputFile = inputFile;
                     model.InputFile = inputFile.Replace("\\", "/");
+                    Model.OriginalData = inputFile;
                     model.InRasterList = new List<string> { inputFile };
                     FileSelected = true;
                     ClearFolder(Path.Combine(Model.Output_Folder, "DataPreparation"));
@@ -797,13 +799,13 @@ namespace SomUI.ViewModel
                             Model.InputFile += Model.InputFile == null ? s : "," + s;
                         }
                         FileSelected = true;
-
+                        Model.OriginalData = Model.InputFile;
                         ReadGeoTiffColumnNames();
                         if (Model.InRasterList.Count > 1)
                         {
                             SplitToColumns();
 
-                        }
+                        }                     
                         else
                             ClearFolder(Path.Combine(Model.Output_Folder, "DataPreparation"));
                     }
@@ -1146,7 +1148,8 @@ namespace SomUI.ViewModel
                 string outputFolder = dialogService.SelectFolderDialog("c:\\", Environment.SpecialFolder.MyComputer);
                 if (!string.IsNullOrEmpty(outputFolder))
                 {
-                    Model.OutputFolderTimestamped = outputFolder;                
+                    Model.OutputFolderTimestamped = outputFolder;
+                    Model.ColumnDataList.Clear();
                     XmlDocument doc = new XmlDocument();
                     doc.Load(Path.Combine(Model.OutputFolderTimestamped, "RunStats.xml"));
                     XmlNode node = doc.DocumentElement.SelectSingleNode("dataShape");
@@ -1163,8 +1166,9 @@ namespace SomUI.ViewModel
                     node = doc.DocumentElement.SelectSingleNode("dataType");
                     if (node != null)
                     {
+                        dataType = node.InnerText;
                     }
-                    dataType= node.InnerText; 
+                    
 
                     node = doc.DocumentElement.SelectSingleNode("isSacled");
                     string normalized = "False";                 
@@ -1180,6 +1184,8 @@ namespace SomUI.ViewModel
                     Model.IsSpatial = bool.Parse(node.InnerText);
 
 
+                    //node = doc.DocumentElement.SelectSingleNode("inputFile");
+                    //string inputFile = node.InnerText;
 
                     Model.DataShape = dataShape;
                     Model.KMeans_min = Int32.Parse(kmeansMin);
@@ -1188,6 +1194,16 @@ namespace SomUI.ViewModel
                     Model.IsNormalized = bool.Parse(normalized);
                     Model.Som_x = Int32.Parse(som_x);
                     Model.Som_y = Int32.Parse(som_y);
+                    try
+                    {
+                        node = doc.DocumentElement.SelectSingleNode("originalData");
+                        Model.OriginalData = node.InnerText;
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.Warn(ex, "List of original data files not found");
+                    }
+
                     if (dataType == "CSV") {
                         IsGeoTiffFile = false;
                         IsCsvFile = true;
@@ -1195,16 +1211,26 @@ namespace SomUI.ViewModel
                     else
                     {
                         IsGeoTiffFile = true;
-                        IsCsvFile = false;
+                        IsCsvFile = false;                        
                     }
 
-                    Model.ScatterPlotList.Clear();
-                    string line1 = File.ReadLines(Path.Combine(Model.OutputFolderTimestamped, "result_som.txt")).First();
-                    var headerArray = line1.Split(' ');
-                    for (int i = 2; i < headerArray.Count() - 3; i++)
-                    {
-                        Model.ScatterPlotList.Add(new BoolStringHelper(headerArray[i], true));
+                    try { 
+
+                        Model.ScatterPlotList.Clear();
+                        string line1 = File.ReadLines(Path.Combine(Model.OutputFolderTimestamped, "result_som.txt")).First();
+                        var headerArray = line1.Split(' ');
+                        for (int i = 2; i < headerArray.Count() - 3; i++)
+                        {
+                            Model.ScatterPlotList.Add(new BoolStringHelper(headerArray[i], true));
+                        }
                     }
+                    catch(Exception ex)
+                    {
+                        logger.Error(ex, "Failed to load old results:" + ex);
+                        dialogService.ShowNotification("Failed to load results: result_som.txt was missing or erroneous", "Error");
+                        return;
+                    }
+                    
 
 
                     Model.InputFile = Path.Combine(Model.OutputFolderTimestamped, "InputData.lrn");
@@ -1260,7 +1286,7 @@ namespace SomUI.ViewModel
 
 
                     AddToImageCollection(SomImageList, SomPlotDirectory);
-                    AddToImageCollection(GeoSpaceImageList, GeoPlotDirectory);
+                    AddToImageCollection(GeoSpaceImageList, GeoPlotDirectory);// if clause for this: if non spatial, do a workaround.
                     AddToImageCollection(BoxPlotList, BoxPlotDirectory);
                     AddToImageCollection(ScatterPlotList, ScatterPlotDirectory);
 
@@ -1274,8 +1300,8 @@ namespace SomUI.ViewModel
             }
             catch (Exception ex)
             {
-                logger.Error(ex, "Failed to load old results");
-                dialogService.ShowNotification("Failed to complete SOM run.", "Error");
+                logger.Error(ex, "Failed to load old results:" +ex);
+                dialogService.ShowNotification("Failed to load results.", "Error");
             }
         }
 
@@ -1928,6 +1954,11 @@ namespace SomUI.ViewModel
                     });
 
                 }
+                if (ImageCollection.Count == 0)
+                    ImageCollection.Add(
+
+
+                        BitmapImage.Create(2,2,96,96,PixelFormats.Indexed1,new BitmapPalette(new List<Color> { Colors.Transparent }),new byte[] { 0, 0, 0, 0 },1)); //dummy image, to stop empty image collection from showing loading icon forever in UI.
             }
             catch (Exception ex)
             {

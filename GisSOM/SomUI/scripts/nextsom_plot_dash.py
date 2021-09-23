@@ -46,31 +46,25 @@ parser.add_argument('--dir',nargs='?',dest="dir", help='Output folder')
 parser.add_argument('--grid_type', dest="grid_type",nargs='?', help='grid type (square or hexa)')
 args=parser.parse_args()
 
-somfile=args.outsomfile  #som results txt file
+somfile=args.outsomfile  
 output_folder=args.dir
-somx=int(args.som_x)        #som x parameter
-somy=int(args.som_y)        #som y parameter
+somx=int(args.som_x)        
+somy=int(args.som_y)       
 outgeofile=args.outgeofile
-input_file=args.input_file  #original input file 
+input_file=args.input_file  
 outgeofile=args.outgeofile
 interactive_folder=args.interactive_dir
-output_folder=args.dir                #output directory of GisSOM 
+output_folder=args.dir                
 gridshape=args.grid_type
 
 
 
-###############################
-# initialize common variables #
-###############################
-
 som_data = np.genfromtxt(somfile,skip_header=(1), delimiter=' ')
-
-
 clusters=int(max(som_data[:,len(som_data[0])-2])+1)#number of clusters
-
 palette=sns.cubehelix_palette(n_colors=clusters, start=1,rot=4, gamma=1.0, hue=3, light=0.77, dark=0.15, reverse=False, as_cmap=False)
 formatted_palette=[]
 discrete_cmap_2=sns.cubehelix_palette(n_colors=clusters, start=0, rot=0.4, gamma=1.0, hue=0.8, light=0.85, dark=0.15, reverse=False, as_cmap=True)
+
 for i in palette:   #format color values to format rgb(x,y,x), where x y and z are values between 0 and 255. values before conversion are in format a,b,c where a b and c are values between 0 and 1
 	formatted_value='rgb('
 	for j in i:
@@ -86,32 +80,17 @@ for i in range (0,clusters):
     clusterColorscale.append([float(float(i+1)/clusters),palette[i]])
 
 
-
-
-
-
-#################################################
-# Initialize dash app, and host it on localhost #
-#################################################
-
-
-
-
-
 """
 Create hexa grid plot and web page
 """
 def run_hexa():
-    #baseUnit=70
     xinch=somx*70-somx
     if(somx>somy):
-        yinch=((somy*70)-somx*somy)   *(1+max(0.25,(somx+somy)*0.01))#(1+((somx/somy)/10)) 1.25 luokkaa pitää olla mutta pitää kasvaa eron kasvaessa. 30 ja 10 rikkoo jo.
+        yinch=((somy*70)-somx*somy)   *(1+max(0.25,(somx+somy)*0.01))
     elif (somx==somy):
         yinch=somy*70-somy
     else:
-        yinch=(somy*70)-somx*somy 
-    #hexa_size=min(somx,somy)*4.5 -min(somx,somy)+10
-    
+        yinch=(somy*70)-somx*somy     
     hexa_size=45
     centers=[]
     base_y=((math.sqrt(3)/2))
@@ -158,8 +137,7 @@ def run_hexa():
                                 'dtick': 1,
                                 'tickvals':cluster_ticks,
                                 'tickmode':"array",
-                                'ticktext':cluster_ticks_text
-                                
+                                'ticktext':cluster_ticks_text                             
                             },
     )
                         )
@@ -203,8 +181,8 @@ def run_square():
     if(int(max(som_data[:,len(som_data[0])-2]))>0): #if data has more than 1 cluster: build array for somspace clusters plot.
         for i in range(0,len(som_data)): 
             taulukko[int(som_data[i][0])][int(som_data[i][1])]=som_data[i][len(som_data[0])-2]            
-    xinch=500#xinch/2
-    yinch=500#yinch/2
+    xinch=500
+    yinch=500
     cluster_ticks=[]
     for j in range (clusters,0,-1):
         cluster_ticks.append(j-0.5)

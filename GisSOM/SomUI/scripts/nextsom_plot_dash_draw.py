@@ -40,12 +40,12 @@ parser.add_argument('--interactive_type', dest="interactive_type",nargs='?', hel
 parser.add_argument('--selected_column', dest="selected_column",nargs='?', help='Selected data column for plotting')
 args=parser.parse_args()
 
-outsomfile=args.outsomfile  #som results txt file
-somx=int(args.som_x)        #som x parameter
-somy=int(args.som_y)        #som y parameter
-input_file=args.input_file  #original input file 
+outsomfile=args.outsomfile  
+somx=int(args.som_x)       
+somy=int(args.som_y)      
+input_file=args.input_file  
 outgeofile=args.outgeofile
-output_folder=args.dir                #output directory of GisSOM
+output_folder=args.dir                
 interactive_type=args.interactive_type
 selected_column=float(args.selected_column)
 
@@ -85,12 +85,11 @@ if(os.path.exists(output_folder+"/clickData2.txt")):
         if(selected_column==0):  
             for i in range(0, len(geo_data)):
                 if(geo_data[i][2]==selected_x and geo_data[i][3]==selected_y):
-                    geo_data[i][4]=clusters #eli tämän tapainen loopitus pitäisi tehdä siinä uudessa geospace muuttujan valinnassa (siis se että plotataan ei-klusteria.)
+                    geo_data[i][4]=clusters 
         else:#if selected column is not cluster col, the process will have to be reversed: in case of data col visualization, we can't really modify the continuous palette, so we'll have to set the non-selected areas to NaN:s and show them as white.
             for i in range(0, len(geo_data)):
                 if(geo_data[i][2]!=selected_x or geo_data[i][3]!=selected_y):
-                    geo_data[i][int(len(som_data[0])-1+selected_column)]=np.NaN #näissä valinnoissa yms. tulee nyt kyllä vähän toistoa. kunhan tää toimii niin pakko kyllä tehä joku refactori.
-     #aivan. keissi interactvive type is clusterille.
+                    geo_data[i][int(len(som_data[0])-1+selected_column)]=np.NaN
     else:
         if(selected_column>0):  
             for i in range(0, len(geo_data)):
@@ -98,7 +97,7 @@ if(os.path.exists(output_folder+"/clickData2.txt")):
                     geo_data[i][int((len(som_data[0])-1+selected_column))]=np.NaN
                     
                     
-if(max(geo_data[:,(4)])>0):     #create dataframe for geospace clusters, if there is more than 1 cluster. 
+if(max(geo_data[:,(4)])>0): #create dataframe for geospace clusters, if there is more than 1 cluster. 
     x=geo_data[:,0]
     y=geo_data[:,1]
     if(selected_column==0):

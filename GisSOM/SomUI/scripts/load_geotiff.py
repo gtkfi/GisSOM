@@ -43,11 +43,12 @@ def load_geotiff_files(input_file_list):
         if(width!=width_0 or height!=height_0):
             sys.exit("Error: Grid of "+geotiffpath+" does not match."+path_0)
         data = src_ds.ReadAsArray()
-        testi=data.flatten(order='C')
+        flat=data.flatten(order='C')
+        
         if(len(returndata)>0):
-            returndata=np.column_stack((returndata,testi))
+            returndata=np.column_stack((returndata,flat))
         else:
-            returndata=testi
+            returndata=flat
         colnames.append(os.path.basename(geotiffpath))            
     rows=len(returndata)   
     if("," in geotiff_list_as_string):
@@ -56,14 +57,9 @@ def load_geotiff_files(input_file_list):
         cols=1            
     band=src_ds.GetRasterBand(1)
     noDataValue= band.GetNoDataValue()
+    dataType=band.DataType
+    return {'rows': rows, 'cols': cols, 'colnames': colnames, 'headerlength': 0, 'data': returndata, 'filetype': 'geotiff','originaldata':data, 'geotransform':gt, 'noDataValue':noDataValue, 'dataType':dataType}   
 
-    return {'rows': rows, 'cols': cols, 'colnames': colnames, 'headerlength': 0, 'data': returndata, 'filetype': 'geotiff','originaldata':data, 'geotransform':gt, 'nodatavalue':noDataValue}   
-
-
-
-"""
-This is required, accessed from core
-"""
 def read_geotiff_coordinate_columns(geotiff_header):
     coordinates_x=[]
     coordinates_y=[]           
@@ -76,9 +72,6 @@ def read_geotiff_coordinate_columns(geotiff_header):
     coordinates=np.column_stack((coordinates_x,coordinates_y)) #Coordinates are just indexes at this stage. TODO: use gt to tranform them back into real world values.
     return {'data': coordinates, 'colnames': geotiff_header['colnames'], 'fmt': ''} 
 
-"""
-This is required, accessed from core
-"""
 def read_geotiff_data_columns(geotiff_header):
     return {'data': geotiff_header['data'], 'colnames': geotiff_header['colnames'], 'fmt': ''} 
 

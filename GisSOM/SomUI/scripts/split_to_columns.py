@@ -13,11 +13,11 @@ Input type is either .lrn file or GeoTIFF file.
 
 
 import numpy as np
-import ast
-from loadfile import load_input_file, read_coordinate_columns, read_data_columns, read_header
+#import ast
+from nextsomcore.loadfile import load_input_file, read_coordinate_columns, read_data_columns, read_header
+#from loadfile import load_input_file, read_coordinate_columns, read_data_columns, read_header
 import pandas as pd
 import sys
-
 inputFile=sys.argv[1]
 output_folder=sys.argv[2]
 inputType=inputFile[-3:].lower()
@@ -81,10 +81,14 @@ if(inputType=="lrn"):
         np.save(output_folder+"/DataPreparation/outfile"+str(i), allButFirstTwoRows[:,i])
 """
 if(inputType=="tif"):   
-    header=load_input_file(inputFile)   #here inputfile is a list of input files.     
+    
+    header=load_input_file(inputFile)   
     columns_data=header['data']                       
     coords=read_coordinate_columns(header)   
-    columns_all=np.concatenate((coords['data'],columns_data),axis=1)     
+    if(len(str(header["noDataValue"]))>15):  # longer representations (mayber a 64 bit representation of the largely negative 32 bit no-data value or something?) dont work with float32, but the shorter representations seem to require it
+        columns_all=np.concatenate((coords['data'],columns_data),axis=1)
+    else:
+        columns_all=np.concatenate((coords['data'],columns_data),axis=1).astype('float32') 
     colnames_coords=["x","y"]   #add x and y column names to colnames
     colnames_data=header['colnames']
     colnames=np.append(colnames_coords,colnames_data)  
@@ -102,7 +106,7 @@ if(inputType=="tif"):
     #save individual data columns as numpy binary files. These will be used by EditColumn, DrawSomHistogram, and CombineLrnFile python scripts
     for i in range(0, len(allButFirstTwoRows[0])):
         np.save(output_folder+"/DataPreparation/outfile"+str(i), allButFirstTwoRows[:,i]) 
-    print(header['nodatavalue'])
+    print(header['noDataValue'])
 
 elif(inputType=="csv"):  
     header=read_header(inputFile)       

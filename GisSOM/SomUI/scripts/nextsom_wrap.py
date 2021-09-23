@@ -60,8 +60,6 @@ def parse_command_line():
     parser.add_argument('--minN', type=str, default=0, dest='minN',help='Minimum value for normalization')
     parser.add_argument('--maxN', type=str, default=1, dest='maxN',help='Maximum value for normalization')
     parser.add_argument('--label', type=str, default=None, dest='label', help='Whether data contains label column, true or false')
-    #parser.add_argument('--scale_min_list',default=None, dest="scale_min_list", help="List of floats for scaling minimum values") 
-    #parser.add_argument('--scale_max_list',default=None, dest="scale_max_list", help="List of floats for scaling maximum values") 
     return parser.parse_args()
 
 """Run SOM training using command line input, and save the results. Uses NxtSomCore package to do the actual work.
@@ -75,8 +73,8 @@ def run_command_line(args):
             som_dictionary = pickle.load(som_dictionary_file)
             args.initialcodebook=som_dictionary['codebook']
             args.initialization=None           
-    header = nxtsomcore.load_data(args.input_file) #load header
-    som = nxtsomcore.train(#train som
+    header = nxtsomcore.load_data(args.input_file) 
+    som = nxtsomcore.train(
         header['data'],
         args.som_x,
         args.som_y,
@@ -97,23 +95,16 @@ def run_command_line(args):
     else:
         output_folder=args.output_folder
     print(args.output_folder)
-    #start_time = time.time()
-    if(args.kmeans.lower()=="true"): #run k-means clustering
+    if(args.kmeans.lower()=="true"):
         som['clusters']=nxtsomcore.clusters(som,args.kmeans_min,args.kmeans_max,args.kmeans_init,output_folder)     
-    #print("Clustering took: --- %s seconds ---" % (time.time() - start_time))
-    #start_time = time.time()
     
     if args.outgeofile is not None:
-        nxtsomcore.save_geospace_result(args.outgeofile, header, som, output_folder, args.input_file, args.normalized, args.label)  #save geospace results
+        nxtsomcore.save_geospace_result(args.outgeofile, header, som, output_folder, args.input_file, args.normalized, args.label) 
     
-    nxtsomcore.save_somspace_result(args.output_file_somspace, header, som, output_folder, args.input_file, args.normalized)                 #save somspace results
-    #print("saving som and geo results took: --- %s seconds ---" % (time.time() - start_time))
-    #start_time = time.time()
+    nxtsomcore.save_somspace_result(args.output_file_somspace, header, som, output_folder, args.input_file, args.normalized)  
     if(args.geotiff_input is not None):
         inputFileArray=args.geotiff_input.split(",")    
         nxtsomcore.write_geotiff_out(args.output_folder, inputFileArray[0])
-    #print("Writing geotiff took: --- %s seconds ---" % (time.time() - start_time))
-    #start_time = time.time()
     with open(output_folder+'/som.dictionary', 'wb') as som_dictionary_file:
         pickle.dump(som, som_dictionary_file) #save som object to file.
 
@@ -124,9 +115,8 @@ def run_command_line(args):
 """
 def run_xml(args):   
     nxtsomcore = NxtSomCore()
-    #Run with xml file
     tree = ET.parse(args.xmlfile)
-    root = tree.getroot()   #get root node
+    root = tree.getroot()   
     som_files=root.find('som_files')
     som_params=root.find('som_parameters')
     kmeans= som_params.find('kMeans')
@@ -139,16 +129,14 @@ def run_xml(args):
         input_file=som_files.find('input').text
     else:
         raise Exception("Input file is missing")
-    #result_som
     if(som_files.find('output_somspace') is not None):
         output_file_somspace=som_files.find('output_somspace').text
     else:
         output_file_somspace="C:/Temp/Nextsom/result_som.txt"   
-        #result_geo
     if(som_files.find('output_geospace') is not None):               
         output_file_geospace=som_files.find('output_geospace').text  
     else:
-        output_file_geospace=None#"C:/Temp/Nextsom/result_geo.txt"        
+        output_file_geospace=None      
     if(som_files.find('output_folder') is not None):
         output_folder=som_files.find('output_folder').text
     input_list_text=[]
@@ -158,100 +146,91 @@ def run_xml(args):
             input_list_text.append(item.text)
         input_file= ",".join(input_list_text)
 
-    #Load header
     header = nxtsomcore.load_data(input_file)
-    #<som_parameters>
 
-    #som_x:
     if(som_params.find('som_x') is not None):
         som_x=int(som_params.find('som_x').text)
     else:
         som_x=10
-    #som_y:
+
     if(som_params.find('som_y') is not None):
         som_y=int(som_params.find('som_y').text)
     else:
         som_y=10
-    #epochs:
+
     if(som_params.find('nEpoch') is not None):
         epochs=int(som_params.find('nEpoch').text)
     else:
         epochs=10
-    #initial codebook:
+
     if(som_params.find('codebook') is not None):
         initial_codebook=som_params.find('codebook').text       
 
-    #initialization:
+
     if(som_params.find('initialization') is not None):
         initialization=som_params.find('initialization').text        
     else:
         initialization='random'
-    #maptype:
+
     if(som_params.find('mapType') is not None):     
         maptype=som_params.find('mapType').text
     else:
         maptype='toroid'
-    #gridtype:
+
     if(som_params.find('gridType') is not None):        
         gridtype=som_params.find('gridType').text
     else:
         gridtype='rectangular'
-    #neighborhood:
+
     if(som_params.find('neighborhood') is not None):        
         neighborhood=som_params.find('neighborhood').text
     else:
         neighborhood='gaussian'
-    #std_coeff:
+
     if(som_params.find('std_coeff') is not None):        
         std_coeff=som_params.find('std_coeff').text
     else:
         std_coeff=0.5
-    #radius0:
+
     if(som_params.find('radius0') is not None):
         radius0=som_params.find('radius0').text       
     else:
         radius0=0
-    #radiusN:
+
     if(som_params.find('radiusN') is not None):    
         radiusN=som_params.find('radiusN').text
     else:
         radiusN=1
-    #radiuscooling:
+
     if(som_params.find('radiuscooling') is not None):		
         radiuscooling= som_params.find('radiuscooling').text
     else:
         radiuscooling='linear'
-    #scalecooling:
+
     if(som_params.find('scalecooling') is not None):
         scalecooling=som_params.find('scalecooling').text
     else:
         scalecooling='linear'
-    #scale0:     
+   
     if(som_params.find('scale0') is not None):
         scale0=som_params.find('scale0').text
     else:
         scale0=0.1
-    #scaleN:
+
     if(som_params.find('scaleN') is not None):
         scaleN=som_params.find('scaleN').text
     else:
-        scaleN=0.01   
-        
-    #       <compact_support>3</compact_support>
-    #		<nDimensions>4</nDimensions> 
-    #kmeans:
+        scaleN=0.01      
+
     if(som_params.find('kMeans') is not None):   
-        #kmeans_init:
         if(kmeans.find('number') is not None):
             kmeans_init=kmeans.find('number').text
         else:
             kmeans_init=5
-        #kmeans_min:
         if(kmeans.find('number_min') is not None):
             kmeans_min=kmeans.find('number_min').text
         else:
             kmeans_min=2
-        #kmeans_max:
         if(kmeans.find('number') is not None):
             kmeans_max=kmeans.find('number_max').text
         else:
@@ -270,7 +249,6 @@ def run_xml(args):
         som_x,
         som_y,
         epochs,
-        #kerneltype=0,
         verbose=2,
         neighborhood=neighborhood,
         std_coeff=float(std_coeff),
@@ -298,15 +276,6 @@ def run_xml(args):
     nxtsomcore.save_somspace_result(output_file_somspace, header, som)
 
 
-#"""
-#Main entry point.
-    
-#"""
-#def run(args):
-#    if(args.xmlfile=='none'): #Normal run with all input params as command line arguments
-#        run_commandLine(args)
-#    else:
-#        run_xml(args) #run with xml input
 
 """
 Main entry point.
@@ -316,17 +285,11 @@ def main():
     
     args = parse_command_line()
 
-    if(args.xmlfile=='none'): #Normal run with all input params as command line arguments
+    if(args.xmlfile=='none'):
         run_command_line(args)
 
     else:
-        run_xml(args) #run with xml input
+        run_xml(args)
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
-

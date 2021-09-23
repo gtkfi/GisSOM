@@ -42,7 +42,7 @@ namespace SomUI.ViewModel
         private bool isBusy = false;
         private readonly ILogger logger = NLog.LogManager.GetCurrentClassLogger();
         private string pythonPath = "C:/Users/shautala/AppData/Local/Programs/Python/Python37/pythonw.exe"; // used for debugging.
-        private bool usePyExes = true;//for switching running of scripts between packed python executables and full python installation. used for debugging.
+        private bool usePyExes = false;//for switching running of scripts between packed python executables and full python installation. used for debugging.
                                      
 
         private event PropertyChangedEventHandler PropertyChanged;
@@ -84,26 +84,10 @@ namespace SomUI.ViewModel
                     ScriptOutput(myProcess);
                     ScriptError(myProcess);
                     myProcess.Start();
-                //StreamReader myStreamReader = myProcess.StandardOutput;
-                //StreamReader errorReader = myProcess.StandardError;
-                //string errors = errorReader.ReadToEnd();
-                //string returnValue = myStreamReader.ReadLine();
-                //if (returnValue != null)
-                //    Model.NoDataValue = returnValue;
                 myProcess.BeginErrorReadLine();
                 myProcess.BeginOutputReadLine();
                 myProcess.WaitForExit();
                     myProcess.Close();
-                //    if (errors != "" && !errors.Contains("Warning")) //Make a more robust solution later
-                //    {                      
-                //        dialogService.ShowNotification("Failed to read data. See the log file for details", "Error");    
-                //    }
-                //if (errors != "")
-                //{
-                //    PythonLogText += errors + "\r\n";
-                //    logger.Error(errors);//throw ex
-
-                //}
 
                 };
                 var SomViewModel = ServiceLocator.Current.GetInstance<SomViewModel>();
@@ -591,7 +575,6 @@ namespace SomUI.ViewModel
         /// <param name="ScatterPlotList"></param>
         public async Task DrawResults(string redraw, SomModel Model, ObservableCollection<ImageSource> SomImageList, ObservableCollection<ImageSource> GeoSpaceImageList, ObservableCollection<ImageSource> BoxPlotList, ObservableCollection<ImageSource> ScatterPlotList, Action<Process> ScriptOutput, Action<Process> ScriptError)
         {
-            //IsBusy = true;
             
 
             await Task.Run(() =>
@@ -638,7 +621,6 @@ namespace SomUI.ViewModel
                 myProcessStartInfo.Arguments += " " + "--labelIndex=" + "\"" + Model.LabelColumnIndex + "\"";
                 myProcessStartInfo.Arguments += " " + "--original_data_dir=" + "\"" + Model.Output_Folder + "\"";
                 myProcessStartInfo.Arguments += " " + "--dataType=" + "\"" + Model.DataShape + "\"";
-                //if (Model.Output_file_geospace.Length > 0)
                 if(Model.IsSpatial==true)
                 {
                     myProcessStartInfo.Arguments += " " + "--outgeofile=" + "\"" + Model.Output_file_geospace + "\"";
@@ -928,9 +910,9 @@ namespace SomUI.ViewModel
                 myProcessStartInfo.RedirectStandardOutput = true;
                 myProcessStartInfo.RedirectStandardError = true;
                 if (usePyExes)
-                    myProcessStartInfo.Arguments = "\"" + Model.OutputFolderTimestamped + "\"" + " " + "\""+ Model.InputFile + "\"";
+                    myProcessStartInfo.Arguments = "\"" + Model.OutputFolderTimestamped + "\"" + " " + "\""+ Model.OriginalData + "\"";
                 else
-                    myProcessStartInfo.Arguments = "\"" + scriptPath + "\"" + " " + "\"" + Model.OutputFolderTimestamped + "\"" + " " + "\"" + Model.InputFile + "\"";
+                    myProcessStartInfo.Arguments = "\"" + scriptPath + "\"" + " " + "\"" + Model.OutputFolderTimestamped + "\"" + " " + "\"" + Model.OriginalData + "\"";
 
                 myProcessStartInfo.Arguments = myProcessStartInfo.Arguments.Replace("\\", "/");
 
@@ -1506,6 +1488,10 @@ namespace SomUI.ViewModel
 
             xmlWriter.WriteStartElement("output_folder");
             xmlWriter.WriteString(model.OutputFolderTimestamped);
+            xmlWriter.WriteEndElement();
+
+            xmlWriter.WriteStartElement("originalData");
+            xmlWriter.WriteString(model.InputFile);
             xmlWriter.WriteEndElement();
 
             xmlWriter.WriteEndElement();

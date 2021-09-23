@@ -28,7 +28,8 @@ import pickle
 import pandas as pd
 from matplotlib.offsetbox import AnchoredOffsetbox, TextArea, VPacker # HPacker,
 from matplotlib.ticker import FormatStrFormatter
-from loadfile import read_header
+#from loadfile import read_header
+from nextsomcore import loadfile
 #from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
 import math
 #from mpl_toolkits.axes_grid1 import make_axes_locatable
@@ -118,7 +119,7 @@ firstFileName=""
 index=0
 
 if(input_file[-3:].lower()=="lrn"):     #if input is lrn file
-    header=read_header(input_file)  
+    header=loadfile.read_header(input_file)  
     actualNumberOfColumns=header['cols']-1         
 else:
     actualNumberOfColumns=len(som_headers)-3#this is really not the actual number of columns...should be renamed.
@@ -504,16 +505,12 @@ def draw_som_clusters():
                                             )
         else:
             location=3
-            #if(y/x>1.4):
-            #    y_anchor=0.3-0.7*(y/x)
-            #    bbox_anchor=(0.31, y_anchor)
             anchored_box = AnchoredOffsetbox(loc=location,
                                             child=box,
                                             borderpad=0.
                                             )
         
         ax1.add_artist(anchored_box)
-        #plt.tight_layout()
         ax1.figure.savefig(working_dir+'/Som/somplot_' + str(len(som_data[0])-1) + '.png',bbox_inches='tight')
         plt.clf()
         plt.cla()
@@ -697,12 +694,11 @@ if outgeofile is not None: #if spatial, draw geo plots
 if(int(max(som_data[:,len(som_data[0])-1]))>0): #draw som cluster plot if there is more than 1 cluster
     draw_som_clusters()
 
-#in case the function was called for redrawing after selecting a different clustering result. so that we can skip stuff we don't have to redraw to speed things up
+#in case the function was called for redrawing after selecting a different clustering result. so that we can skip stuff we don't have to redraw to speed things up. CURRENTLY NOT IN USE, ALWAYS TRUE.
 if(redraw!="false"):
     draw_som_results()
 draw_number_of_hits()
 print("SomSpace plots finshed")
-#start_time = time.time()
 
 if(som_dict['clusters'] is not None):
     draw_boxplots()

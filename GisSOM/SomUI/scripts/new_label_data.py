@@ -100,14 +100,6 @@ if(grid_type.lower()=="hexagonal"):
 
 
 
-
-
-
-
-"""Function definitions"""
-
-
-
 """
 Calculate best matching som cell for new data, using euclidian distance of data values to existing data points
 """
@@ -184,12 +176,6 @@ def create_annotations():
 
 
 
-
-
-
-
-
-
 """
 Draw Som Cluster plot
 """
@@ -245,20 +231,14 @@ def draw_som_clusters():
     else:
         anchored_box = AnchoredOffsetbox(loc=3,
                                         child=box, pad=0.,
-                                        frameon=True#,
-                                        #bbox_to_anchor=(0.01, 0.01)#,
-                                        #bbox_transform=ax.transAxes,
-                                        #borderpad=0.,
+                                        frameon=True
                                         )
     
     ax1.add_artist(anchored_box)
-    #plt.tight_layout()
     ax1.figure.savefig(working_dir+'/Som/labels_new.png',bbox_inches='tight')
     plt.clf()
     plt.cla()
     plt.close()
-
-
 
 
 

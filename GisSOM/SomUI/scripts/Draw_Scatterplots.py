@@ -67,9 +67,6 @@ clusters=int(max(som_data[:,len(som_data[0])-2])+1)
 discrete_cmap=sns.cubehelix_palette(n_colors=clusters, start=1,rot=4, gamma=1.0, hue=3, light=0.77, dark=0.15, reverse=False, as_cmap=False)
 
 
-
-
-
 """
 Plot scatterplots using som data.
 """

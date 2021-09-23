@@ -2,7 +2,7 @@
 """
 Created on Wed Aug 18 13:10:28 2021
 
-Functions for creating plots. Currently only contains hexagonal plot function, if that continues to be the case this file should be renamed.
+Functions for creating plots.
 @author: shautala
 """
 import math
@@ -45,7 +45,6 @@ def plot_hexa(somx,
             
             ):
     discrete_cmap=sns.cubehelix_palette(n_colors=clusters, start=1,rot=4, gamma=1.0, hue=3, light=0.77, dark=0.15, reverse=False, as_cmap=False)
-    #discrete_cmap_2=sns.cubehelix_palette(n_colors=clusters, start=1,rot=4, gamma=1.0, hue=3, light=0.77, dark=0.15, reverse=False, as_cmap=True)
     n_centers = grid['centers']
     x, y = grid['x'], grid['y']
     if(somx<somy):
@@ -69,8 +68,6 @@ def plot_hexa(somx,
     width, height = fig.canvas.get_width_height()
     ypix = height - ypix
     
-    # discover radius and hexagon
-    #apothem = 1.8 * (xpix[1] - xpix[0]) / math.sqrt(3)#.9 
     if(ptype=='scatter'): #if the data type is csv with gaps
         apothem=(xpix[1] - xpix[0]) 
         area_inner_circle = abs(apothem) 
@@ -79,7 +76,6 @@ def plot_hexa(somx,
             rotation=150,
             sizes=(area_inner_circle,),
             edgecolor="none",
-            #edgecolors = (0, 0, 0, 1),
             array= d_matrix,
             cmap = colmap,
             offsets = n_centers,
@@ -87,10 +83,10 @@ def plot_hexa(somx,
         )
         
     else: #regular hexa plot
-        apothem = 1.8 * (xpix[1] - xpix[0]) / math.sqrt(3)#.9 oli
+        apothem = 1.8 * (xpix[1] - xpix[0]) / math.sqrt(3)
         area_inner_circle = math.pi * (apothem ** 2)
         collection_bg = RegularPolyCollection(
-            numsides=6,  # a hexagon
+            numsides=6, 
             rotation=0,
             sizes=(area_inner_circle,),
             edgecolors = (0, 0, 0, 1),
@@ -106,7 +102,6 @@ def plot_hexa(somx,
     
     if(colmap=='jet'):
         cax = divider.append_axes("right", size="5%", pad=0.05)
-        #cax = fig.add_axes([.98,.124,.04,.754])
         cbar=plt.colorbar(collection_bg, cax=cax,ticklocation='right', aspect=10,spacing='proportional')
         cbar.ax.invert_yaxis()
         cbar.ax.tick_params(axis='y', direction='out', pad=30)
@@ -128,7 +123,7 @@ def plot_hexa(somx,
             for i in range(0, len(n_centers)):
                 ax.annotate(ticks_flattened[i], (n_centers[i][0], n_centers[i][1]),color=contrasting_text_color(discrete_cmap[int(d_matrix[i])]),ha='center', va='center', fontsize=max(39-(somy/2)-(4*somx/somy),10))
         bounds = np.linspace(0, clusters, clusters+1)
-        bounds2 = np.linspace(0.5, clusters+0.5, clusters+1.5)
+        bounds2 = np.linspace(0.5, clusters+0.5, clusters+1)
         norm = mpl.colors.BoundaryNorm(bounds, colmap2.N)
         if(ptype=='scatter'):
             cb_ax = divider.append_axes("right", size="5%", pad=0.05)

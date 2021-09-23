@@ -31,8 +31,6 @@ parser.add_argument('--outsomfile', nargs='?', dest="outsomfile", help='#path to
 parser.add_argument('--workingdir', nargs='?', dest="workingdir", help='#working directory')
 parser.add_argument('--outgeofile', default=None, dest="outgeofile", help='#path to geo results text file, where new clustering is saved to. Optional (in case of non-spatial data)')
 parser.add_argument('--normalized', type=str, default="False", dest='normalized',help='Whether the data has been normalized or not')
-#parser.add_argument('--minN', type=str, default=0, dest='minN',help='Minimum value for normalization')
-#parser.add_argument('--maxN', type=str, default=1, dest='maxN',help='Maximum value for normalization')
 parser.add_argument('--label', type=str, default=None, dest='label', help='Whether data contains label column, true or false')
 parser.add_argument('--scale_min_list',default=None, dest="scale_min_list", help="List of floats for scaling minimum values") 
 parser.add_argument('--scale_max_list',default=None, dest="scale_max_list", help="List of floats for scaling maximum values") 
@@ -60,7 +58,6 @@ som['clusters'] = selected_cluster['cluster']
 header = nxtsomcore.load_data(input_file)
 if(outgeofile is not None):
     nxtsomcore.save_geospace_result(outgeofile, header, som, working_dir, input_file,args.normalized, args.label)
-#nxtsomcore.save_somspace_result(output_file_somspace, header, som, working_dir,input_file)
 nxtsomcore.save_somspace_result(output_file_somspace, header, som, working_dir, args.input_file, args.normalized)  
 with open(working_dir+'/som.dictionary', 'wb') as som_dictionary_file:
     pickle.dump(som, som_dictionary_file) 

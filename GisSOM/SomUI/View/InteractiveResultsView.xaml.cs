@@ -82,74 +82,30 @@ namespace SomUI.View
             });
            
         }
-        //private void BrowserAddressChanged(object sender, AddressChangedEventArgs e)
-        //{
-        //    this.CurrentAddress = e.Address;
-        //}
-        //private void ToolTip_SourceUpdated(object sender, DataTransferEventArgs e)
-        //{
-        //    //var TB = (TextBlock)sender; //Cast sender as textbox (which it is)
-        //    try { 
-        //    var wb = (WebBrowser)sender; //exc
-        //    wb.Refresh(true);
-        //    }
-        //    catch (Exception)
-        //    {
-
-        //    }
-        //    //var scrollViewer = (ScrollViewer)TB.Parent; //get parent of the texbox and cast it to scrollviewer(which it is)
-        //    //scrollViewer.ScrollToBottom(); //call the ScrollToBottomEvent
-        //}
         private void RefreshBrowser(object sender, RoutedEventArgs e) {
             if (this.Browser.IsBrowserInitialized && this.Browser.IsLoaded)
             {
-                //this.Browser.Stop();
-                //this.Browser.Reload(true);
-                //this.Browser.Load("http://localhost:8050/");
+
                 Cef.GetGlobalCookieManager().DeleteCookies("", "");
                 CefSharp.WebBrowserExtensions.Reload(this.Browser, true);
-                //Cef.GetGlobalCookieManager().DeleteCookies("", "");
-                //CefSharp.WebBrowserExtensions.Reload(this.Browser, true);
-                //this.Browser.Visibility = Visibility.Visible;       
-
             }
-                
-            //(true);
         }
 
-
-
-        //public async Task HttpPost(string URI, string Parameters)
-        //{
-        //    await Task.Run(async () =>
-        //    {
-        //        try
-        //        {
-        //            System.Net.WebRequest req = System.Net.WebRequest.Create(URI);
-        //            req.Proxy = WebRequest.DefaultWebProxy;
-        //            //Add these, as we're doing a POST
-        //            req.ContentType = "application/x-www-form-urlencoded";
-        //            req.Method = "POST";
-        //            //We need to count how many bytes we're sending. Params should be name=value&
-        //            byte[] bytes = System.Text.Encoding.ASCII.GetBytes(Parameters);
-        //            req.ContentLength = bytes.Length;
-        //            System.IO.Stream os = req.GetRequestStream();
-        //            os.Write(bytes, 0, bytes.Length); //Push it out there
-        //            os.Close();
-        //            System.Net.WebResponse resp = req.GetResponse();
-        //            if (resp != null)
-        //            {
-        //                System.IO.StreamReader sr = new System.IO.StreamReader(resp.GetResponseStream());
-        //                resp.Close();
-        //            }
-
-        //        }
-        //        catch (Exception)
-        //        {
-        //        }
-        //    });
-        //}
-
+        /// <summary>
+        /// For whatever reason single refreshes don't seem to do the trick.
+        /// </summary>
+        private async void DumbMultipleRefresh()
+        {
+            await Task.Run(() =>
+            {
+                for (int i = 0; i < 10; i++)
+                {
+                    Cef.GetGlobalCookieManager().DeleteCookies("", "");
+                    CefSharp.WebBrowserExtensions.Reload(this.Browser, true);
+                    Thread.Sleep(500);
+                }
+            });
+            }
         private string HttpPost(string URI, string Parameters)
         {
             try
@@ -165,17 +121,36 @@ namespace SomUI.View
                 os.Write(bytes, 0, bytes.Length);
                 os.Close();
                 //WebResponse resp = req.GetResponse();
+
+                using (HttpWebResponse httpWebResponse = (HttpWebResponse)req.GetResponse())
+                {
+                    if (httpWebResponse.StatusDescription == "OK")
+                    {
+                        Cef.GetGlobalCookieManager().DeleteCookies("", "");
+                        CefSharp.WebBrowserExtensions.Reload(this.Browser, true);
+                        httpWebResponse.Close();
+                        return "OK";
+
+                    }
+                    if (httpWebResponse == null) return null;
+                    System.IO.StreamReader sr = new System.IO.StreamReader(httpWebResponse.GetResponseStream());
+                    httpWebResponse.Close();
+                    return null;
+                }
+                /*
                 HttpWebResponse httpWebResponse = (HttpWebResponse)req.GetResponse();
                 if (httpWebResponse.StatusDescription == "OK")
                 {
                     Cef.GetGlobalCookieManager().DeleteCookies("", "");
                     CefSharp.WebBrowserExtensions.Reload(this.Browser, true);
+                    httpWebResponse.Close();
                     return "OK";
                 }
                 if (httpWebResponse == null) return null;
                 System.IO.StreamReader sr = new System.IO.StreamReader(httpWebResponse.GetResponseStream());
                 httpWebResponse.Close();
                 return null;
+                */
             }
             catch (Exception e)
             {
@@ -200,6 +175,7 @@ namespace SomUI.View
                 Cef.GetGlobalCookieManager().DeleteCookies("", "");
                 CefSharp.WebBrowserExtensions.Reload(this.Browser, true);
                 this.Browser.Visibility = Visibility.Visible;
+                DumbMultipleRefresh();
                 //App.Current.Dispatcher.Invoke((Action)delegate
                 //{
                 //    this.Browser.Load("http://localhost:8050/");
