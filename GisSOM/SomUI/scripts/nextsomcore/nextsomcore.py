@@ -266,10 +266,10 @@ class NxtSomCore(object):
             data_cols = read_data_columns(header)
             tree = ET.parse(output_folder+"/DataStats.xml")
             for i in range(2,len(som_cols["data"][0])-2):               	
-                    maxD=Decimal(tree.find(data_cols["colnames"][i-2]).find("max").text)
-                    minD=Decimal(tree.find(data_cols["colnames"][i-2]).find("min").text)        
-                    minN=float(Decimal(tree.find(data_cols["colnames"][i-2]).find("scaleMin").text))
-                    maxN=float(Decimal(tree.find(data_cols["colnames"][i-2]).find("scaleMax").text)) 
+                    maxD=Decimal(tree.find(data_cols["colnames"][i-2].replace("\"","")).find("max").text)
+                    minD=Decimal(tree.find(data_cols["colnames"][i-2].replace("\"","")).find("min").text)        
+                    minN=float(Decimal(tree.find(data_cols["colnames"][i-2].replace("\"","")).find("scaleMin").text))
+                    maxN=float(Decimal(tree.find(data_cols["colnames"][i-2].replace("\"","")).find("scaleMax").text)) 
                     for j in range(0,len(som_cols["data"])):
                         N=Decimal(som_cols["data"][j][i].item())
                         som_cols["data"][j][i]=(maxD-minD)*(N-Decimal(minN))/(Decimal(maxN)-Decimal(minN))+minD         

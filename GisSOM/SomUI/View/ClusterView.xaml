@@ -78,7 +78,8 @@
             </WrapPanel>
         </UniformGrid>
             <Button DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Content="Run clustering" Width="200" Command="{Binding RunClusteringCommand}"></Button>
-            
+            <Button DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Content="Save clustering dictionary" Width="200" Command="{Binding SaveClusterFileCommand}"></Button>
+            <Button DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Content="Load clustering dictionary" Width="200" Command="{Binding LoadClusterFileCommand}"></Button>
             <UniformGrid>
                 <ListBox Name="MyListBox" 
                          IsEnabled="False"
@@ -102,9 +103,8 @@
                 <!--Maximum="{Binding Model.KMeans_max_last_calculation}"--><!--This is disabled, until RunStats.txt or some other place reliably provides the current kmeans min and max
                 , and these are read also when doing clustering on Older results loaded in.-->
             </WrapPanel>
-            <Button DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Content="Use selected" Width="200" Command="{Binding SaveClusterCommand}"></Button>
-            <Button DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Content="Save result" Width="200" Command="{Binding SaveClusterFileCommand}"></Button>
-            <Button DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Content="Load result" Width="200" Command="{Binding LoadClusterFileCommand}"></Button>
+            <Button DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Content="Visualize selected" Width="200" Command="{Binding SaveClusterCommand}"></Button>
+
             <mah:ProgressRing DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsActive="{Binding IsBusy, Mode=TwoWay}" />
         </StackPanel>
     </Grid>

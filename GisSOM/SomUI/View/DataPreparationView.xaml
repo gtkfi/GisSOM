@@ -380,21 +380,7 @@
                             <TextBox.ToolTip>If data contains numeric values representing null values.</TextBox.ToolTip>
                         </TextBox>
                     </WrapPanel>-->
-                    <CheckBox Name="NormalizeCheckBox" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}"  Style="{StaticResource CheckBoxStyle}" IsChecked="{Binding Model.IsNormalized, Mode=TwoWay}" Content="Scale data?">
-                        <CheckBox.ToolTip>Scale data</CheckBox.ToolTip>
-                    </CheckBox>
-                    <WrapPanel>
-                        <TextBox DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsEnabled="{Binding Model.IsNormalized}"  HorizontalAlignment="Left" Margin="30,5,0,5" Text="{Binding NormalizationMin , Mode=TwoWay}" MinWidth="50">
-                            <TextBox.ToolTip>Scaling minimum value</TextBox.ToolTip>
-                        </TextBox>
-                        <TextBlock Margin="5,0,0,0">Scaling min value</TextBlock>
-                    </WrapPanel>
-                    <WrapPanel>
-                        <TextBox DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsEnabled="{Binding Model.IsNormalized}"  HorizontalAlignment="Left" Margin="30,5,0,5" Text="{Binding NormalizationMax , Mode=TwoWay}" MinWidth="50">
-                            <TextBox.ToolTip>Scaling minimum value</TextBox.ToolTip>
-                        </TextBox>
-                        <TextBlock Margin="5,0,0,0">Scaling max value</TextBlock>
-                    </WrapPanel>
+                    
                     
                     <StackPanel  DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Margin="26,0,0,0">
                         <!--<CheckBox DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Style="{StaticResource CheckBoxStyle}" Content="Easting" IsChecked="{Binding IsSelectedEasting}" >
@@ -416,7 +402,7 @@
                     <CheckBox DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Style="{StaticResource CheckBoxStyle}" Content="Log transform" Margin="5,10,5,5" IsChecked="{Binding Model.IsLogTransformed , Mode=TwoWay}" >
                         <CheckBox.ToolTip>Apply log transformation to variable values</CheckBox.ToolTip>
                     </CheckBox>
-                    <CheckBox DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Style="{StaticResource CheckBoxStyle}" Content="Winsorize" IsChecked="{Binding Model.IsWinsorized}">
+                    <CheckBox DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Style="{StaticResource CheckBoxStyle}" Content="Winsorize (original values)" IsChecked="{Binding Model.IsWinsorized}">
                         <CheckBox.ToolTip>Limit extremities in data. Values exceeding the minimum and maximum threshold values will be set to the threshold value.</CheckBox.ToolTip>
                     </CheckBox>
                     <WrapPanel>
@@ -434,7 +420,23 @@
                     </WrapPanel>
 
                     <Button Margin="0,10,0,0" Content="Update Histogram"  HorizontalAlignment="Left" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding DrawCommand}"></Button>
-                    
+
+
+                    <CheckBox Margin="0,50,0,0" Name="NormalizeCheckBox" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}"  Style="{StaticResource CheckBoxStyle}" IsChecked="{Binding Model.IsNormalized, Mode=TwoWay}" Content="Scale data">
+                        <CheckBox.ToolTip>Scale data</CheckBox.ToolTip>
+                    </CheckBox>
+                    <WrapPanel>
+                        <TextBox DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsEnabled="{Binding Model.IsNormalized}"  HorizontalAlignment="Left" Margin="30,5,0,5" Text="{Binding NormalizationMin , Mode=TwoWay}" MinWidth="50">
+                            <TextBox.ToolTip>Scaling minimum value</TextBox.ToolTip>
+                        </TextBox>
+                        <TextBlock Margin="5,0,0,0">Scaling min value</TextBlock>
+                    </WrapPanel>
+                    <WrapPanel>
+                        <TextBox DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsEnabled="{Binding Model.IsNormalized}"  HorizontalAlignment="Left" Margin="30,5,0,5" Text="{Binding NormalizationMax , Mode=TwoWay}" MinWidth="50">
+                            <TextBox.ToolTip>Scaling minimum value</TextBox.ToolTip>
+                        </TextBox>
+                        <TextBlock Margin="5,0,0,0">Scaling max value</TextBlock>
+                    </WrapPanel>
 
                     <Button Margin="0,60,0,0" 
                         Style="{StaticResource AccentedSquareButtonStyle}"
