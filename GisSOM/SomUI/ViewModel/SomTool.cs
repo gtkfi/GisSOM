@@ -42,7 +42,7 @@ namespace SomUI.ViewModel
         private bool isBusy = false;
         private readonly ILogger logger = NLog.LogManager.GetCurrentClassLogger();
         private string pythonPath = "C:/Users/shautala/AppData/Local/Programs/Python/Python37/pythonw.exe"; // used for debugging.
-        private bool usePyExes = true;//for switching running of scripts between packed python executables and full python installation. used for debugging.
+        private bool usePyExes = false;//for switching running of scripts between packed python executables and full python installation. used for debugging.
                                      
 
         private event PropertyChangedEventHandler PropertyChanged;
