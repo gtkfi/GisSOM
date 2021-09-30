@@ -66,7 +66,8 @@ parser.add_argument('--outgeofile', default=None, dest="outgeofile", help='#som 
 parser.add_argument('--eastingIndex', default=None, dest="eastingIndex", help='index of easting column')
 parser.add_argument('--northingIndex', default=None, dest="northingIndex", help='index of northing column')
 parser.add_argument('--labelIndex', default=None, dest="labelIndex", help='index of label column')
-parser.add_argument('--dataType', default=None, dest="dataType", help='index of label column')
+parser.add_argument('--dataType', default=None, dest="dataType", help='Data type (scatter or grid)')
+parser.add_argument('--noDataValue', default='NA', dest="noDataValue", help='noData value')
 args=parser.parse_args()
 
 outsomfile=args.outsomfile  #somspace results txt file
@@ -190,14 +191,14 @@ if (labelIndex!="-2"):
             )
     outfile=[]
     for i in range(0,len(data[0])):
-        if(data[0][i]=='label'):
+        if(data[0][i].replace("\"","")=='label'):
             outfile=data[1:,i]
     annot_ticks=np.empty([somx, somy], dtype="<U32")
     bmus=som_dict["bmus"]
     counter=1
     for i in range(2,len(outfile)):         # ticks are added to list. annot_strings_for_dict stores them in a list, so that they can be sorted and reliably checked for duplicates including ones that are in different order.
         tick=annot_ticks[bmus[i-2][0]][bmus[i-2][1]]
-        if(outfile[i]!='' and outfile[i]!= "nan" and outfile[i]!='NA' and outfile[i]!='NULL' and outfile[i]!='Null' and outfile[i]!='NoData'):
+        if(outfile[i]!='' and outfile[i]!= "nan" and outfile[i]!='NA' and outfile[i]!='NULL' and outfile[i]!='Null' and outfile[i]!='NoData' and outfile[i]!=args.noDataValue):#tähän jonon jatkoksi vielä noDataValue
             if (tick==''): 
                 annot_ticks[bmus[i-2][0]][bmus[i-2][1]]=str(counter)    
                 annot_strings[str(counter)]=[outfile[i]]

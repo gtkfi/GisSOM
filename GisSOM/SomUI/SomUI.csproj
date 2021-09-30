@@ -330,6 +330,9 @@
     <None Include="scripts\Executables\nextsom_plot_dash_draw_scatter.exe.manifest" />
     <None Include="scripts\Executables\split_to_columns.exe.manifest" />
     <None Include="scripts\Executables\write_geotiff.exe.manifest" />
+    <None Include="TestData\Lapland_csv_grid.csv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="UserSettings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
       <LastGenOutput>UserSettings.Designer.cs</LastGenOutput>
@@ -4105,27 +4108,6 @@
     <None Include="scripts\Executables\_tkinter.pyd">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="TestData\GeoTIFF\Lapland\dns_strct.tfw" />
-    <None Include="TestData\GeoTIFF\Lapland\dns_strct.tif.ovr" />
-    <None Include="TestData\GeoTIFF\Lapland\dst_domli.tfw" />
-    <None Include="TestData\GeoTIFF\Lapland\dst_domli.tif.ovr" />
-    <None Include="TestData\GeoTIFF\Lapland\dst_struct.img" />
-    <None Include="TestData\GeoTIFF\Lapland\dst_struct.rrd" />
-    <None Include="TestData\GeoTIFF\Lapland\dst_struct.tfw" />
-    <None Include="TestData\GeoTIFF\Lapland\dst_struct.tif.ovr" />
-    <None Include="TestData\GeoTIFF\Lapland\dst_wrms.tfw" />
-    <None Include="TestData\GeoTIFF\Lapland\dst_wrms.tif.ovr" />
-    <None Include="TestData\GeoTIFF\Lapland\em_appres.tfw" />
-    <None Include="TestData\GeoTIFF\Lapland\em_appres.tif.ovr" />
-    <None Include="TestData\GeoTIFF\Lapland\em_quad.tfw" />
-    <None Include="TestData\GeoTIFF\Lapland\em_quad.tif.ovr" />
-    <None Include="TestData\GeoTIFF\Lapland\em_real.tfw" />
-    <None Include="TestData\GeoTIFF\Lapland\em_real.tif.ovr" />
-    <None Include="TestData\GeoTIFF\Lapland\magnetic.tfw" />
-    <None Include="TestData\GeoTIFF\Lapland\magnetic.tif.ovr" />
-    <None Include="TestData\GeoTIFF\Thumbs.db" />
-    <None Include="TestData\testdata.lrn" />
-    <None Include="TestData\testdata_csv.csv" />
     <None Include="scripts\input_example.lrn" />
     <None Include="scripts\lrnfile.pyc">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
@@ -4191,32 +4173,15 @@
     <Content Include="scripts\write_geotiff.py">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Resource Include="TestData\GeoTIFF\Lapland2\AEM_Im.tif" />
-    <Resource Include="TestData\GeoTIFF\Lapland2\AEM_Im_norm.tif" />
-    <Resource Include="TestData\GeoTIFF\Lapland2\AEM_Re.tif" />
-    <Resource Include="TestData\GeoTIFF\Lapland2\AEM_Re_norm.tif" />
-    <Resource Include="TestData\GeoTIFF\Lapland2\albiteOcc.tif" />
-    <Resource Include="TestData\GeoTIFF\Lapland2\albiteOcc_norm.tif" />
-    <Resource Include="TestData\GeoTIFF\Lapland\dns_strct.tif" />
-    <Resource Include="TestData\GeoTIFF\Lapland\dns_strct.tif.aux.xml" />
-    <Resource Include="TestData\GeoTIFF\Lapland\dst_domli.tif" />
-    <Resource Include="TestData\GeoTIFF\Lapland\dst_domli.tif.aux.xml" />
-    <Resource Include="TestData\GeoTIFF\Lapland\dst_struct.img.aux.xml" />
-    <Resource Include="TestData\GeoTIFF\Lapland\dst_struct.tif" />
-    <Resource Include="TestData\GeoTIFF\Lapland\dst_struct.tif.aux.xml" />
-    <Resource Include="TestData\GeoTIFF\Lapland\dst_wrms.tif" />
-    <Resource Include="TestData\GeoTIFF\Lapland\dst_wrms.tif.aux.xml" />
-    <Resource Include="TestData\GeoTIFF\Lapland\em_appres.tif" />
-    <Resource Include="TestData\GeoTIFF\Lapland\em_appres.tif.aux.xml" />
-    <Resource Include="TestData\GeoTIFF\Lapland\em_quad.tif" />
-    <Resource Include="TestData\GeoTIFF\Lapland\em_quad.tif.aux.xml" />
-    <Resource Include="TestData\GeoTIFF\Lapland\em_real.tif" />
-    <Resource Include="TestData\GeoTIFF\Lapland\em_real.tif.aux.xml" />
-    <Resource Include="TestData\GeoTIFF\Lapland\magnetic.tif" />
-    <Resource Include="TestData\GeoTIFF\Lapland\magnetic.tif.aux.xml" />
-    <Resource Include="TestData\GeoTIFF\AEM_ReIm_500m.tif" />
-    <Resource Include="TestData\GeoTIFF\AEM_Re_500m.tif" />
-    <Resource Include="TestData\GeoTIFF\AM_DGRF_500m.tif" />
+    <Resource Include="TestData\GeoTIFF\dst_strcu_2km.tif">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="TestData\GeoTIFF\em_appres_2km.tif">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="TestData\GeoTIFF\magnetic_2km.tif">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Readme.txt" />
     <Content Include="css\font-awesome.css" />
     <Content Include="css\font-awesome.min.css" />

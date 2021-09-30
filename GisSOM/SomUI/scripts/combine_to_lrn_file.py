@@ -187,14 +187,16 @@ def write_nonspatial_from_csv():
     writeXmlTreeFromCsv(df_in,columns_included)
     
     if(args.normalized is not None):
-        for i in range(0,len(columns_included)):
-            data_min= min(columns_included[i][2:].astype(float))
-            data_max= max(columns_included[i][2:].astype(float))
-            for j in range(2, len(columns_included[i])):
-                if(columns_included[i][j]!=na_value):
-                    columns_included[i][j]=(scale_max_list_included[i]-scale_min_list_included[i])*(columns_included[i][j].astype(float)-data_min)/(data_max-data_min)+scale_min_list_included[i]
-    
-    df_in=pd.DataFrame(np.squeeze(np.stack(columns_included, axis=1)))  
+        for i in range(0,len(columns_in[0])):
+            colForMinMax=columns_included[i][2:].astype(float)[~np.isnan(df_in[i][2:].astype(float))]
+            data_min= min(colForMinMax)[0]#(columns_in[2:][i].astype(float))#[~np.isnan(df_in[2:][i].astype(float))]
+            data_max= max(colForMinMax)[0]#(columns_in[2:][i].astype(float))
+            for j in range(2, len(columns_in)):
+                if(columns_in[j,i]!=na_value):
+                    columns_in[j,i]=(scale_max_list_included[i]-scale_min_list_included[i])*(float(columns_in[j,i])-data_min)/(data_max-data_min)+scale_min_list_included[i]
+                    
+    #df_in=pd.DataFrame(np.squeeze(np.stack(columns_in, axis=1)))  
+    df_in=pd.DataFrame(np.squeeze(np.stack(columns_in, axis=0)))  
     columns_in=df_in.values        
     combineCsvColumns()
     
@@ -224,6 +226,7 @@ def write_spatial_from_csv():
             columns[i][0][0]=0
         else:
             columns[i][0][0]=1
+    
     columns_sorted.append(columns[int(eastingIndex)])
     columns_sorted.append(columns[int(northingIndex)])
     exclude_list_sorted.append(exclude_list[int(eastingIndex)])
@@ -257,17 +260,23 @@ def write_spatial_from_csv():
     
     if(args.normalized is not None):
         if(na_value is not ''):
-            for i in range(0,len(columns_in[0])):
-                colForMinMax= list(filter(lambda x: x!=str(float(na_value)), df_in[i][2:]))
-                colForMinMax=[float(i) for i in colForMinMax]
-                data_min= min(colForMinMax)
-                data_max= max(colForMinMax)
+            for i in range(0,len(columns_in[0])):               
+                #colForMinMax= list(filter(lambda x: x!=str(float(na_value)), df_in[i][2:]))
+                #colForMinMax=[float(i) for i in colForMinMax]              
+                colForMinMax=columns_included[i][2:].astype(float)[~np.isnan(df_in[i][2:].astype(float))]
+                colForMinMax= list(filter(lambda x: x!=float(na_value), colForMinMax))               
+                data_min= min(colForMinMax)[0]
+                data_max= max(colForMinMax)[0]
                 for j in range(2, len(columns_in[:,i])):
                     if(columns_in[j,i]!=str(float(na_value))):
                         columns_in[j,i]=((scale_max_list_included[i]-scale_min_list_included[i])*(float(columns_in[j,i])-data_min)/(data_max-data_min))+scale_min_list_included[i] 
+                        columns_in[j,i]=columns_in[j,i]
+                    else:
+                         columns_in[j,i]=np.nan
         else:
             for i in range(0,len(columns_in[0])):                   
-                colForMinMax=df_in[i][2:].astype(float)
+                #colForMinMax=df_in[i][2:].astype(float)
+                colForMinMax=df_in[i][2:].astype(float)[~np.isnan(df_in[i][2:].astype(float))]
                 data_min= min(colForMinMax) 
                 data_max= max(colForMinMax)
                 for j in range(2, len(columns_in[:,i])):
@@ -276,14 +285,14 @@ def write_spatial_from_csv():
     df_in=pd.DataFrame(np.squeeze(np.stack(columns_in, axis=0)))  
 
     combineCsvColumns()
-    d = dict()
-    for i in range (2, len(columns)):
-        d[tuple((columns[i][1], columns[i][2]))] = i#
-    if(len(columns)-2>len(d)):
-        print("Warning: Data contains duplicate coordinates. The duplicates are written over, so that only the last duplicate instance is kept.")
-        values=list(d.values())
-        columns[values]
-        columns=np.vstack((columns[0:2],columns[values]))
+    #d = dict()
+    #for i in range (2, len(columns)):
+    #    d[tuple((columns[i][1], columns[i][2]))] = i#
+    #if(len(columns)-2>len(d)):
+    #    print("Warning: Data contains duplicate coordinates. The duplicates are written over, so that only the last duplicate instance is kept.")
+    #    values=list(d.values())
+    #    columns[values]
+    #    columns=np.vstack((columns[0:2],columns[values]))
        
     # Remove linebreaker from headers.
     for i in range(0, len(columns[1])): 
@@ -551,6 +560,9 @@ def populateCsvDataFrames(indexModifier=0):
     df_in=pd.DataFrame(np.squeeze(np.stack(columns_included, axis=1)))
     df_in = df_in.replace('NA','nan', regex=True)  
     df_in=df_in.replace(np.nan, 'nan', regex=True)
+    if(na_value is not ""):
+        na_value=float(na_value)
+        df_in=df_in.replace(str(na_value),np.nan)
     for i in range(0,len(df_in.columns)):
         df_in=df_in.loc[df_in[:][i] !='nan']   
     
@@ -558,9 +570,10 @@ def populateCsvDataFrames(indexModifier=0):
     df_ex=df_ex.drop(rowsToDrop.index)  
     columns_ex=df_ex.values   
     columns_in=df_in.values   
-    if(na_value is not ""):
-        na_value=float(na_value)
-        df_in=df_in.replace(str(na_value),np.nan)
+    
+    #if(na_value is not ""):
+    #    na_value=float(na_value)
+    #    df_in=df_in.replace(str(na_value),np.nan)
         
     df_in_header=df_in[:2]
     df_in=df_in[2:].apply(pd.to_numeric,errors='coerce')  
@@ -574,6 +587,7 @@ def combineCsvColumns():
     global columns_in
     global columns
     columns=np.hstack((columns_ex, columns_in))
+    #columns = [item for sublist in columns for item in sublist]
     columns=((pd.DataFrame(columns)).dropna()).values
     id_col=[]
     for i in range(0, len(columns)-2): 

@@ -1050,9 +1050,7 @@ namespace SomUI.ViewModel
         {         
             try
             {
-                Directory.CreateDirectory(Path.Combine(root, "Interactive"));
-                Directory.CreateDirectory(Path.Combine(root, "DataPreparation"));
-                Directory.CreateDirectory(Path.Combine(root, "DataForOriginalPlots", "DataPreparation"));
+                Directory.CreateDirectory(Path.Combine(root, "Interactive"));                
                 Directory.CreateDirectory(Path.Combine(root, "Clustering"));
                 Directory.CreateDirectory(root + "/Som");
                 Directory.CreateDirectory(root + "/Geo");

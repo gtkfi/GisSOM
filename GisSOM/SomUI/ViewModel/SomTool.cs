@@ -42,7 +42,7 @@ namespace SomUI.ViewModel
         private bool isBusy = false;
         private readonly ILogger logger = NLog.LogManager.GetCurrentClassLogger();
         private string pythonPath = "C:/Users/shautala/AppData/Local/Programs/Python/Python37/pythonw.exe"; // used for debugging.
-        private bool usePyExes = false;//for switching running of scripts between packed python executables and full python installation. used for debugging.
+        private bool usePyExes = true;//for switching running of scripts between packed python executables and full python installation. used for debugging.
                                      
 
         private event PropertyChangedEventHandler PropertyChanged;
@@ -614,9 +614,9 @@ namespace SomUI.ViewModel
 
 
                 if (usePyExes)
-                    myProcessStartInfo.Arguments =  " "+"--outsomfile=" + "\"" + Model.Output_file_somspace + "\"" + " " + "--som_x=" + Model.Som_x + " " + "--som_y=" + Model.Som_y + " " + "\"" + "--input_file=" + inputFile + "\"" + " " + "\"" + "--dir=" + Model.OutputFolderTimestamped + "\"" + " " + "--grid_type=" + Model.GridShape;
+                    myProcessStartInfo.Arguments =  " "+"--outsomfile=" + "\"" + Model.Output_file_somspace + "\"" + " " + "--som_x=" + Model.Som_x + " " + "--som_y=" + Model.Som_y + " " + "\"" + "--input_file=" + inputFile + "\"" + " " + "\"" + "--dir=" + Model.OutputFolderTimestamped + "\"" + " " + "--grid_type=" + Model.GridShape + " --noDataValue=\"" + Model.NoDataValue + "\"";
                 else
-                    myProcessStartInfo.Arguments = "-u" + " " + "\"" + somPlotScriptPath + "\"" + " " + "--outsomfile=" + "\"" + Model.Output_file_somspace + "\"" + " " + "--som_x=" + Model.Som_x + " " + "--som_y=" + Model.Som_y + " " + "--input_file=" + "\"" + inputFile + "\"" + " " + "--dir=" + "\"" + Model.OutputFolderTimestamped + "\"" + " " + "--grid_type=" + Model.GridShape;
+                    myProcessStartInfo.Arguments = "-u" + " " + "\"" + somPlotScriptPath + "\"" + " " + "--outsomfile=" + "\"" + Model.Output_file_somspace + "\"" + " " + "--som_x=" + Model.Som_x + " " + "--som_y=" + Model.Som_y + " " + "--input_file=" + "\"" + inputFile + "\"" + " " + "--dir=" + "\"" + Model.OutputFolderTimestamped + "\"" + " " + "--grid_type=" + Model.GridShape + " --noDataValue=\"" + Model.NoDataValue + "\"";
 
                 myProcessStartInfo.Arguments += " " + "--labelIndex=" + "\"" + Model.LabelColumnIndex + "\"";
                 myProcessStartInfo.Arguments += " " + "--original_data_dir=" + "\"" + Model.Output_Folder + "\"";
@@ -817,7 +817,7 @@ namespace SomUI.ViewModel
                 else
                     myProcessStartInfo.Arguments = "-u" + " " + "\"" + somPlotScriptPath + "\"" + " " + "--outsomfile=" + "\"" + Model.Output_file_somspace + "\"" + " " + "--som_x=" + Model.Som_x + " " + "--som_y=" + Model.Som_y + " "+ "\""+ "--outgeofile=" + Model.Output_file_geospace + "\""+ " " + "--input_file=" + "\"" + Model.InputFile + "\"" + " " + "--interactive_dir="+ "\"" + interactiveFolder +"\""+" "+ "--dir=" + "\"" + Model.OutputFolderTimestamped + "\"" + " " + " " + "--grid_type=" + "\"" + Model.GridShape + "\"";
 
-
+             
 
                 //if (usePyExes)
                 //    myProcessStartInfo.Arguments = "\"" + Model.Output_file_somspace + "\"" + " " + Model.Som_x + " " + Model.Som_y + " " + "\"" + Model.Output_file_geospace + "\"" + " " + "\"" + Model.InputFile + "\"" + " " + "\"" + interactiveFolder + "\"" + " " + "\"" + Model.OutputFolderTimestamped + "\"" + " " + Model.GridShape;
