@@ -78,12 +78,13 @@ clusterColorscale=[]        #so each cluster is assigned a specific color.
 for i in range (0,clusters):
     clusterColorscale.append([float(float(i)/float(clusters)),palette[i]])
     clusterColorscale.append([float(float(i+1)/clusters),palette[i]])
-
+base_y=-1
 
 """
 Create hexa grid plot and web page
 """
 def run_hexa():
+    global base_y
     xinch=somx*70-somx
     if(somx>somy):
         yinch=((somy*70)-somx*somy)   *(1+max(0.25,(somx+somy)*0.01))
@@ -250,15 +251,26 @@ def shutdown():
 
 
 def display_hoverdata(hoverData, clickData,pathname):
+    global base_y
     if pathname =='/shutdown':
         shutdown()
     if(clickData is not None):
         with open(output_folder+'/clickData.txt', 'w') as f:
+            if(gridshape=='hexagonal'):
+                x=math.floor(float(clickData["points"][0]['x'])) #every other row in hexa is staggered to the right, floor
+                y=int(float(clickData["points"][0]['y'])/base_y)#convert from hexa plot coordinates back to integers
+                z=clickData["points"][0]['text']
+                clickData["points"][0]={'curveNumber':0,'x':x,'y':y,'z':z}
+            #else:
             for item in clickData["points"]:
-                f.write("%s\n" % item)       
+                f.write("%s\n" % item) #after updating python 'z' was replaced with 'text' in hexagonal plot
         ValueOfX=clickData["points"][0]['x']
         ValueOfY=clickData["points"][0]['y']
-        ValueOfZ=clickData["points"][0]['z']          
+        ValueOfZ=None
+        if ('z' in clickData["points"][0]):
+            ValueOfZ=clickData["points"][0]['z']    
+        else:
+            ValueOfZ=clickData["points"][0]['text']
         if(os.path.isfile(output_folder+'/clickData2.txt')):
             with open (output_folder+"/clickData2.txt", "r") as clickData2:
                 x=clickData2.readline()
