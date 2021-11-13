@@ -39,7 +39,7 @@ GisSOM is implemented in C# and XAML using the Windows Presentation Foundation (
 
 ## Development
 
-If you wan't to develop GisSOM, or use it or parts of it in your own projects in accordance with it's license, you are welcome to do so. Just clone or download the code, open the solution with VS 2019, set up the Nuget packages, and you should be ready to go.
+If you want to develop GisSOM, or use it or parts of it in your own projects in accordance with it's license, you are welcome to do so. Just clone or download the code, open the solution with VS 2019, set up the Nuget packages, and you should be ready to go.
 If you want to edit and run your own versions of the python scripts, you're going to need a working installation of Python 3.7, with all the required libraries installed (required libraries are listed in the Tech Spec file, under the GisSOM/SomUI/Documents folder).
 GisSOM uses bundled python executables by default, but this can be switched off by setting the usePyExes-variable in the SomTools class (rows 44 and 45 in version 1.1.0), and providing your Python installation path in the pythonPath-variable.
 
