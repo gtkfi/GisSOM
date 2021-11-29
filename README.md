@@ -58,6 +58,3 @@ If you want to contribute to GisSOM, you can just fork the repository, and submi
 29.11.2021 GisSOM version 1.2.2 release  
 30.09.2021 GisSOM version 1.2.1 release  
 23.09.2021 GisSOM version 1.2 release  
-30.08.2021 GisSOM beta version 1.1 release  
-17.11.2020 GisSOM beta version 1.0.1 release  
-12.10.2020 GisSOM beta version 1.0 release  
