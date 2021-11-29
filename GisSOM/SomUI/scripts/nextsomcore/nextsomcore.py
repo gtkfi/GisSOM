@@ -332,10 +332,10 @@ class NxtSomCore(object):
         with open(dir+"/result_geo.txt") as gd:
             line = gd.readline()
             headers=line.split()
-        for a in range(0, len(som_data[0])-5): 
+        for a in range(0, len(som_data[0])-4): 
             x=geo_data[:,0]
             y=geo_data[:,1]
-            z=geo_data[:,(len(som_data[0])-3+a)]
+            z=geo_data[:,(len(som_data[0])-4+a)]
             df = pd.DataFrame.from_dict(np.array([x,y,z]).T)
             df.columns = ['X_value','Y_value','Z_value']
             df['Z_value'] = pd.to_numeric(df['Z_value'])
@@ -345,7 +345,7 @@ class NxtSomCore(object):
             rows=pivotted.shape[0]
     
             driver = gdal.GetDriverByName('GTiff')
-            outDs = driver.Create(dir+"/GeoTIFF/out_"+headers[len(som_data[0])-3+a]+".tif", cols, rows, 1, gdal.GDT_Float32)
+            outDs = driver.Create(dir+"/GeoTIFF/out_"+headers[len(som_data[0])-4+a]+".tif", cols, rows, 1, gdal.GDT_Float32)
             if outDs is None:
                 print ("Could not create tif file")
                 sys.exit(1) 

@@ -6,19 +6,20 @@ Created on Thu Mar 14 14:54:21 2019
 
 Python script to visualize SOM calculation results & original data. Draws heatmaps based on som and geospace results, and boxplots of data distribution per cluster 
 
-inputs:
-1)outSomFile
-2)som_x
-3)som_y
-4)outGeoFile
-5)Model.InputFile
-6)Model.EastingColumnIndex
-7)Model.NorthingColumnIndex
-8)Model.Working_Folder
+Inputs:
+1) Somspace results file
+2) Som x dimension
+3) Som y dimension
+4) Geospace results file
+5) Input file used for som calculation 
+6) Index of easting column 
+7) Index of northing column
+8) Index of label column
+8) Output folder
+9) Grid type (rectangular or hexagonal)
+10) Redraw (boolean) - whether to calculate all plots or only those that deal with clustering 
 """
-#import warnings
-#with warnings.catch_warnings():
-#    warnings.filterwarnings("ignore")
+
 import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
@@ -29,28 +30,14 @@ import pandas as pd
 from matplotlib.offsetbox import AnchoredOffsetbox, TextArea, VPacker # HPacker,
 from matplotlib.ticker import FormatStrFormatter
 #from loadfile import read_header
-from nextsomcore import loadfile
-#from mpl_toolkits.axes_grid1.anchored_artists import AnchoredSizeBar
+#from nextsomcore import loadfile
 import math
-#from mpl_toolkits.axes_grid1 import make_axes_locatable
-#from matplotlib.collections import RegularPolyCollection
 from matplotlib.lines import Line2D
 from plotting_functions import plot_hexa
 
 """
 Load input parameters & do basic setup
-Inputs:
-1) Model.Output_file_somspace
-2) Model.Som_x 
-3) Model.Som_y 
-4) Model.Output_file_geospace
-5) Model.InputFile 
-6) Model.EastingColumnIndex 
-7) Model.NorthingColumnIndex
-8) Model.LabelColumnIndex
-8) Model.Output_Folder
-9) Model.GridType
-10) Redraw (boolean) - whether to calculate all plots or only those that deal with clustering 
+
 """
 
 parser = argparse.ArgumentParser(description='Script for drawing plots from self organizing maps')
@@ -94,15 +81,12 @@ if args.labelIndex is not None:
     
 
 
-
-"""Declare and initialize variables"""
+"""Initialize variables"""
 
 with open(dir+"/som.dictionary", 'rb') as som_dictionary_file:
      som_dict = pickle.load(som_dictionary_file)
 som_data= np.genfromtxt(outsomfile,skip_header=(1), delimiter=' ')
 working_dir=dir#+"/somresults"
-dataPrepDir=dir+"/DataPreparation"
-dataPrepDir2=dir+"/DataForOriginalPlots/DataPreparation"
 
 som=pd.read_csv(outsomfile, delimiter=' ', header=None)
 som_headers=som.iloc[0] 
@@ -115,15 +99,6 @@ if outgeofile is not None: #if spatial, draw geo plots
     geo_headers=['#']
     geo_headers = geo_headers +header_line.split(" ")
 
-columns=[]    
-firstFileName=""
-index=0
-
-if(input_file[-3:].lower()=="lrn"):     #if input is lrn file
-    header=loadfile.read_header(input_file)  
-    actualNumberOfColumns=header['cols']-1         
-else:
-    actualNumberOfColumns=len(som_headers)-3#this is really not the actual number of columns...should be renamed.
 
 #Generate colormaps and ticks for clustering
 clusters=int(max(som_data[:,len(som_data[0])-2])+1)
@@ -132,14 +107,18 @@ discrete_cmap_2=sns.cubehelix_palette(n_colors=clusters, start=1,rot=4, gamma=1.
 cluster_ticks=[]
 cluster_tick_labels=[]
 cluster_hit_count=[]
+
+
+#labeling clusters in colorbar with format "cluster number:  number of data points in this cluster".
 for i in range (clusters,0,-1):
+    cluster_array=som_dict['clusters'].transpose()#TODO: figure out if this a problem elsewhere.
     cluster_ticks.append(i-1)   
-    
-    if outgeofile is not None:
-        cluster_tick_labels.append(str(i-1)+ "   " +str(geo_data[:,(4)].tolist().count(i-1))) 
-        cluster_hit_count.append(geo_data[:,(4)].tolist().count(i-1))
-    else: 
-        cluster_tick_labels.append(str(i-1)+ "   " +str(som_data[:,len(som_data[0])-2].tolist().count(i))) 
+    count=0
+    for bmu in som_dict['bmus']:
+        if (cluster_array[bmu[0]][bmu[1]])+1==i:
+            count+=1
+    cluster_tick_labels.append(str(i-1)+ "   " +str(count)) 
+        
 palette=sns.cubehelix_palette(n_colors=clusters, start=1,rot=4, gamma=1.0, hue=3, light=0.77, dark=0.15, reverse=False, as_cmap=False)
 formatted_palette=[]
 
@@ -160,7 +139,7 @@ for i in range (0,clusters):
     clusterColorscale.append([float(float(i+1)/clusters),palette[i]])
 
 
-if(grid_type.lower()!="rectangular"):
+if(grid_type.lower()=="hexagonal"): #if grid shape is hexagonal, initialize corresponding variables for hexa plots
     x=somx
     y=somy
     centers=[]
@@ -178,7 +157,9 @@ if(grid_type.lower()!="rectangular"):
     grid={'centers':np.array(centers), 
           'x':np.array([float(x)]),
           'y':np.array([float(y)])}
-
+else:
+    grid=None
+    
 if (labelIndex!="-2"):
     annot_strings={}
     annot_strings_for_dict={}
@@ -196,25 +177,25 @@ if (labelIndex!="-2"):
     annot_ticks=np.empty([somx, somy], dtype="<U32")
     bmus=som_dict["bmus"]
     counter=1
-    for i in range(2,len(outfile)):         # ticks are added to list. annot_strings_for_dict stores them in a list, so that they can be sorted and reliably checked for duplicates including ones that are in different order.
-        tick=annot_ticks[bmus[i-2][0]][bmus[i-2][1]]
+    for i in range(0,len(outfile)):   #AA. eli jos nonspatial: -2 kusee. luultavasti ainakin tän takia. veikkaanpa että spatiaalilla on ton takia 2:n ekan skippi.      # ticks are added to list. annot_strings_for_dict stores them in a list, so that they can be sorted and reliably checked for duplicates including ones that are in different order.
+        tick=annot_ticks[bmus[i][0]][bmus[i][1]]
         if(outfile[i]!='' and outfile[i]!= "nan" and outfile[i]!='NA' and outfile[i]!='NULL' and outfile[i]!='Null' and outfile[i]!='NoData' and outfile[i]!=args.noDataValue):#tähän jonon jatkoksi vielä noDataValue
             if (tick==''): 
-                annot_ticks[bmus[i-2][0]][bmus[i-2][1]]=str(counter)    
+                annot_ticks[bmus[i][0]][bmus[i][1]]=str(counter)    
                 annot_strings[str(counter)]=[outfile[i]]
                 annot_strings_for_dict[str(counter)]=[outfile[i]]
                 if outgeofile is not None:
-                    annot_data.append([(str(counter) + ": " + outfile[i]),(str(bmus[i-2][0]) + str(bmus[i-2][1])),(str(geo_data[i-2][0]) + ", " + str(geo_data[i-2][1]))]) 
+                    annot_data.append([(str(counter) + ": " + outfile[i]),(str(bmus[i][0]) + str(bmus[i][1])),(str(geo_data[i][0]) + ", " + str(geo_data[i][1]))]) 
                 else:
-                    annot_data.append([(str(counter) + ": " + outfile[i]),(str(bmus[i-2][0]) + str(bmus[i-2][1]))])          
+                    annot_data.append([(str(counter) + ": " + outfile[i]),(str(bmus[i][0]) + str(bmus[i][1]))])          
                 counter=counter+1
             else:   
                 annot_strings[tick].append(outfile[i])
                 annot_strings_for_dict[tick].append(outfile[i])
                 if outgeofile is not None:
-                    annot_data.append([(str(tick) + ": " + outfile[i]),(str(bmus[i-2][0]) + str(bmus[i-2][1])),(str(geo_data[i-2][0]) + ", " + str(geo_data[i-2][1]))])
+                    annot_data.append([(str(tick) + ": " + outfile[i]),(str(bmus[i][0]) + str(bmus[i][1])),(str(geo_data[i][0]) + ", " + str(geo_data[i][1]))])
                 else:
-                    annot_data.append([(str(tick) + ": " + outfile[i]),(str(bmus[i-2][0]) + str(bmus[i-2][1]))])
+                    annot_data.append([(str(tick) + ": " + outfile[i]),(str(bmus[i][0]) + str(bmus[i][1]))])
      
     for i in range(1, len(annot_strings_for_dict)+1): 
         annot_strings_for_dict[str(i)].sort()
@@ -259,10 +240,7 @@ else:
 """
 Plot geospace plots & q-error if type is grid
 """
-def plot_geospace_results_grid():
-    global geo_data
-    global geo_headers
-    global som_data
+def plot_geospace_results_grid(geo_data, geo_headers, som_data):
     mpl.rcParams.update({'font.size': 14})
 
     for i in range(0, len(som_data[0])-4): 
@@ -303,11 +281,8 @@ def plot_geospace_results_grid():
                 label.set_visible(False)
         ax.xaxis.get_ticklabels()[-1].set_visible(True)
         ax.yaxis.get_ticklabels()[-1].set_visible(True)
-        plt.yticks(rotation=90)
-        plt.yticks(ha='right')
-        plt.yticks(va='bottom')
-        plt.xticks(rotation=0)
-        plt.xticks(ha='left')
+        plt.yticks(rotation=90,ha='right',va='bottom')
+        plt.xticks(rotation=0,ha='left')
         ax.invert_yaxis()
         ax.set_title(geo_headers[5+i+1])
         plt.tight_layout()
@@ -355,11 +330,8 @@ def plot_geospace_results_grid():
             label.set_visible(False)
     ax.xaxis.get_ticklabels()[-1].set_visible(True)
     ax.yaxis.get_ticklabels()[-1].set_visible(True)
-    plt.yticks(rotation=90)
-    plt.yticks(ha='right')
-    plt.yticks(va='bottom')
-    plt.xticks(rotation=0)
-    plt.xticks(ha='left')
+    plt.yticks(rotation=90, ha='right',va='bottom')
+    plt.xticks(rotation=0, ha='left')
     ax.invert_yaxis()
     ax.set_title(geo_headers[(len(som_data[0])-5)*2 +6])#(geo_headers[len(som_data[0])+i+1])#tähän sama 5     
     plt.tight_layout()
@@ -373,10 +345,7 @@ def plot_geospace_results_grid():
 """
 Plot geospace plots & q-error if type is scatter
 """
-def plot_geospace_results_scatter():
-    global geo_data
-    global geo_headers
-    global som_data
+def plot_geospace_results_scatter(geo_data, geo_headers, som_data):
 
     centers=[]     
     for i in range(0, len(geo_data)):	
@@ -390,11 +359,8 @@ def plot_geospace_results_scatter():
         sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
         mpl.rcParams.update({'font.size': 30})
         ax = plot_hexa(somx,somy,clusters,grid,z,cluster_tick_labels=cluster_tick_labels, title=geo_headers[5+i+1], ptype='scatter')           
-        plt.yticks(rotation=90)
-        plt.yticks(ha='right')
-        plt.yticks(va='bottom')
-        plt.xticks(rotation=0)
-        plt.xticks(ha='left')
+        plt.yticks(rotation=90, ha='right', va='bottom')
+        plt.xticks(rotation=0, ha='left')
         ax.invert_yaxis()
         plt.tight_layout()
         ax.figure.savefig(working_dir+'/Geo/geoplot_'+str(i+2)+'.png', dpi=300)
@@ -409,11 +375,8 @@ def plot_geospace_results_scatter():
     sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
     mpl.rcParams.update({'font.size': 30})
     ax = plot_hexa(somx,somy,clusters,grid,z,cluster_tick_labels=cluster_tick_labels, title=geo_headers[(len(som_data[0])-5)*2 +6], ptype='scatter')           
-    plt.yticks(rotation=90)
-    plt.yticks(ha='right')
-    plt.yticks(va='bottom')
-    plt.xticks(rotation=0)
-    plt.xticks(ha='left')
+    plt.yticks(rotation=90, ha='right', va='bottom')
+    plt.xticks(rotation=0, ha='left')
     ax.invert_yaxis()
     plt.tight_layout()
     ax.figure.savefig(working_dir+'/Geo/geoplot_'+str(len(som_data[0])-2)+'.png', dpi=300)
@@ -431,12 +394,7 @@ def plot_geospace_results_scatter():
 """
 Draw Som result plots
 """
-def draw_som_results():
-    global som_data
-    global som_table
-    global grid
-    global hits
-    global som_headers
+def draw_som_results(som_data, som_table,grid, annot_ticks, som_headers):
     for j in range(2,len(som_data[0])-2):
         if(grid_type.lower()=="rectangular"):
             for i in range(0,len(som_data)): 
@@ -459,12 +417,7 @@ def draw_som_results():
 """
 Draw Som Cluster plot
 """
-def draw_som_clusters():
-    global som_data
-    global som_table
-    global annot_ticks
-    global som_headers
-    
+def draw_som_clusters(som_data, som_table, annot_ticks, som_headers):    
     if(grid_type.lower()=="rectangular"):
         mpl.rcParams.update({'font.size': 14})  
         for i in range(0,len(som_data)): 
@@ -476,7 +429,7 @@ def draw_som_clusters():
     else:#grid type=="hexagonal":
         hits=som_data[:,len(som_data[0])-2]   
         mpl.rcParams.update({'font.size': 30})  
-        ax = plot_hexa(somx,somy,clusters,grid,hits,annot_ticks,cluster_tick_labels,colmap=discrete_cmap_2, ptype='grid')
+        ax = plot_hexa(somx,somy,clusters,grid,hits,annot_ticks,cluster_tick_labels,colmap=discrete_cmap_2, ptype='grid',labelIndex=labelIndex)
         mpl.rcParams.update({'font.size': 32})  
         ax.set_title(som_headers[len(som_headers)-2])
         mpl.rcParams.update({'font.size': 30})  
@@ -527,8 +480,8 @@ def draw_som_clusters():
 """
 Plot geospace clusters, if there is more than 1 cluster and input type is grid
 """
-def plot_geospace_clusters_grid():
-    global geo_data
+def plot_geospace_clusters_grid(geo_data):
+    #global geo_data
     x=geo_data[:,0]
     y=geo_data[:,1]
     z=geo_data[:,(4)]    
@@ -585,8 +538,8 @@ def plot_geospace_clusters_grid():
 """
 Plot geospace clusters if input type is scatter
 """
-def plot_geospace_clusters_scatter():
-    global geo_data
+def plot_geospace_clusters_scatter(geo_data):
+    #global geo_data
     z=geo_data[:,(4)]  
     
     centers=[]     
@@ -612,13 +565,11 @@ def plot_geospace_clusters_scatter():
 Plot boxplots using som data.
 """
 
-def draw_boxplots():
+def draw_boxplots(som_dict,som_data):
     
-    global som_dict
-    global geo_data
     mpl.rcParams.update({'font.size': 12})  
     cluster_col=[]
-
+    
     for i in range(0,len(som_data)): 
         cluster_col.append(som_data[i][len(som_data[0])-2])
     cluster_nparray=np.asarray(cluster_col)   
@@ -646,61 +597,58 @@ def draw_boxplots():
 Draw number of hits
 """
 def draw_number_of_hits():
-    mpl.rcParams.update({'font.size': 12})
-    if outgeofile is not None:
-        hits=np.zeros((somx,somy))   
-        for i in range(0, len(geo_data)):
-            x=geo_data[:,2]
-            y=geo_data[:,3]
-            hits[int(x[i])][int(y[i])]+=1
-        hits=np.transpose(hits)
-        if(grid_type=='rectangular'):
-            ax = sns.heatmap(hits, cmap="binary", linewidth=0)   
-            ax.set_title("Number of hits per SOM cell")
-        else: #if grid type is hexagonal
-            mpl.rcParams.update({'font.size': 30})
-            ax = plot_hexa(somx,somy,clusters,grid,hits.flatten(order='F'),annot_ticks,cluster_tick_labels,  colmap="binary", ptype='grid')    
-            mpl.rcParams.update({'font.size': 32})  
-            if(somy/somx>1.5):
-                mpl.rcParams.update({'font.size': int(48/(somy/somx))})  #scale header font down if plot is narrow (i.e. x<y). This was a problem only in this, because the title is so long compared to the others
-            ax.set_title("Number of hits per SOM cell")
+    mpl.rcParams.update({'font.size': 12}) 
+    hits=np.zeros((somx,somy))   
+    for i in range(0, len(som_dict['bmus'])):
+        x=int(som_dict['bmus'][i][0])
+        y=int(som_dict['bmus'][i][1])
+        hits[x][y]+=1
+    hits=np.transpose(hits)
+    if(grid_type=='rectangular'):
+        ax = sns.heatmap(hits, cmap="binary", linewidth=0)   
+        ax.set_title("Number of hits per SOM cell")
+    else: #if grid type is hexagonal
+        mpl.rcParams.update({'font.size': 30})
+        ax = plot_hexa(somx,somy,clusters,grid,hits.flatten(order='F'),annot_ticks,cluster_tick_labels,  colmap="binary", ptype='grid')    
+        mpl.rcParams.update({'font.size': 32})  
+        if(somy/somx>1.5):
+            mpl.rcParams.update({'font.size': int(48/(somy/somx))})  #scale header font down if plot is narrow (i.e. x<y). This was a problem only in this, because the title is so long compared to the others
+        ax.set_title("Number of hits per SOM cell")
  
-            mpl.rcParams.update({'font.size': 30})  
-        ax.figure.savefig(working_dir+'/Som/somplot_' +str(len(som_data[0])-2)+'.png',bbox_inches='tight')
-        mpl.rcParams.update({'font.size': 12})
-        plt.clf()
-        plt.cla()
-        plt.close()
-
-
+        mpl.rcParams.update({'font.size': 30})  
+    ax.figure.savefig(working_dir+'/Som/somplot_' +str(len(som_data[0])-2)+'.png',bbox_inches='tight')
+    mpl.rcParams.update({'font.size': 12})
+    plt.clf()
+    plt.cla()
+    plt.close()
+    
 
 """
 Run plotting scripts
-"""
-           
-#start_time_0 = time.time(0)
+"""          
+
 if outgeofile is not None: #if spatial, draw geo plots
     if(dataType=='scatter'):
         if(max(geo_data[:,(4)])>0):#if clusters
-            plot_geospace_clusters_scatter()
+            plot_geospace_clusters_scatter(geo_data)
         if(redraw!="false"):
-            plot_geospace_results_scatter()
+            plot_geospace_results_scatter(geo_data, geo_headers, som_data)
         print("GeoSpace plots finished")
     else:
         if(max(geo_data[:,(4)])>0):#if clusters
-            plot_geospace_clusters_grid()
+            plot_geospace_clusters_grid(geo_data)
         if(redraw!="false"):
-            plot_geospace_results_grid()
+            plot_geospace_results_grid(geo_data, geo_headers, som_data)
         print("GeoSpace plots finished")
 if(int(max(som_data[:,len(som_data[0])-1]))>0): #draw som cluster plot if there is more than 1 cluster
-    draw_som_clusters()
+    draw_som_clusters(som_data, som_table, annot_ticks, som_headers)
 
 #in case the function was called for redrawing after selecting a different clustering result. so that we can skip stuff we don't have to redraw to speed things up. CURRENTLY NOT IN USE, ALWAYS TRUE.
 if(redraw!="false"):
-    draw_som_results()
+    draw_som_results(som_data, som_table,grid, annot_ticks, som_headers)
 draw_number_of_hits()
 print("SomSpace plots finshed")
 
 if(som_dict['clusters'] is not None):
-    draw_boxplots()
+    draw_boxplots(som_dict,som_data)
 print("Boxplots finished")

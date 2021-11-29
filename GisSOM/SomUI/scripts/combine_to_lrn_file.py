@@ -192,11 +192,11 @@ def write_nonspatial_from_csv():
             data_min= min(colForMinMax)[0]#(columns_in[2:][i].astype(float))#[~np.isnan(df_in[2:][i].astype(float))]
             data_max= max(colForMinMax)[0]#(columns_in[2:][i].astype(float))
             for j in range(2, len(columns_in)):
+
                 if(columns_in[j,i]!=na_value):
                     columns_in[j,i]=(scale_max_list_included[i]-scale_min_list_included[i])*(float(columns_in[j,i])-data_min)/(data_max-data_min)+scale_min_list_included[i]
                     
-    #df_in=pd.DataFrame(np.squeeze(np.stack(columns_in, axis=1)))  
-    df_in=pd.DataFrame(np.squeeze(np.stack(columns_in, axis=0)))  
+    df_in=pd.DataFrame(np.squeeze(np.stack(columns_in, axis=0))) 
     columns_in=df_in.values        
     combineCsvColumns()
     
@@ -428,7 +428,7 @@ def writeXmlTreeFromCsv(df_in,columns_included):
         newElement.append(maxElement)
         root.append(newElement)
 
-    xmlstr = minidom.parseString(ET.tostring(root)).toprettyxml(indent="   ")
+    xmlstr = minidom.parseString(ET.tostring(root,encoding='utf-8', method='xml')).toprettyxml(indent="   ")
     with open(output_folder+"/DataStats.xml", "w") as f:
         f.write(xmlstr)  
             

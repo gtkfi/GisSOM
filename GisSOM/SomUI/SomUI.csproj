@@ -35,7 +35,7 @@
     <UpdateRequired>false</UpdateRequired>
     <MapFileExtensions>true</MapFileExtensions>
     <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.2.0.%2a</ApplicationVersion>
+    <ApplicationVersion>1.2.2.%2a</ApplicationVersion>
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
   </PropertyGroup>
@@ -301,9 +301,9 @@
     <None Include="ClassDiagram_1.cd" />
     <Resource Include="fonts\FontAwesome.otf" />
     <Resource Include="fonts\fontawesome-webfont.ttf" />
-    <None Include="Documents\Deliverable_4.11_Appendix_2_TechSpecOfGisSOM.docx" />
-    <None Include="Documents\Deliverable_4.11_Appendix_3_UserManual_GisSOM.docx" />
     <None Include="Documents\GisSOM open source licenses.docx" />
+    <None Include="Documents\TechSpec_GisSOM.pdf" />
+    <None Include="Documents\UserManual_GisSOM.pdf" />
     <None Include="fonts\fontawesome-webfont.eot" />
     <None Include="fonts\fontawesome-webfont.woff" />
     <None Include="fonts\fontawesome-webfont.woff2" />

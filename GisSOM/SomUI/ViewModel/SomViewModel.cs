@@ -579,7 +579,8 @@ namespace SomUI.ViewModel
                 RunningProcessCount++;
                 Task t = SomTool.SaveCluster(Model, SelectedClusterIndex, SomImageList, GeoSpaceImageList, BoxPlotList, ScatterPlotList, ScriptOutput, ScriptError);
                 await t;
-
+                if (IsGeoTiffFile)
+                    WriteGeotif();
                 DrawResults("false");
                 DrawResultsInteractive();
                 RunningProcessCount--;
