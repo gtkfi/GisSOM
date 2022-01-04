@@ -55,6 +55,7 @@ private bool usePyExes = false;
 If you want to contribute to GisSOM, you can just fork the repository, and submit a pull request with your changes.  
   
 ## History
+04.01.2022 GisSOM version 1.2.3 release  
 29.11.2021 GisSOM version 1.2.2 release  
 30.09.2021 GisSOM version 1.2.1 release  
 23.09.2021 GisSOM version 1.2 release  
