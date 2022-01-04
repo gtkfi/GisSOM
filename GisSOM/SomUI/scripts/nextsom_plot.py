@@ -652,3 +652,4 @@ print("SomSpace plots finshed")
 if(som_dict['clusters'] is not None):
     draw_boxplots(som_dict,som_data)
 print("Boxplots finished")
+

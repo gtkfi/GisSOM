@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using GalaSoft.MvvmLight;
-using GalaSoft.MvvmLight.CommandWpf;
+//using GalaSoft.MvvmLight;
+//using GalaSoft.MvvmLight.CommandWpf;
 using SomUI.Model;
 using SomUI.Service;
 using NLog;
@@ -12,20 +12,20 @@ using System.Net;
 using CommonServiceLocator;
 using GalaSoft.MvvmLight.Ioc;
 using System.ComponentModel;
-using System.Windows.Controls;
+//using System.Windows.Controls;
 using System.IO;
 using System.Diagnostics;
 using System.Collections.ObjectModel;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using Microsoft.Win32;
-using System.Text.RegularExpressions;
-using System.Windows;
-using MahApps.Metro.Controls;
-using MahApps.Metro.Controls.Dialogs;
-using System.Threading;
+//using Microsoft.Win32;
+//using System.Text.RegularExpressions;
+//using System.Windows;
+//using MahApps.Metro.Controls;
+//using MahApps.Metro.Controls.Dialogs;
+//using System.Threading;
 using System.Xml;
-using System.Xml.Linq;
+//using System.Xml.Linq;
 
 namespace SomUI.ViewModel
 {
@@ -773,20 +773,6 @@ namespace SomUI.ViewModel
                 else
                     inputFile = Model.InputFile;
 
-                //var somPlotScriptPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "scripts", "NextSomPlot.py");            //Path to python script file in case of script launch
-                //var executablePath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "scripts", "executables", "NextSomPlot.exe"); //path to executable file in case of executable launch (default).
-
-                //if (usePyExes)
-                //myProcessStartInfo = new ProcessStartInfo(executablePath);
-                //else
-                //myProcessStartInfo = new ProcessStartInfo(pythonPath);
-
-                //myProcessStartInfo.UseShellExecute = false;
-                //myProcessStartInfo.CreateNoWindow = true;
-                //myProcessStartInfo.RedirectStandardOutput = true;
-                //myProcessStartInfo.RedirectStandardError = true;
-
-
                 ProcessStartInfo myProcessStartInfo;
                 var somPlotScriptPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "scripts", "nextsom_plot_dash.py");
                 var executablePath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "scripts", "executables", "nextsom_plot_dash.exe");
@@ -802,6 +788,8 @@ namespace SomUI.ViewModel
                 myProcessStartInfo.RedirectStandardError = true;
 
                 var interactiveFolder = Path.Combine(Model.OutputFolderTimestamped, "Interactive");
+
+                // DEPRECATED
                 try
                 {
                     System.IO.File.WriteAllText(Path.Combine(Model.OutputFolderTimestamped, "clickData2.txt"), "-1"); //create these files. this should be really handled in a better way, the whole system for checking if the user has clicked a new cluster
@@ -813,17 +801,11 @@ namespace SomUI.ViewModel
                 }
 
                 if (usePyExes)
-                    myProcessStartInfo.Arguments = " " + "--outsomfile=" + "\"" + Model.Output_file_somspace + "\"" + " " + "--som_x=" + Model.Som_x + " " + "--som_y=" + Model.Som_y + " " + "--outgeofile=" + "\"" + Model.Output_file_geospace + "\"" + " "  + "--input_file=" + "\"" + Model.InputFile + "\"" + " " + "--interactive_dir=" + "\"" + interactiveFolder + "\"" + " " + "--dir=" + "\"" + Model.OutputFolderTimestamped + "\"" + " " + "--grid_type=" + "\"" + Model.GridShape + "\"";
+                    myProcessStartInfo.Arguments = " " + "--outsomfile=" + "\"" + Model.Output_file_somspace + "\"" + " " + "--som_x=" + Model.Som_x + " " + "--som_y=" + Model.Som_y + " " + "--outgeofile=" + "\"" + Model.Output_file_geospace + "\"" + " "  + "--input_file=" + "\"" + Model.InputFile + "\"" + " " + "--interactive_dir=" + "\"" + interactiveFolder + "\"" + " " + "--dir=" + "\"" + Model.OutputFolderTimestamped + "\"" + " " + "--grid_type=" + "\"" + Model.GridShape + "\" " + "--data_type=" + "\"" + Model.DataShape + "\"";
                 else
-                    myProcessStartInfo.Arguments = "-u" + " " + "\"" + somPlotScriptPath + "\"" + " " + "--outsomfile=" + "\"" + Model.Output_file_somspace + "\"" + " " + "--som_x=" + Model.Som_x + " " + "--som_y=" + Model.Som_y + " "+ "\""+ "--outgeofile=" + Model.Output_file_geospace + "\""+ " " + "--input_file=" + "\"" + Model.InputFile + "\"" + " " + "--interactive_dir="+ "\"" + interactiveFolder +"\""+" "+ "--dir=" + "\"" + Model.OutputFolderTimestamped + "\"" + " " + " " + "--grid_type=" + "\"" + Model.GridShape + "\"";
+                    myProcessStartInfo.Arguments = "-u" + " " + "\"" + somPlotScriptPath + "\"" + " " + "--outsomfile=" + "\"" + Model.Output_file_somspace + "\"" + " " + "--som_x=" + Model.Som_x + " " + "--som_y=" + Model.Som_y + " "+ "\""+ "--outgeofile=" + Model.Output_file_geospace + "\""+ " " + "--input_file=" + "\"" + Model.InputFile + "\"" + " " + "--interactive_dir="+ "\"" + interactiveFolder +"\""+" "+ "--dir=" + "\"" + Model.OutputFolderTimestamped + "\""  + " " + "--grid_type=" + "\"" + Model.GridShape + "\" "+ "--data_type="+"\""+Model.DataShape+"\"";
 
              
-
-                //if (usePyExes)
-                //    myProcessStartInfo.Arguments = "\"" + Model.Output_file_somspace + "\"" + " " + Model.Som_x + " " + Model.Som_y + " " + "\"" + Model.Output_file_geospace + "\"" + " " + "\"" + Model.InputFile + "\"" + " " + "\"" + interactiveFolder + "\"" + " " + "\"" + Model.OutputFolderTimestamped + "\"" + " " + Model.GridShape;
-                //else
-                //    myProcessStartInfo.Arguments = "-u" + " " + "\"" + somPlotScriptPath + "\"" + " "+ "\"" + Model.Output_file_somspace + "\""+ " " + Model.Som_x + " " + Model.Som_y + " " + "\"" + Model.Output_file_geospace + "\""+ " " + "\""+ Model.InputFile + "\""+ " " + "\"" + interactiveFolder + "\"" + " " + "\"" + Model.OutputFolderTimestamped + "\"" + " " + Model.GridShape;
-
                 myProcessStartInfo.Arguments = myProcessStartInfo.Arguments.Replace("\\", "/");
                 using (var myProcess = new Process())
                 {
@@ -1122,6 +1104,9 @@ namespace SomUI.ViewModel
 
         /// <summary>
         /// Function to draw selected cluster
+        /// 
+        /// DEPRECATED
+        /// 
         /// </summary>
         public void RunDashDraw(SomModel Model, Action<Process> ScriptOutput, Action<Process> ScriptError)
         {

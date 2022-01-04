@@ -12,7 +12,7 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import seaborn as sns
-
+from matplotlib.colors import ListedColormap
 """
 Define text color to be black/white to give maximum contrast and visibility
 """
@@ -69,8 +69,12 @@ def plot_hexa(somx,
     ypix = height - ypix
     
     if(ptype=='scatter'): #if the data type is csv with gaps
-        apothem=(xpix[1] - xpix[0]) 
-        area_inner_circle = abs(apothem) 
+        apothem_x=(xpix[1] - xpix[0]) 
+        apothem_y=(ypix[1] - ypix[0]) 
+        area_inner_circle = max(abs(apothem_x),abs(apothem_y),4)
+        if(area_inner_circle<1):
+            apothem=(ypix[1] - ypix[0]) 
+            area_inner_circle = abs(apothem) 
         collection_bg = RegularPolyCollection(
             numsides=4,  
             rotation=150,
@@ -143,4 +147,41 @@ def plot_hexa(somx,
     plt.gca().invert_yaxis()
     ax.set_title(title)
 
+    return ax
+
+def dash_draw_scatter(geo_data,som_data,palette,cluster_ticks,cluster_tick_labels,title,outputColumn,somx,somy,clusters): 
+    centers=[]     
+    for i in range(0, len(geo_data)):	
+        centers.append([geo_data[i][0],geo_data[i][1]])
+    grid={'centers':np.array(centers), 
+          'x':np.array([len(geo_data)]),
+          'y':np.array([len(geo_data)])}
+    
+    
+    
+    if(outputColumn==0):
+        z=geo_data[:,(4)] 
+    else:
+        z=geo_data[:,int(len(som_data[0])-1+outputColumn)]
+    sns.set_style("ticks", {"xtick.major.size": 8, "ytick.major.size": 8})
+    if(clusters>15):
+        mpl.rcParams.update({'font.size': 18})  
+    else:
+        mpl.rcParams.update({'font.size': 30})
+        
+        
+    if(outputColumn==0):
+        ax = plot_hexa(somx,somy,clusters+1,grid, z,annot_ticks=cluster_ticks,cluster_tick_labels=cluster_tick_labels,title="Clusters",colmap=ListedColormap(palette), ptype='scatter')   
+    else:
+        z = np.ma.array (z, mask=np.isnan(z))
+        cmap = mpl.cm.jet
+        cmap.set_bad('white',1.)
+        ax = plot_hexa(somx,somy,clusters,grid, z,annot_ticks=cluster_ticks,cluster_tick_labels=cluster_tick_labels,title=title,colmap="jet", ptype='scatter')   
+    plt.yticks(rotation=90)
+    plt.yticks(ha='right')
+    plt.yticks(va='bottom')
+    plt.xticks(rotation=0)
+    plt.xticks(ha='left')
+    ax.invert_yaxis()
+    plt.tight_layout()
     return ax

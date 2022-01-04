@@ -64,7 +64,7 @@ namespace SomUI.ViewModel
         DateTime lastRead = DateTime.MinValue;
 
         private SomTool SomTool;
-        private FileSystemWatcher somPlotWatcher;
+        private FileSystemWatcher somPlotWatcher;   // DEPRECATED
         //ViewModelLocator viewModelLocator;
         private string flyOutText;
         private bool statusFlyOutOpen;
@@ -196,7 +196,7 @@ namespace SomUI.ViewModel
 
             try {
                 Directory.CreateDirectory(Path.Combine(Model.Output_Folder, "DataPreparation"));
-                Directory.CreateDirectory(Path.Combine(Model.Output_Folder, "DataForOriginalPlots", "DataPreparation"));
+                //Directory.CreateDirectory(Path.Combine(Model.Output_Folder, "DataForOriginalPlots", "DataPreparation"));
             }
             catch (Exception ex)
             {
@@ -216,18 +216,18 @@ namespace SomUI.ViewModel
             {
                 logger.Error(ex, "Failed to clear temp folder.");
             }
-            di = new DirectoryInfo(Path.Combine(Model.Output_Folder, "DataForOriginalPlots", "DataPreparation"));
-            try
-            {
-                foreach (FileInfo file in di.GetFiles())
-                {
-                    file.Delete();
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex, "Failed to clear temp folder.");
-            }
+            //di = new DirectoryInfo(Path.Combine(Model.Output_Folder, "DataForOriginalPlots", "DataPreparation"));
+            //try
+            //{
+            //    foreach (FileInfo file in di.GetFiles())
+            //    {
+            //        file.Delete();
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    logger.Error(ex, "Failed to clear temp folder.");
+            //}
             di = new DirectoryInfo(Path.Combine(Model.Output_Folder, "DataPreparation"));
 
             RunToolCommand = new RelayCommand(RunTool, CanRunTool);
@@ -398,8 +398,8 @@ namespace SomUI.ViewModel
             }
 
 
-            CreateFolderStructure(Model.OutputFolderTimestamped);
-            RegisterFolderWatcher(Model.OutputFolderTimestamped);
+            CreateFolderStructure(Model.OutputFolderTimestamped);  
+            RegisterFolderWatcher(Model.OutputFolderTimestamped);   // DEPRECATED
 
             try
             {
@@ -701,21 +701,24 @@ namespace SomUI.ViewModel
                 string outputFolder = dialogService.SelectFolderDialog("c:\\", Environment.SpecialFolder.MyComputer);//Tähän C:\\ tilalle se DefaultFolder? ja sit se asetetaan kans aina. vai pitääkö tää ehkä tehdä dialogservicen puolella?
                 if (!string.IsNullOrEmpty(outputFolder))
                 {
-                    Model.Output_Folder = Path.Combine(outputFolder, "GisSOM");
-                    CreateFolderStructure(Model.Output_Folder);//Create folder structure for new output folder
-                    var oldFolderPath = Path.Combine(oldFolder, "DataForOriginalPlots", "DataPreparation");
-                    DirectoryInfo di = new DirectoryInfo(oldFolderPath);
 
+                    //CreateFolderStructure(Model.Output_Folder);//Create folder structure for new output folder
+                    
+                    //DirectoryInfo di = new DirectoryInfo(oldFolderPath);
+                    Model.Output_Folder = Path.Combine(outputFolder, "GisSOM");
+                    //if (Directory.Exists(oldFolderPath))
+                    //{
+                    //    foreach (FileInfo f in di.GetFiles())
+                    //{
+                    //f.CopyTo(Path.Combine(Model.Output_Folder, "DataForOriginalPlots", "DataPreparation", f.Name), true);
+                    //}
+                    //}
+                    Directory.CreateDirectory(Path.Combine(Model.Output_Folder, "DataPreparation"));
+                    var oldFolderPath = Path.Combine(oldFolder, "DataPreparation");
+
+                    //Directory.CreateDirectory(Path.Combine(root, "Interactive"));
+                    DirectoryInfo di_original = new DirectoryInfo(oldFolderPath);
                     if (Directory.Exists(oldFolderPath))
-                    {
-                        foreach (FileInfo f in di.GetFiles())
-                        {
-                            f.CopyTo(Path.Combine(Model.Output_Folder, "DataForOriginalPlots", "DataPreparation", f.Name), true);
-                        }
-                    }
-                    var oldFolderPath_original = Path.Combine(oldFolder, "DataPreparation");
-                    DirectoryInfo di_original = new DirectoryInfo(oldFolderPath_original);
-                    if (Directory.Exists(oldFolderPath_original))
                     {
                         foreach (FileInfo f in di_original.GetFiles())
                         {
@@ -1258,7 +1261,7 @@ namespace SomUI.ViewModel
                             Model.InteractiveResultColumnList.Add(Model.ColumnDataList[i].Name);
                         }
                     }
-                    RegisterFolderWatcher(Model.OutputFolderTimestamped);
+                    RegisterFolderWatcher(Model.OutputFolderTimestamped);  // DEPRECATED
                     //doc = new XmlDocument();
                     //doc.Load(Path.Combine(Model.OutputFolderTimestamped, "DataStats.xml"));
                     //XmlNode node = doc.DocumentElement.SelectSingleNode("dataShape");
@@ -1571,6 +1574,8 @@ namespace SomUI.ViewModel
             }
         }
 
+
+        // DEPRECATED
         private void RegisterFolderWatcher(string folderPath)
         {
             somPlotWatcher = new FileSystemWatcher

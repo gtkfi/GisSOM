@@ -3,6 +3,8 @@
 @author: Sakari Hautala
 
 Python script to visualize SOM calculation results, when input is scatter type. Draws only selected cluster/som cell on heatmap, the rest of the data is colorer white/highly transparent. Selecting the cluster or som cell is done in the dash interactive web page (created in nextsomplot_dash script)
+
+DEPRECATED. The whole interactive plot was combined into one dash script in version 1.2.3
 """
 
 #import warnings
