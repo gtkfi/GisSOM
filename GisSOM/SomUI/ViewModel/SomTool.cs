@@ -819,8 +819,7 @@ namespace SomUI.ViewModel
                 };
 
 
-            });
-            //kludge for refreshing browser. try to think of a better way.
+            });          
         }
 
         /// <summary>

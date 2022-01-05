@@ -558,12 +558,12 @@ def populateCsvDataFrames(indexModifier=0):
     df_ex=df_ex.replace(np.nan, 'nan', regex=True)
     
     df_in=pd.DataFrame(np.squeeze(np.stack(columns_included, axis=1)))
-    df_in = df_in.replace('NA','nan', regex=True)  
-    df_in=df_in.replace(np.nan, 'nan', regex=True)
+    df_in.iloc[2:,:] = df_in.iloc[2:,:].replace('NA','nan', regex=True)  
+    df_in.iloc[2:,:]=df_in.iloc[2:,:].replace(np.nan, 'nan', regex=True)
     if(na_value is not ""):
         na_value=float(na_value)
         df_in=df_in.replace(str(na_value),np.nan)
-    for i in range(0,len(df_in.columns)):
+    for i in range(0,len(df_in.columns)): 
         df_in=df_in.loc[df_in[:][i] !='nan']   
     
     rowsToDrop=df_ex.drop(df_in.index)
