@@ -7,9 +7,9 @@ Created on Tue Mar 19 11:34:41 2019
 Python script to draw histogram of selected data column for visualizing data distribution in the data preparation stage.
 Data is read from numpy arrays saved in binary format.
 """
-#import warnings
-#with warnings.catch_warnings():
-    #warnings.filterwarnings("ignore")
+import warnings
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore")
 import matplotlib.pyplot as plt
 import sys
 import numpy as np

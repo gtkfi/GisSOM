@@ -62,7 +62,7 @@ namespace SomUI.ViewModel
         private double normalizationMin;
         private double normalizationMax;
         DateTime lastRead = DateTime.MinValue;
-
+        private bool stopRun = false;
         private SomTool SomTool;
         private FileSystemWatcher somPlotWatcher;   // DEPRECATED
         //ViewModelLocator viewModelLocator;
@@ -114,6 +114,7 @@ namespace SomUI.ViewModel
         public RelayCommand<DataColumn> RemoveTifCommand { get; }
         public RelayCommand DrawResultsInteractiveCommand { get; }
         public RelayCommand<string> ShowResultsInFileSystemCommand { get; }
+        public RelayCommand KillPythonProcessesCommand { get; }
 
         public RelayCommand<ObservableCollection<BoolStringHelper>> SelectAllCommand { get; }
         public RelayCommand<ObservableCollection<BoolStringHelper>> DeSelectAllCommand { get; }
@@ -264,6 +265,7 @@ namespace SomUI.ViewModel
             UnCheckLabelCommand = new RelayCommand<DataColumn>((DataColumn d) => UnCheckLabel(d));
             AddLabelDataCommand = new RelayCommand(AddDataLabelColumn);
             DrawResultsInteractiveCommand = new RelayCommand(DrawResultsInteractive);
+            KillPythonProcessesCommand = new RelayCommand(KillPythonProcesses);
             if (File.Exists(Path.Combine(Model.Output_Folder, "settingsFile.txt"))) //Deprecated
             {
                 pythonPath = File.ReadAllText(Path.Combine(Model.Output_Folder, "settingsFile.txt"));//Deprecated
@@ -399,7 +401,7 @@ namespace SomUI.ViewModel
 
 
             CreateFolderStructure(Model.OutputFolderTimestamped);  
-            RegisterFolderWatcher(Model.OutputFolderTimestamped);   // DEPRECATED
+            //RegisterFolderWatcher(Model.OutputFolderTimestamped);   // DEPRECATED
 
             try
             {
@@ -437,6 +439,12 @@ namespace SomUI.ViewModel
                 {
                     Task t = SomTool.RunTool(Model, SomImageList, GeoSpaceImageList, BoxPlotList, ScatterPlotList, ClusterPlotList, ScriptOutput, ScriptError);
                     await t;
+                    if (stopRun == true)
+                    {
+                        //stopRun = false;
+                        //runningProcessCount--;
+                        return;
+                    }
                     if(IsGeoTiffFile)
                         WriteGeotif();
                     App.Current.Dispatcher.Invoke((Action)delegate         //delegate to access different thread
@@ -459,14 +467,33 @@ namespace SomUI.ViewModel
             {
                 dialogService.ShowNotification("Failed to complete SOM run.", "Error");
             }
+            if (stopRun == true)
+            {
+                RunningProcessCount--;
+                stopRun = false;
+                return;
+            }
             DrawResults("true");
+            if (stopRun == true)
+            {
+                RunningProcessCount--;
+                stopRun = false;
+                return;
+            }
             if (Model.KMeans != "False")
             {
                 DrawClusters();
                 SelectedClusterIndex = Model.KMeans_min;
             }
+            if (stopRun == true)
+            {
+                RunningProcessCount--;
+                stopRun = false;
+                return;
+            }
             //if (Model.Output_file_geospace.Length > 0)
-            DrawResultsInteractive();
+            if (Model.IsSpatial)
+                DrawResultsInteractive();
             ClusterPlotList.Clear();
             RunningProcessCount--;
 
@@ -1091,7 +1118,7 @@ namespace SomUI.ViewModel
             if (Model.KMeans != "False"&&Model.IsSpatial==true) { 
                 try
                 {
-                    RunDashDraw();
+                    //RunDashDraw();
                     var imageSource = BitmapFromUri(new Uri(Path.Combine(Model.OutputFolderTimestamped, "somplot_interactive.png")));
                     Model.InteractiveResultSomPlot = imageSource;
                     RaisePropertyChanged("Model.InteractiveResultSomPlot");
@@ -1946,7 +1973,7 @@ namespace SomUI.ViewModel
                 });
                 d = new DirectoryInfo(PlotDirectory);
                 Files = d.GetFiles("*.png").OrderBy(p => p.CreationTime).ToArray(); //Getting png files
-                
+
                 foreach (FileInfo file in Files)
                 {
                     fullPath = Path.Combine(PlotDirectory, file.Name);//full path of images to copy to final output destination
@@ -2021,7 +2048,7 @@ namespace SomUI.ViewModel
         {
             myProcess.OutputDataReceived += new DataReceivedEventHandler((sender, e) =>
             {
-                if (!String.IsNullOrEmpty(e.Data) && !e.Data.ToLower().Contains("matplotlibdata") && !e.Data.ToLower().Contains("return_n_iter") && !e.Data.ToLower().Contains("HTTP"))
+                if (!String.IsNullOrEmpty(e.Data) && !e.Data.ToLower().Contains("matplotlibdata") && !e.Data.ToLower().Contains("return_n_iter") && !e.Data.ToLower().Contains("HTTP") && !e.Data.ToLower().Contains("bad key") && !e.Data.ToLower().Contains("matplotlibrc"))
                 {
                     PythonLogText += e.Data + "\r\n";
                     if (!e.Data.ToLower().Contains("POST") && !e.Data.ToLower().Contains("typeerror") && e.Data.ToLower().Contains("error"))
@@ -2040,7 +2067,7 @@ namespace SomUI.ViewModel
             string ScatterPlotDirectory = Path.Combine(Model.OutputFolderTimestamped, "Scatterplot");
             myProcess.OutputDataReceived += new DataReceivedEventHandler((sender, e) =>
             {
-                if (!String.IsNullOrEmpty(e.Data) && !e.Data.ToLower().Contains("matplotlibdata") && !e.Data.ToLower().Contains("return_n_iter") && !e.Data.ToLower().Contains("HTTP"))
+                if (!String.IsNullOrEmpty(e.Data) && !e.Data.ToLower().Contains("matplotlibdata") && !e.Data.ToLower().Contains("return_n_iter") && !e.Data.ToLower().Contains("HTTP") && !e.Data.ToLower().Contains("bad key") && !e.Data.ToLower().Contains("matplotlibrc"))
                 {
                     PythonLogText += e.Data + "\r\n";
                     if (!e.Data.ToLower().Contains("POST") && !e.Data.ToLower().Contains("typeerror") && e.Data.ToLower().Contains("error"))
@@ -2081,7 +2108,7 @@ namespace SomUI.ViewModel
         {
             myProcess.ErrorDataReceived += new DataReceivedEventHandler((sender, e) =>
             {
-                if (!String.IsNullOrEmpty(e.Data) && !e.Data.Contains("MATPLOTLIBDATA") && !e.Data.Contains("hoverdata") && !e.Data.ToLower().Contains("return_n_iter")&& !e.Data.ToLower().Contains("matplotlibdeprecationwarning") && !e.Data.ToLower().Contains("exec(bytecode") && !e.Data.Contains("POST") && !e.Data.Contains("GET"))//filter out persistent and unnecessary python warnings
+                if (!String.IsNullOrEmpty(e.Data) && !e.Data.Contains("MATPLOTLIBDATA") && !e.Data.ToLower().Contains("set_bad") && !e.Data.Contains("hoverdata") && !e.Data.ToLower().Contains("return_n_iter")&& !e.Data.ToLower().Contains("matplotlibdeprecationwarning") && !e.Data.ToLower().Contains("exec(bytecode") && !e.Data.Contains("POST") && !e.Data.Contains("GET") && !e.Data.ToLower().Contains("visibledeprecation") && !e.Data.ToLower().Contains("getattr(asarray(obj), method)(*args, **kwds)") && !e.Data.ToLower().Contains("bad key") && !e.Data.ToLower().Contains("matplotlibrc") && !e.Data.ToLower().Contains("matplotlib source distribution"))//filter out persistent and unnecessary python warnings getattr(asarray(obj), method)(*args, **kwds)
                 {
                     logger.Error(e.Data);
                     PythonLogText += e.Data + "\r\n";
@@ -2097,7 +2124,7 @@ namespace SomUI.ViewModel
         {
             myProcess.OutputDataReceived += new DataReceivedEventHandler((sender, e) =>
             {
-                if (!String.IsNullOrEmpty(e.Data) && !e.Data.ToLower().Contains("matplotlibdata") && !e.Data.ToLower().Contains("return_n_iter") && !e.Data.ToLower().Contains("HTTP"))
+                if (!String.IsNullOrEmpty(e.Data) && !e.Data.ToLower().Contains("matplotlibdata") && !e.Data.ToLower().Contains("return_n_iter") && !e.Data.ToLower().Contains("HTTP") && !e.Data.ToLower().Contains("bad key") && !e.Data.ToLower().Contains("matplotlib source distribution"))
                 {
                     if(e.Data.ToLower().Contains("warning"))
                         PythonLogText += e.Data + "\r\n";//only print warnings
@@ -2178,6 +2205,24 @@ namespace SomUI.ViewModel
                 logger.Error(ex, "Failed to open results folder.");
                 dialogService.ShowNotification("Failed to open results folder.", "Error");
             }
+        }
+        /// <summary>
+        /// 
+        /// </summary>
+        private async void KillPythonProcesses()
+        {
+            await Task.Run(async () =>
+            {
+                //BrowserToolTip = "";
+                RunningProcessCount++;
+                ServiceLocator.SetLocatorProvider(() => SimpleIoc.Default);
+                Task t = SomTool.KillRunningPythonProcesses();//SomTool.DrawResultsInteractive(Model, ScriptOutput, ScriptError);
+                stopRun = true;
+                
+                await t;
+                RunningProcessCount--;
+            });
+            
         }
     }
 }

@@ -179,9 +179,9 @@ def write_nonspatial_from_csv():
                 column_names_sorted.append('label')
         else:
             column_names_sorted.append(header['colnames'][i])
-    for i in range(0, actualNumberOfColumns):
+    for i in range(0, actualNumberOfColumns+2):
         if(i>1):
-            columns_sorted[i][1][0]=column_names_sorted[i]   
+            columns_sorted[i][1][0]=column_names_sorted[i]   #+2 because of dummy x y columns
             
     populateCsvDataFrames(-2)        
     writeXmlTreeFromCsv(df_in,columns_included)
@@ -256,10 +256,12 @@ def write_spatial_from_csv():
             columns_sorted[i][1][0]=column_names_sorted[i]
   
     populateCsvDataFrames() 
+
+
     writeXmlTreeFromCsv(df_in,columns_included)
     
     if(args.normalized is not None):
-        if(na_value is not ''):
+        if(na_value != ''):
             for i in range(0,len(columns_in[0])):               
                 #colForMinMax= list(filter(lambda x: x!=str(float(na_value)), df_in[i][2:]))
                 #colForMinMax=[float(i) for i in colForMinMax]              
@@ -276,7 +278,7 @@ def write_spatial_from_csv():
         else:
             for i in range(0,len(columns_in[0])):                   
                 #colForMinMax=df_in[i][2:].astype(float)
-                colForMinMax=df_in[i][2:].astype(float)[~np.isnan(df_in[i][2:].astype(float))]
+                colForMinMax=df_in[i][2:].astype(float)[~np.isnan(df_in[i][2:].astype(float))]                
                 data_min= min(colForMinMax) 
                 data_max= max(colForMinMax)
                 for j in range(2, len(columns_in[:,i])):
@@ -285,6 +287,7 @@ def write_spatial_from_csv():
     df_in=pd.DataFrame(np.squeeze(np.stack(columns_in, axis=0)))  
 
     combineCsvColumns()
+    checkForDuplicateCoords()
     #d = dict()
     #for i in range (2, len(columns)):
     #    d[tuple((columns[i][1], columns[i][2]))] = i#
@@ -363,7 +366,7 @@ def write_from_tif_input():
     df=pd.DataFrame(columns)
     df.apply(pd.to_numeric,errors='coerce')
     
-    if(na_value is not ""):
+    if(na_value != ""):
         na_value=float(na_value)
         df=df.replace(str(na_value),np.nan)
         df=df.dropna()    
@@ -381,7 +384,7 @@ Create xml-tree containing data transformation stage stats and and write it to f
 def writeXmlTreeFromCsv(df_in,columns_included):
     root = ET.Element("data") 
     for i in range(0,len(df_in.columns)):
-        if(na_value is not ''):
+        if(na_value !=''):
             colForMinMax=columns_included[i][2:].astype(float)[~np.isnan(columns_included[i][2:].astype(float))]
             colForMinMax= list(filter(lambda x: x!=float(na_value), colForMinMax))
             data_min= min(colForMinMax)
@@ -560,11 +563,13 @@ def populateCsvDataFrames(indexModifier=0):
     df_in=pd.DataFrame(np.squeeze(np.stack(columns_included, axis=1)))
     df_in.iloc[2:,:] = df_in.iloc[2:,:].replace('NA','nan', regex=True)  
     df_in.iloc[2:,:]=df_in.iloc[2:,:].replace(np.nan, 'nan', regex=True)
-    if(na_value is not ""):
+    if(na_value !=""):
         na_value=float(na_value)
         df_in=df_in.replace(str(na_value),np.nan)
     for i in range(0,len(df_in.columns)): 
-        df_in=df_in.loc[df_in[:][i] !='nan']   
+        tempCol=(df_in[:][i] !='nan')#create boolean array on wether data elements are valid numbers or 'nan'
+        tempCol[1]=True #assign True to header, so that the header is not labeled False even if it is 'nan', because that should be a valid header as well.
+        df_in=df_in.loc[tempCol]   
     
     rowsToDrop=df_ex.drop(df_in.index)
     df_ex=df_ex.drop(rowsToDrop.index)  
@@ -595,9 +600,20 @@ def combineCsvColumns():
     id_col_with_header=np.vstack((["%9"],["id"],np.c_[id_col]))    
     columns=np.hstack((id_col_with_header, columns))  
     
+    
         
 
-
+def checkForDuplicateCoords():
+    global columns
+    ##Check for duplicate coordinates
+    d = dict()
+    for i in range (2, len(columns)):
+        d[tuple((columns[i][1], columns[i][2]))] = i
+    if(len(columns)-2>len(d)):
+        print("Warning: Data contains duplicate coordinates. The duplicates are written over, so that only the last duplicate instance is kept.")
+        values=list(d.values())
+        columns[values]
+        columns=np.vstack((columns[0:2],columns[values])) #does the header already being here create any problems?
 
 if(fileType=="tif"):
     write_from_tif_input()

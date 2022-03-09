@@ -118,7 +118,6 @@ def run_hexa():
         yinch=somy*70-somy
     else:
         yinch=(somy*70)-somx*somy  
-        
     scaleX=550/xinch #scale the resulting plot down
     scale='scale('+str(scaleX)+','+str(scaleX)+')'
     #yHeight=str(20)+'px'
@@ -140,7 +139,6 @@ def run_hexa():
             centers_y.append((j+1)*base_y)
 
     hits=som_data[:,len(som_data[0])-2]
-    
     font_size=1.8*(math.sqrt(somx*somy))
     cluster_ticks=[]
     mystery_extra=0
@@ -148,7 +146,6 @@ def run_hexa():
         mystery_extra=((7-clusters)**2)/100
     for j in range (clusters,0,-1):
         cluster_ticks.append(j-1+(0.5-(j/clusters))+mystery_extra)#for whatever reason, the numeric scale on the colorbar of plotly's scatterplot differs from the above heatmap's, and seems to follow no reason or logic, so the tick indices must be modified accordingly. The above formula gets it close enough.
-
     app.layout = html.Div([
             
         html.Div([html.H2(children='Selection Mode'),
@@ -362,7 +359,7 @@ def create_output_plot(ValueOfX,ValueOfY,ValueOfZ,outputColumn,selectionType):
     else:
         z=geo_data_selection[:,int(len(som_data[0])-1+outputColumn)]#skip som data values.
         cmap="jet"
-    df = pd.DataFrame.from_dict(np.array([x,y,z]).T)
+    df = pd.DataFrame.from_dict(np.array([x,y,z],dtype=object).T)
     df.columns = ['X_value','Y_value','Z_value']
     df['Z_value'] = pd.to_numeric(df['Z_value'])
     pivotted= df.pivot('Y_value','X_value','Z_value')   
@@ -445,13 +442,14 @@ def create_output_plot(ValueOfX,ValueOfY,ValueOfZ,outputColumn,selectionType):
                 cluster_ticks.append(i-1)   
                 cluster_tick_labels.append(str(i-1))
         else:
-            for i in range (clusters+1,0,-1):
+            for i in range (clusters,0,-1): 
                 cluster_ticks.append(i-1)   
                 cluster_tick_labels.append(str(i-1))
+            
         title=geo_headers[int(len(som_data[0])-1+outputColumn)]
         ax=dash_draw_scatter(geo_data_selection,som_data,palette_2,cluster_ticks,cluster_tick_labels,title,outputColumn,somx,somy,clusters)
     current_cmap = plt.cm.get_cmap()
-    current_cmap.set_bad(color='white')   
+    current_cmap=current_cmap.copy().set_bad(color='white')   
     plt.yticks(rotation=90)
     plt.yticks(ha='right')
     plt.yticks(va='bottom')
@@ -502,8 +500,8 @@ def update_plot(clickData,outputColumn,selectionType,cur_plot_src):
 def create_palette(selectionType,ValueOfZ):
     #create palette
     palette=sns.cubehelix_palette(n_colors=clusters, start=1,rot=4, gamma=1.0, hue=3, light=0.77, dark=0.15, reverse=False, as_cmap=False)
-    if(selectionType!="Cluster"):
-        palette.append([0.00,0.00,0.00,1]);#change this to appending so that the colorscale stays the same 
+    #if(selectionType!="Cluster"):
+    #    palette.append([0.00,0.00,0.00,1]);#change this to appending so that the colorscale stays the same 
     if(selectionType=="Cluster"):
         for i in range(0, len(palette)):   
             if (i!=ValueOfZ):               
@@ -511,11 +509,13 @@ def create_palette(selectionType,ValueOfZ):
             else:
                 palette[i].append(1)
     else:
-        for i in range(0, len(palette)): 
+        for i in range(0, len(palette)): #does this produce a long enough palette?
             palette[i].append(0.1)
             #last palette slot to black
     if(selectionType!="Cluster"):
-        palette[len(palette)-1]=[0.00,0.00,0.00,1] 
+        palette.append([0.00,0.00,0.00,1]);
+    #if(selectionType!="Cluster"):
+     #    palette[len(palette)-1]=[0.00,0.00,0.00,1] 
     
     return palette
 

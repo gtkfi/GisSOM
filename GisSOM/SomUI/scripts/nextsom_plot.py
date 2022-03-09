@@ -171,6 +171,11 @@ if (labelIndex!="-2"):
             skiprows=3
             )
     outfile=[]
+    
+    #So. the current label format is the one that should be written to file, as it preserves all data. But for the plots, the new labeling system
+    #should be changed so, that differences in count are not taken into account, i.e. A A B = A B B, both are reduced to A B. should clean up the legend by
+    #quite a bit
+    
     for i in range(0,len(data[0])):
         if(data[0][i].replace("\"","")=='label'):
             outfile=data[1:,i]
@@ -395,7 +400,7 @@ def plot_geospace_results_scatter(geo_data, geo_headers, som_data):
 Draw Som result plots
 """
 def draw_som_results(som_data, som_table,grid, annot_ticks, som_headers):
-    for j in range(2,len(som_data[0])-2):
+    for j in range(2,len(som_data[0])-3):
         if(grid_type.lower()=="rectangular"):
             for i in range(0,len(som_data)): 
                 som_table[int(som_data[i][0])][int(som_data[i][1])]=som_data[i][j] #som_table: somx*somy size
@@ -407,6 +412,30 @@ def draw_som_results(som_data, som_table,grid, annot_ticks, som_headers):
             ax = plot_hexa(somx,somy,clusters,grid, hits, annot_ticks,cluster_tick_labels,title=som_headers[j+1], ptype='grid')   
             mpl.rcParams.update({'font.size': 32})           
             ax.set_title(som_headers[j-1]) 
+            mpl.rcParams.update({'font.size': 32})  
+        ax.figure.savefig(working_dir+'/Som/somplot_' +str(j-1)+'.png',bbox_inches='tight')#Creating the folder is done in C# side of things.    
+        plt.clf()
+        plt.cla()
+        plt.close()  
+        mpl.rcParams.update({'font.size': 12})
+        
+        
+"""
+Draw U-matrix plot
+"""
+def draw_umatrix(som_data, som_table,grid, annot_ticks, som_headers):
+    for j in range(len(som_data[0])-3,len(som_data[0])-2):
+        if(grid_type.lower()=="rectangular"):
+            for i in range(0,len(som_data)): 
+                som_table[int(som_data[i][0])][int(som_data[i][1])]=som_data[i][j] #som_table: somx*somy size
+            ax = sns.heatmap(som_table.transpose(), cmap="jet", linewidth=0)   
+            ax.set_title(som_headers[j])    
+        else:#grid type=="hexagonal":
+            hits=som_data[:,j]
+            mpl.rcParams.update({'font.size': 30})
+            ax = plot_hexa(somx,somy,clusters,grid, hits, annot_ticks,cluster_tick_labels,title=som_headers[j+1], ptype='grid')   #j+1 to 
+            mpl.rcParams.update({'font.size': 32})           
+            ax.set_title(som_headers[j]) 
             mpl.rcParams.update({'font.size': 32})  
         ax.figure.savefig(working_dir+'/Som/somplot_' +str(j-1)+'.png',bbox_inches='tight')#Creating the folder is done in C# side of things.    
         plt.clf()
@@ -540,8 +569,7 @@ Plot geospace clusters if input type is scatter
 """
 def plot_geospace_clusters_scatter(geo_data):
     #global geo_data
-    z=geo_data[:,(4)]  
-    
+    z=geo_data[:,(4)]      
     centers=[]     
     for i in range(0, len(geo_data)):	
         centers.append([geo_data[i][0],geo_data[i][1]])
@@ -643,10 +671,12 @@ if outgeofile is not None: #if spatial, draw geo plots
 if(int(max(som_data[:,len(som_data[0])-1]))>0): #draw som cluster plot if there is more than 1 cluster
     draw_som_clusters(som_data, som_table, annot_ticks, som_headers)
 
-#in case the function was called for redrawing after selecting a different clustering result. so that we can skip stuff we don't have to redraw to speed things up. CURRENTLY NOT IN USE, ALWAYS TRUE.
-if(redraw!="false"):
-    draw_som_results(som_data, som_table,grid, annot_ticks, som_headers)
+draw_umatrix(som_data, som_table,grid, annot_ticks, som_headers)
 draw_number_of_hits()
+#in case the function was called for redrawing after selecting a different clustering result. so that we can skip stuff we don't have to redraw to speed things up. CURRENTLY NOT IN USE, ALWAYS TRUE.
+#if(redraw!="false"):
+draw_som_results(som_data, som_table,grid, annot_ticks, som_headers)
+
 print("SomSpace plots finshed")
 
 if(som_dict['clusters'] is not None):

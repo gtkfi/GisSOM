@@ -16,6 +16,7 @@
         <service:CodebookTextConverter x:Key="CodebookTextConverter" />
         <service:InitialCodebookTooltipConverter x:Key="InitialCodebookTooltipConverter"/>
         <service:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+        <service:InverseBooleanToCollapsedVisibilityConverter x:Key="InverseBooleanToCollapsedVisibilityConverter"/>
     </UserControl.Resources>
     <!--DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}"-->
     <Grid HorizontalAlignment="Left">
@@ -185,8 +186,18 @@
                         <UniformGrid>
                             <WrapPanel/>
                             <WrapPanel Margin="0,10,0,0">
-                                    <DockPanel DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBooleanConverter}, UpdateSourceTrigger=PropertyChanged}">
-                                <Button
+                                    <DockPanel DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" >
+                                        <Button
+                                        Padding="20,10,20,10"
+                                        Name="cancelButton"
+                                        mah:ButtonHelper.PreserveTextCase="True"
+                                        Style="{StaticResource AccentedSquareButtonStyle}"
+                                        BorderThickness="0"
+                                        Visibility="{Binding IsBusy, Converter={StaticResource BoolToCollapsedVisibilityConverter}}"
+                                        Command="{Binding KillPythonProcessesCommand}"                                    
+                                        DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}"
+                                        >Cancel</Button>
+                                        <Button
                         Padding="20,10,20,10"
                                     Name="runButton"
                                     mah:ButtonHelper.PreserveTextCase="True"
@@ -194,6 +205,7 @@
                         BorderThickness="0"
                         Command="{Binding RunToolCommand}"                                    
                         DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}"
+                        Visibility="{Binding IsBusy, Converter={StaticResource InverseBooleanToCollapsedVisibilityConverter}}"
                         Content="Run"></Button>
                                     </DockPanel>
                                     <Button 
@@ -203,6 +215,7 @@
                         Style="{StaticResource AccentedSquareButtonStyle}"
                         Margin="20,0,0,0" Command="{Binding GoToResultView}"                                      
                                         >Results</Button>
+                                    
                                     <!--IsEnabled="{Binding ElementName=runButton, Path=IsEnabled}"-->
 
                                 </WrapPanel>

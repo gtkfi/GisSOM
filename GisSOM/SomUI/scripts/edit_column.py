@@ -6,10 +6,6 @@ Script to edit data columns saved as numpy arrays saved in binary format. Actual
 are used to mark whether data is winsorized, log transformed, is column excluded, winsormin, winsor max, etc...
 @author: shautala
 """
-#import warnings
-#with warnings.catch_warnings():
-#warnings.filterwarnings("ignore")
-import matplotlib.pyplot as plt
 import numpy as np
 import sys
 

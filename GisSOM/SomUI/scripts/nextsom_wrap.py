@@ -237,7 +237,7 @@ def run_xml(args):
             kmeans_max=25
 
 
-        if(initial_codebook is not None and initial_codebook is not ""):
+        if(initial_codebook is not None and initial_codebook != ""):
             with open(initial_codebook, 'rb') as som_dictionary_file:
                 som_dictionary = pickle.load(som_dictionary_file)
                 initial_codebook=som_dictionary['codebook']

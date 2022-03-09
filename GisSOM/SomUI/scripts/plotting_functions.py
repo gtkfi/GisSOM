@@ -44,6 +44,7 @@ def plot_hexa(somx,
             labelIndex="-2",
             
             ):
+
     discrete_cmap=sns.cubehelix_palette(n_colors=clusters, start=1,rot=4, gamma=1.0, hue=3, light=0.77, dark=0.15, reverse=False, as_cmap=False)
     n_centers = grid['centers']
     x, y = grid['x'], grid['y']
@@ -67,7 +68,6 @@ def plot_hexa(somx,
     # upper right for most image software, so we'll flip the y-coords
     width, height = fig.canvas.get_width_height()
     ypix = height - ypix
-    
     if(ptype=='scatter'): #if the data type is csv with gaps
         apothem_x=(xpix[1] - xpix[0]) 
         apothem_y=(ypix[1] - ypix[0]) 
@@ -127,7 +127,7 @@ def plot_hexa(somx,
             for i in range(0, len(n_centers)):
                 ax.annotate(ticks_flattened[i], (n_centers[i][0], n_centers[i][1]),color=contrasting_text_color(discrete_cmap[int(d_matrix[i])]),ha='center', va='center', fontsize=max(39-(somy/2)-(4*somx/somy),10))
         bounds = np.linspace(0, clusters, clusters+1)
-        bounds2 = np.linspace(0.5, clusters+0.5, clusters+1)
+        bounds2 = np.linspace(0.5, clusters-0.5, clusters)#clusters+0.5 in case of som cell selection?
         norm = mpl.colors.BoundaryNorm(bounds, colmap2.N)
         if(ptype=='scatter'):
             cb_ax = divider.append_axes("right", size="5%", pad=0.05)
@@ -137,8 +137,7 @@ def plot_hexa(somx,
             else:
                 cb_ax = fig.add_axes([.98,.124,.04,.754])
                    
-        cbar=mpl.colorbar.ColorbarBase(cb_ax, cmap=colmap2, norm=norm,
-        spacing='uniform',ticklocation='right', ticks=bounds2, boundaries=bounds, format='%1i')
+        cbar=mpl.colorbar.ColorbarBase(cb_ax, cmap=colmap2, norm=norm,spacing='uniform',ticklocation='right', ticks=bounds2, boundaries=bounds, format='%1i')
         cbar.ax.invert_yaxis()   
         cbar.ax.tick_params(axis='y', direction='out', pad=30)
         ticks_reverse=cluster_tick_labels.copy()
@@ -171,7 +170,7 @@ def dash_draw_scatter(geo_data,som_data,palette,cluster_ticks,cluster_tick_label
         
         
     if(outputColumn==0):
-        ax = plot_hexa(somx,somy,clusters+1,grid, z,annot_ticks=cluster_ticks,cluster_tick_labels=cluster_tick_labels,title="Clusters",colmap=ListedColormap(palette), ptype='scatter')   
+        ax = plot_hexa(somx,somy,clusters,grid, z,annot_ticks=cluster_ticks,cluster_tick_labels=cluster_tick_labels,title="Clusters",colmap=ListedColormap(palette), ptype='scatter')   
     else:
         z = np.ma.array (z, mask=np.isnan(z))
         cmap = mpl.cm.jet

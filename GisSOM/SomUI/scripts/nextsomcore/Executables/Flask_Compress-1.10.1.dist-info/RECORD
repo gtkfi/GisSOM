@@ -1,0 +1,12 @@
+Flask_Compress-1.10.1.dist-info/INSTALLER,sha256=zuuue4knoyJ-UwPPXg8fezS7VCrXJQrAP7zeNuwvFQg,4
+Flask_Compress-1.10.1.dist-info/LICENSE.txt,sha256=oZ51osarUWjhwPGF9tFLTwEwzZJlEbiPM4KDOiEeImk,1085
+Flask_Compress-1.10.1.dist-info/METADATA,sha256=o22voXvfZjmJKIOy06gGvgIFx9IN9cT9dJNLmg55l8E,6594
+Flask_Compress-1.10.1.dist-info/RECORD,,
+Flask_Compress-1.10.1.dist-info/WHEEL,sha256=OqRkF0eY5GHssMorFjlbTIq072vpHpF60fIQA6lS9xA,92
+Flask_Compress-1.10.1.dist-info/top_level.txt,sha256=R7cqncNaZ2mv8eO4-hZhJgv5Js4V9KHmiFsWPc3lG8w,15
+flask_compress/__init__.py,sha256=h2TT9zdxEuxudZk3-Ec-LuGqtOz4keZiaVC2RGajG-k,350
+flask_compress/__pycache__/__init__.cpython-39.pyc,,
+flask_compress/__pycache__/_version.cpython-39.pyc,,
+flask_compress/__pycache__/flask_compress.cpython-39.pyc,,
+flask_compress/_version.py,sha256=XJxRje8uMkpozTKeIz1H9ojU0DbKoYp8lwHL77pw54I,23
+flask_compress/flask_compress.py,sha256=L2j60Qo2g1Fxl_dF-IEP8JvVGGpSoVuZEBTUFgL4VXE,9012

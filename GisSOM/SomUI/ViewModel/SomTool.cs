@@ -41,9 +41,9 @@ namespace SomUI.ViewModel
         private ImageSource dataHistogram;
         private bool isBusy = false;
         private readonly ILogger logger = NLog.LogManager.GetCurrentClassLogger();
-        private string pythonPath = "C:/Users/shautala/AppData/Local/Programs/Python/Python37/pythonw.exe"; // used for debugging.
+        private string pythonPath = "C:/Users/shautala/AppData/Local/Programs/Python/Python39/pythonw.exe"; // used for debugging.
         private bool usePyExes = true;//for switching running of scripts between packed python executables and full python installation. used for debugging.
-                                     
+        private ObservableCollection<Process> PythonProcesses = new ObservableCollection<Process>();
 
         private event PropertyChangedEventHandler PropertyChanged;
         public SomTool()
@@ -414,10 +414,11 @@ namespace SomUI.ViewModel
                 var executablePath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "scripts", "executables", "nextsom_wrap.exe");
                 var editedData = Path.Combine(Model.Output_Folder, "DataPreparation", "EditedData.lrn");
                 Model.Output_file_somspace = Model.OutputFolderTimestamped + "/result_som.txt";
-                if (Model.IsSpatial == true)
-                    Model.Output_file_geospace = Model.OutputFolderTimestamped + "/result_geo.txt";
-                else
-                    Model.Output_file_geospace = "";
+                //if (Model.IsSpatial == true)
+                //    Model.Output_file_geospace = Model.OutputFolderTimestamped + "/result_geo.txt";
+                //else
+                //    Model.Output_file_geospace = "";
+                Model.Output_file_geospace = Model.OutputFolderTimestamped + "/result_geo.txt";//Change it so that even when the run is nonspatial a dummy file is written
                 string inputFile;
                 if (File.Exists(editedData))
                 {
@@ -539,6 +540,7 @@ namespace SomUI.ViewModel
                 myProcessStartInfo.Arguments = myProcessStartInfo.Arguments.Replace("\\", "/");
                 using (var myProcess = new Process())
                 {
+                    PythonProcesses.Add(myProcess);
                     myProcess.StartInfo = myProcessStartInfo;
                     //PythonLogText = "";
                     ScriptOutput(myProcess);
@@ -548,6 +550,7 @@ namespace SomUI.ViewModel
                     myProcess.BeginOutputReadLine();
                     myProcess.WaitForExit();
                     myProcess.Close();
+                    PythonProcesses.Remove(myProcess);
                 };
             });
 
@@ -630,6 +633,7 @@ namespace SomUI.ViewModel
               myProcessStartInfo.Arguments = myProcessStartInfo.Arguments.Replace("\\", "/");
                 using (var myProcess = new Process())
                 {
+                    PythonProcesses.Add(myProcess);
                     myProcess.StartInfo = myProcessStartInfo;
                     ScriptOutput(myProcess);
                     ScriptError(myProcess);
@@ -638,6 +642,7 @@ namespace SomUI.ViewModel
                     myProcess.BeginOutputReadLine();
                     myProcess.WaitForExit();
                     myProcess.Close();
+                    PythonProcesses.Remove(myProcess);
                 };               
             });          
         }
@@ -735,6 +740,7 @@ namespace SomUI.ViewModel
 
                 using (var myProcess = new Process())
                 {
+                    PythonProcesses.Add(myProcess);
                     myProcess.StartInfo = myProcessStartInfo;
                     ScriptOutput(myProcess);
                     ScriptError(myProcess);
@@ -743,6 +749,7 @@ namespace SomUI.ViewModel
                     myProcess.BeginErrorReadLine();
                     myProcess.WaitForExit();
                     myProcess.Close();
+                    PythonProcesses.Remove(myProcess);
                 };
             });
         }
@@ -809,6 +816,7 @@ namespace SomUI.ViewModel
                 myProcessStartInfo.Arguments = myProcessStartInfo.Arguments.Replace("\\", "/");
                 using (var myProcess = new Process())
                 {
+                    PythonProcesses.Add(myProcess);
                     myProcess.StartInfo = myProcessStartInfo;
                     ScriptOutput(myProcess);
                     ScriptError(myProcess);
@@ -816,6 +824,7 @@ namespace SomUI.ViewModel
                     myProcess.BeginOutputReadLine();
                     myProcess.BeginErrorReadLine();
                     myProcess.Close();
+                    PythonProcesses.Remove(myProcess);
                 };
 
 
@@ -852,6 +861,7 @@ namespace SomUI.ViewModel
 
                 using (var myProcess = new Process())
                 {
+                    PythonProcesses.Add(myProcess);
                     myProcess.StartInfo = myProcessStartInfo;
                     ScriptOutput(myProcess);
                     ScriptError(myProcess);
@@ -860,6 +870,7 @@ namespace SomUI.ViewModel
                     myProcess.BeginOutputReadLine();
                     myProcess.WaitForExit();
                     myProcess.Close();
+                    PythonProcesses.Remove(myProcess);
                 };
             });
             
@@ -1086,6 +1097,7 @@ namespace SomUI.ViewModel
                 myProcessStartInfo.Arguments = myProcessStartInfo.Arguments.Replace("\\", "/");
                 using (var myProcess = new Process())
                 {
+                    PythonProcesses.Add(myProcess);
                     myProcess.StartInfo = myProcessStartInfo;
                     ScriptOutput(myProcess);
                     ScriptError(myProcess);
@@ -1094,6 +1106,7 @@ namespace SomUI.ViewModel
                     myProcess.BeginOutputReadLine();
                     myProcess.WaitForExit();
                     myProcess.Close();
+                    PythonProcesses.Remove(myProcess);
                 };
 
                 //re-draw results with new clustering
@@ -1146,6 +1159,7 @@ namespace SomUI.ViewModel
 
             using (var myProcess = new Process())
             {
+                PythonProcesses.Add(myProcess);
                 myProcess.StartInfo = myProcessStartInfo;
                 ScriptOutput(myProcess);
                 ScriptError(myProcess);
@@ -1154,10 +1168,17 @@ namespace SomUI.ViewModel
                 myProcess.BeginOutputReadLine();
                 myProcess.WaitForExit();
                 myProcess.Close();
+                PythonProcesses.Remove(myProcess);
             };
         }
-       
 
+        public async void AsyncHttpPost(string Uri, string Parameters)
+        {
+            Task.Run(async () =>
+            {
+                HttpPost(Uri, Parameters);
+            });
+        }
         //For sending the shutdown message to the interactive plot.
         public void HttpPost(string URI, string Parameters)
         {
@@ -1182,46 +1203,15 @@ namespace SomUI.ViewModel
                     {
                     if (httpWebResponse.StatusDescription == "OK")
                     {
-                        //Cef.GetGlobalCookieManager().DeleteCookies("", "");
-                        //CefSharp.WebBrowserExtensions.Reload(this.Browser, true);
-                        //return "OK";
                         Debug.Write("Ok");
                         logger.Trace("Shutting down interactive plot");
 
                     }
-                }
-
-
-
-                //HttpWebResponse httpWebResponse = (HttpWebResponse)req.GetResponse();
-                    /*if (httpWebResponse.StatusDescription == "OK")
-                    {
-                        //Cef.GetGlobalCookieManager().DeleteCookies("", "");
-                        //CefSharp.WebBrowserExtensions.Reload(this.Browser, true);
-                        //return "OK";
-                        Debug.Write("Ok");
-                        logger.Trace("Shutting down interactive plot");
-                        
-                    }
-                    httpWebResponse.Close();
-                    */
-                /*
-                    System.Net.WebResponse resp = req.GetResponse();
-                    if (resp != null)
-                    {
-
-                        System.IO.StreamReader sr = new System.IO.StreamReader(resp.GetResponseStream());
-                        resp.Close();
-                    }
-                */
+                }         
             }
                 catch (Exception e)
-                {
-                //unable to connect to the remote server tulee jos ei oo plottia mitä pysäyttää?
-                var test = e;
-
+                {             
             }
-            //});
         }
         public static ImageSource BitmapFromUri(Uri source)
         {
@@ -1352,6 +1342,31 @@ namespace SomUI.ViewModel
         //        logger.Error(ex, "Failed to show output images");
         //    }
         //}
+
+        /// <summary>
+        /// /
+        /// </summary>
+        public async Task KillRunningPythonProcesses()
+        {
+
+            await Task.Run(() =>
+            {
+                foreach (Process p in PythonProcesses)
+                {
+                    try { 
+                    p.Kill();
+                    }
+                    catch(Exception e)
+                    {
+                        logger.Trace("Could not kill python process:"+e);
+                    }
+                }
+                HttpPost("http://localhost:8050/shutdown", "message=shuts down interactive plots");
+            });
+                
+            
+
+        }
         private void EditRunStatsXml( string xmlPath, string elementName, string elementText)
         {
             XmlDocument doc = new XmlDocument();
