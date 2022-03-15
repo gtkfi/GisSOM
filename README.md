@@ -58,6 +58,7 @@ If you want to contribute to GisSOM, you can just fork the repository, and submi
 15.03.2022 GisSOM version 1.2.4 release  
 NOTE: There's a known issue when using .TIF input,the software will give warnings on proj.db and PROJ installation. The software can still be used despite these warnings.  
 -Added Cancel button for som calculation  
+-Upgraded python version to 3.9 and updated used python packages  
 -Fixed a bug with heades of hexagonal som output plots  
 -Added geospace output data files for nonspatial data (with dummy coordinates)  
 -'nan' is now a viable data header  
