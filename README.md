@@ -55,6 +55,14 @@ private bool usePyExes = false;
 If you want to contribute to GisSOM, you can just fork the repository, and submit a pull request with your changes.  
   
 ## History
+15.03.2022 GisSOM version 1.2.4 release  
+NOTE: There's a known issue when using .TIF input,the software will give warnings on proj.db and PROJ installation. The software can still be used despite these warnings.  
+-Added Cancel button for som calculation  
+-Fixed a bug with heades of hexagonal som output plots  
+-Added geospace output data files for nonspatial data (with dummy coordinates)  
+-'nan' is now a viable data header  
+-Fixed bugs with CSV-scatter dataset plotting  
+
 04.01.2022 GisSOM version 1.2.3 release  
 29.11.2021 GisSOM version 1.2.2 release  
 30.09.2021 GisSOM version 1.2.1 release  
