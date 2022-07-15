@@ -16,6 +16,7 @@
         <service:CodebookTextConverter x:Key="CodebookTextConverter" />
         <service:InitialCodebookTooltipConverter x:Key="InitialCodebookTooltipConverter"/>
         <service:InverseBooleanConverter x:Key="InverseBooleanConverter"/>
+        <service:InverseBooleanToCollapsedVisibilityConverter x:Key="InverseBooleanToCollapsedVisibilityConverter"/>
     </UserControl.Resources>
     <!--DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}"-->
     <Grid HorizontalAlignment="Left">
@@ -25,9 +26,9 @@
             <RowDefinition Height="Auto"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition ></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
-        <StatusBar Background="WhiteSmoke" Grid.ColumnSpan="4" Grid.Row="0">
+        <StatusBar Background="WhiteSmoke" Grid.ColumnSpan="4" Grid.Row="0" Width="2000000">
             <StatusBarItem>
                 
                 <Button Background="Transparent" Foreground="DarkGray" BorderThickness="0" Width="50" Height="30" Command="{Binding GoToDataPreparationView}">
@@ -44,7 +45,7 @@
         </StatusBar>
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Visible" HorizontalAlignment="Left" VerticalAlignment="Top">
             <StackPanel VerticalAlignment="Top">
-            <UniformGrid Columns="2" Margin="10">
+            <UniformGrid Columns="2" Margin="10" MaxWidth="1280">
                 <WrapPanel HorizontalAlignment="Left" VerticalAlignment="Center">
                     <StackPanel Margin="0,10,0,0">
                         <UniformGrid Rows="1" Margin="10">
@@ -161,7 +162,7 @@
                             VerticalAlignment="Center"  
                             DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}"  
                             IsDefault="True" Command="{Binding SelectFolderCommand}" 
-                            mah:ButtonHelper.PreserveTextCase="True">
+                            mah:ControlsHelper.ContentCharacterCasing="Normal">
                                     <!-- Command="{Binding SelectFileCommand}" Tämä sit toteuttaa vielä-->
                                     <Button.ToolTip>
                                         <TextBlock Text="{Binding Model.Output_Folder}"></TextBlock>
@@ -174,7 +175,7 @@
                         <UniformGrid Margin="0,-30,0,0">
                             <WrapPanel></WrapPanel>
                             <WrapPanel>
-                                <ToggleButton Name="AdvancedButton" FontSize="16" Style="{StaticResource MetroFlatToggleButton}" Content="Show Advanced parameters">
+                                    <ToggleButton Name="AdvancedButton" FontSize="16" Style="{StaticResource MahApps.Styles.ToggleButton.Flat}" Content="Show Advanced parameters">
                                     <ToggleButton.ToolTip>Advanced parameters for SOM calculation</ToggleButton.ToolTip>
                                 </ToggleButton>
                                 <!--DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsChecked="{Binding ShowAdvancedParams}"-->
@@ -185,25 +186,38 @@
                         <UniformGrid>
                             <WrapPanel/>
                             <WrapPanel Margin="0,10,0,0">
-                                    <DockPanel DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBooleanConverter}, UpdateSourceTrigger=PropertyChanged}">
-                                <Button
+                                    <DockPanel DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" >
+                                        <Button
+                                        Padding="20,10,20,10"
+                                        Name="cancelButton"
+                                        mah:ControlsHelper.ContentCharacterCasing="Normal"
+                                        Style="{StaticResource MahApps.Styles.Button.Square.Accent}"
+                                        BorderThickness="0"
+                                        Visibility="{Binding IsBusy, Converter={StaticResource BoolToCollapsedVisibilityConverter}}"
+                                        Command="{Binding KillPythonProcessesCommand}"                                    
+                                        DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}"
+                                        >Cancel</Button>
+                                        <Button
                         Padding="20,10,20,10"
                                     Name="runButton"
-                                    mah:ButtonHelper.PreserveTextCase="True"
-                        Style="{StaticResource AccentedSquareButtonStyle}"
+                                    mah:ControlsHelper.ContentCharacterCasing="Normal"
+                        Style="{StaticResource MahApps.Styles.Button.Square.Accent}"
                         BorderThickness="0"
                         Command="{Binding RunToolCommand}"                                    
                         DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}"
+                        Visibility="{Binding IsBusy, Converter={StaticResource InverseBooleanToCollapsedVisibilityConverter}}"
                         Content="Run"></Button>
                                     </DockPanel>
                                     <Button 
                         Padding="20,10,20,10"
                         BorderThickness="0"
-                        mah:ButtonHelper.PreserveTextCase="True"
-                        Style="{StaticResource AccentedSquareButtonStyle}"
-                        Margin="20,0,0,0" Command="{Binding GoToResultView}"                                      
+                        mah:ControlsHelper.ContentCharacterCasing="Normal"
+                        
+                        Margin="20,0,0,0" Command="{Binding GoToResultView}" FontSize="14" Style="{StaticResource MahApps.Styles.Button.Flat}"                                
                                         >Results</Button>
-                                    <!--IsEnabled="{Binding ElementName=runButton, Path=IsEnabled}"-->
+                                    <!--Style="{StaticResource 	MahApps.	MahApps.Styles.ToggleButton.Flat}"-->
+
+
 
                                 </WrapPanel>
                         </UniformGrid>
@@ -266,7 +280,7 @@
                             VerticalAlignment="Center"  
                             DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}"  
                             IsDefault="True" Command="{Binding SelectSomCommand}" 
-                            mah:ButtonHelper.PreserveTextCase="True"
+                            mah:ControlsHelper.ContentCharacterCasing="Normal"
                             MinWidth="80">
                                         <!-- Command="{Binding SelectFileCommand}" Tämä sit toteuttaa vielä-->
                                         <Button.ToolTip>
@@ -373,6 +387,20 @@
                                         <TextBox.ToolTip>Training rate in the final epoch.</TextBox.ToolTip>
                                     </TextBox>
                                 </WrapPanel>
+                                
+                            </UniformGrid>
+                            <UniformGrid Margin="0,-15,0,0">
+                                <WrapPanel>
+                                    <TextBlock>Run Id
+                                        <TextBlock.ToolTip>Replace subfolder name with a given run Id. If a run Id is given, possible previous results with the same name are overwritten.</TextBlock.ToolTip>
+                                    </TextBlock>
+                                </WrapPanel>
+                                <WrapPanel>
+                                    <TextBox Width="100" Text="{Binding Model.RunId}">
+                                        <TextBox.ToolTip>Run Id. If a run Id is given, possible previous results with the same name are overwritten.</TextBox.ToolTip>
+                                    </TextBox>
+                                </WrapPanel>
+
                             </UniformGrid>
 
                             <!--<UniformGrid>
@@ -395,7 +423,7 @@
                     </WrapPanel>
                 </UniformGrid>
                 <UniformGrid VerticalAlignment="Top">
-                    <TextBlock  VerticalAlignment="Top" Margin="20,30,20,20" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Text="{Binding PythonLogText,NotifyOnTargetUpdated=True}"/>
+                    <TextBlock TextWrapping="Wrap" VerticalAlignment="Top" Margin="20,30,20,20" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Text="{Binding PythonLogText,NotifyOnTargetUpdated=True}"/>
                 </UniformGrid>
             </StackPanel>
             <!--<StackPanel Grid.Column="1" Grid.Row="1" Visibility="Hidden" Width="Auto"> -->

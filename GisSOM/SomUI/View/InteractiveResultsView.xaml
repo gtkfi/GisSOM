@@ -4,28 +4,48 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:SomUI.View"
+             xmlns:wpf="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf" xmlns:mah="http://metro.mahapps.com/winfx/xaml/controls"
              mc:Ignorable="d" 
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
+        <!--xmlns:wpf="clr-namespace:CefSharp.Wpf;assembly=CefSharp.Wpf"-->
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>
-            <ColumnDefinition Width="*"></ColumnDefinition>
+            <!--<ColumnDefinition Width="*"></ColumnDefinition>-->
         </Grid.ColumnDefinitions>
         <Button Name="BindingHelperButton" Visibility="Collapsed" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding OpenPlotCommand}"></Button>
         <StackPanel>
-            <TextBlock Margin="0,20,0,0" Width="200" FontSize="16">Selection mode:</TextBlock>
-            <ComboBox Width="200" FontSize="16" SelectedIndex="0" Text="{Binding Model.InteractiveType, Mode=OneWayToSource}" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}">
+            <!--<TextBlock Margin="0,20,0,0" Width="200" FontSize="16">Selection mode:</TextBlock>-->
+            <!--<ComboBox Width="200" FontSize="16" SelectedIndex="0" Text="{Binding Model.InteractiveType, Mode=OneWayToSource}" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}">
                 <ComboBoxItem>Cluster</ComboBoxItem>
                 <ComboBoxItem>Som Cell</ComboBoxItem>
+            </ComboBox>-->
+            <WrapPanel>
+                <Button Click="RefreshBrowser" ToolTip="Refresh plot" HorizontalAlignment="Left" Margin="50,0,0,0" FontFamily="{StaticResource FontAwesome}" Content=""></Button>
+                <!--<Button DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding DrawResultsInteractiveCommand}" HorizontalAlignment="Left" Margin="50,0,0,0" FontFamily="{StaticResource FontAwesome}" Content=""></Button>--><!--Tää on muuten ViewModelille kamaa.-->
+                <!--<Button Click="ShutDownPlot" HorizontalAlignment="Left" Margin="50,0,0,0" FontFamily="{StaticResource FontAwesome}" Content=""></Button>-->
+                <Button Click="ZoomOut" ToolTip="Zoom out" HorizontalAlignment="Left" Margin="50,0,0,0" FontFamily="{StaticResource FontAwesome}" Content=""></Button>
+                <Button Click="ZoomIn" ToolTip="Zoom in" HorizontalAlignment="Left" Margin="50,0,0,0" FontFamily="{StaticResource FontAwesome}" Content=""></Button>
+                <Button ToolTip="Manually start the plot" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding DrawResultsInteractiveCommand}" HorizontalAlignment="Left" Margin="50,0,0,0" FontFamily="{StaticResource FontAwesome}" Content="Run"></Button>
+                <Button Click="Stop" ToolTip="Stop" HorizontalAlignment="Left" Margin="50,0,0,0" FontFamily="{StaticResource FontAwesome}" Content="Stop"></Button><!--ViewModelista httpPost? vai codeBehindista-->
+            </WrapPanel>
+            
+            <!--<Border Grid.Row="1" BorderBrush="Gray" BorderThickness="0,1">-->
+            <mah:MetroProgressBar DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsIndeterminate="True" Width="400" Margin="40,40,40,-45" Visibility="{Binding IsBusy, Converter={StaticResource BooleanToVisibilityConverter}}"></mah:MetroProgressBar>
+            <wpf:ChromiumWebBrowser 	Loaded="RefreshBrowser" x:Name="Browser" Height="1000" MaxWidth="1800" Address="http://localhost:8050/" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" ToolTipService.IsEnabled="False" ToolTip="{Binding BrowserToolTip,NotifyOnTargetUpdated=True}"  TargetUpdated="ToolTip_SourceUpdated"/>
+            
+            <!--</Border>-->
+            <!--<WebBrowser Grid.Column="0" Height="600" Width="400" Name="myWebBrowser" Source="http://localhost:8050/" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" ToolTip="{Binding BrowserToolTip,NotifyOnTargetUpdated=True}"  TargetUpdated="ToolTip_SourceUpdated"></WebBrowser>-->
+            <!--<Button Width="200" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Content="web browser" Command="{Binding LaunchInWebBrowserCommand}"></Button>-->
+        </StackPanel>
+        <!--<StackPanel  Grid.Column="1" >
+            <TextBlock Margin="0,20,0,0" Width="200" FontSize="16">Select Output:</TextBlock>
+            <ComboBox Width="200" FontSize="16" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" SelectedIndex="{Binding Model.SelectedInteractiveColumn}" ItemsSource="{Binding Path=Model.InteractiveResultColumnList, UpdateSourceTrigger=PropertyChanged}">--><!--ja tähän sit ne data columnit valittaviksi--><!--
             </ComboBox>
-            <WebBrowser Grid.Column="0" Height="600" Width="550" Name="myWebBrowser" Source="http://localhost:8050/" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" ToolTip="{Binding BrowserToolTip,NotifyOnTargetUpdated=True}"  TargetUpdated="ToolTip_SourceUpdated"></WebBrowser>
-            <Button Width="200" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Content="Open in web browser" Command="{Binding LaunchInWebBrowserCommand}"></Button>
-        </StackPanel>
-        <StackPanel  Grid.Column="1" >
-            <Button HorizontalAlignment="Left" Width="200" Margin="0,50,0,0" Command="{Binding SaveFileCommand}" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}">Save Image</Button>
-            <Button Padding="2" BorderThickness="0" BorderBrush="AliceBlue" Background="White" Margin="0" HorizontalAlignment="Center" Command="{Binding OpenPlotCommand}" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" CommandParameter="{Binding Model.InteractiveResultSomPlot}">
-                <Image HorizontalAlignment="Left" VerticalAlignment="Top"  DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Source="{Binding Path=Model.InteractiveResultSomPlot}" Grid.Column="1" Width="500"></Image>
+            <Button  Width="200" Margin="0,10,0,10" Command="{Binding SaveFileCommand}" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}">Save Image</Button>
+            <Button Padding="2" BorderThickness="0" BorderBrush="AliceBlue" Background="White" Margin="0,0,20,20" HorizontalAlignment="Center" Command="{Binding OpenPlotCommand}" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" CommandParameter="{Binding Model.InteractiveResultSomPlot}">
+                <Image HorizontalAlignment="Left" VerticalAlignment="Top"  DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Source="{Binding Path=Model.InteractiveResultSomPlot}" Grid.Column="1" MinWidth="500"></Image>
                 </Button>
-        </StackPanel>
+        </StackPanel>-->
         </Grid>
 </UserControl>

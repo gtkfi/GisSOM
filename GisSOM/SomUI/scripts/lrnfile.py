@@ -8,7 +8,7 @@ The module contains  functions to read lrn-files
 import numpy as np
 
 def load_lrn_file(input_file):
-    lrn_header = lrn_read_lrn_header(input_file)
+    lrn_header = read_lrn_header(input_file)
     datacols = [i for i, x in enumerate(lrn_header['coltypes']) if x == 1]
     data = np.loadtxt(
         input_file, 
@@ -19,7 +19,7 @@ def load_lrn_file(input_file):
     lrn_header['data'] = data
     return lrn_header
 
-def lrn_read_lrn_header(input_file):
+def read_lrn_header(input_file):
     linenum = 0
     with open(input_file) as fh:
         while True:

@@ -24,5 +24,23 @@ namespace SomUI.View
         {
             InitializeComponent();
         }
+
+
+        private void ToolTip_SourceUpdated(object sender, DataTransferEventArgs e)
+        {
+
+            if (this.webView.IsLoaded)
+            {
+                this.webView.Reload();
+                //App.Current.Dispatcher.Invoke((Action)delegate
+                //{
+                //    this.Browser.Load("http://localhost:8050/");
+                //});
+
+                //this.Browser.Visibility = Visibility.Visible;
+            }
+
+
+        }
     }
 }

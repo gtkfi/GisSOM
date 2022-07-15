@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Thu Jul 25 11:50:45 2019
-Script for loading csv input data  files
+Script for loading csv input data files
 @author: shautala
 """
 import numpy as np
@@ -14,8 +14,9 @@ def load_csv_file(input_file):
         input_file, 
         dtype='str',
         delimiter=',',
-        skiprows=1
-        ,usecols=(datacols))
+        skiprows=1,
+        encoding="utf-8-sig",
+        usecols=(datacols))
     csv_header['data'] = data
     return csv_header 
            
@@ -30,7 +31,7 @@ def read_csv_data_columns(csv_header):
     data_cols=[]
     for i in range(2, len(csv_header['colnames'])):
         data_cols.append(i)
-    return _read_columns(csv_header, data_cols, fmt)
+    return _read_columns(csv_header, data_cols)
 
 def _read_columns(csv_header, columns, fmt=''):
     if not type(columns) in (list, tuple):
@@ -39,6 +40,7 @@ def _read_columns(csv_header, columns, fmt=''):
     data = np.loadtxt(
                 csv_header['file'],
                 dtype='float32', 
+                encoding="utf-8-sig",
                 delimiter=',',
                 skiprows=csv_header['headerlength'] , 
                 usecols=(columns))
@@ -50,11 +52,12 @@ def read_csv_header(input_file):
         input_file, 
         dtype='str',
         delimiter=',',
-        skiprows=1)
+        skiprows=1,
+        encoding="utf-8-sig")
     rows=len(data)
     cols=len(data[0])  
     
-    with open(input_file) as fh:
+    with open(input_file,encoding='utf-8-sig') as fh:
         header_line = fh.readline()
         colnames=header_line.split(",")
     

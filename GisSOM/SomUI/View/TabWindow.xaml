@@ -8,7 +8,7 @@
         xmlns:local="clr-namespace:SomUI.View"
         mc:Ignorable="d"
         Title="GisSOM"
-        TitleCaps="False"
+        TitleCharacterCasing="Normal"
                  Height="450" Width="800">
     <dragablz:TabablzControl   x:Name="TabablzControl"
                                Margin="4 0 4 4"
