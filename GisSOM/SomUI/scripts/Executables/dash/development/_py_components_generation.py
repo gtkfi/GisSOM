@@ -1,6 +1,7 @@
 from collections import OrderedDict
 import copy
 import os
+from textwrap import fill
 
 from dash.development.base_component import _explicitize_args
 from dash.exceptions import NonExistentEventException
@@ -10,23 +11,18 @@ from .base_component import Component
 
 # pylint: disable=unused-argument
 def generate_class_string(typename, props, description, namespace):
-    """
-    Dynamically generate class strings to have nicely formatted docstrings,
-    keyword arguments, and repr
-
+    """Dynamically generate class strings to have nicely formatted docstrings,
+    keyword arguments, and repr.
     Inspired by http://jameso.be/2013/08/06/namedtuple.html
-
     Parameters
     ----------
     typename
     props
     description
     namespace
-
     Returns
     -------
     string
-
     """
     # TODO _prop_names, _type, _namespace, and available_properties
     # can be modified by a Dash JS developer via setattr
@@ -55,12 +51,10 @@ def generate_class_string(typename, props, description, namespace):
         self.available_properties = {list_of_valid_keys}
         self.available_wildcard_properties =\
             {list_of_valid_wildcard_attr_prefixes}
-
         _explicit_args = kwargs.pop('_explicit_args')
         _locals = locals()
         _locals.update(kwargs)  # For wildcard attrs
         args = {{k: _locals[k] for k in _explicit_args if k != 'children'}}
-
         for k in {required_props}:
             if k not in args:
                 raise TypeError(
@@ -72,29 +66,31 @@ def generate_class_string(typename, props, description, namespace):
     wildcard_prefixes = repr(parse_wildcards(props))
     list_of_valid_keys = repr(list(map(str, filtered_props.keys())))
     docstring = create_docstring(
-        component_name=typename,
-        props=filtered_props,
-        description=description).replace('\r\n', '\n')
+        component_name=typename, props=filtered_props, description=description
+    ).replace("\r\n", "\n")
 
     prohibit_events(props)
 
     # pylint: disable=unused-variable
     prop_keys = list(props.keys())
-    if 'children' in props:
-        prop_keys.remove('children')
+    if "children" in props:
+        prop_keys.remove("children")
         default_argtext = "children=None, "
-        argtext = 'children=children, **args'
+        argtext = "children=children, **args"
     else:
         default_argtext = ""
-        argtext = '**args'
+        argtext = "**args"
     default_argtext += ", ".join(
-        [('{:s}=Component.REQUIRED'.format(p)
-          if props[p]['required'] else
-          '{:s}=Component.UNDEFINED'.format(p))
-         for p in prop_keys
-         if not p.endswith("-*") and
-         p not in python_keywords and
-         p != 'setProps'] + ["**kwargs"]
+        [
+            (
+                "{:s}=Component.REQUIRED".format(p)
+                if props[p]["required"]
+                else "{:s}=Component.UNDEFINED".format(p)
+            )
+            for p in prop_keys
+            if not p.endswith("-*") and p not in python_keywords and p != "setProps"
+        ]
+        + ["**kwargs"]
     )
     required_args = required_props(props)
     return c.format(
@@ -106,52 +102,44 @@ def generate_class_string(typename, props, description, namespace):
         docstring=docstring,
         default_argtext=default_argtext,
         argtext=argtext,
-        required_props=required_args
+        required_props=required_args,
     )
 
 
 def generate_class_file(typename, props, description, namespace):
-    """
-    Generate a python class file (.py) given a class string
-
+    """Generate a Python class file (.py) given a class string.
     Parameters
     ----------
     typename
     props
     description
     namespace
-
     Returns
     -------
-
     """
-    import_string =\
-        "# AUTO GENERATED FILE - DO NOT EDIT\n\n" + \
-        "from dash.development.base_component import " + \
-        "Component, _explicitize_args\n\n\n"
-    class_string = generate_class_string(
-        typename,
-        props,
-        description,
-        namespace
+    import_string = (
+        "# AUTO GENERATED FILE - DO NOT EDIT\n\n"
+        + "from dash.development.base_component import "
+        + "Component, _explicitize_args\n\n\n"
     )
+    class_string = generate_class_string(typename, props, description, namespace)
     file_name = "{:s}.py".format(typename)
 
     file_path = os.path.join(namespace, file_name)
-    with open(file_path, 'w') as f:
+    with open(file_path, "w") as f:
         f.write(import_string)
         f.write(class_string)
 
-    print('Generated {}'.format(file_name))
+    print("Generated {}".format(file_name))
 
 
 def generate_imports(project_shortname, components):
-    with open(os.path.join(project_shortname, '_imports_.py'), 'w') as f:
-        imports_string = '{}\n\n{}'.format(
-            '\n'.join(
-                'from .{0} import {0}'.format(x) for x in components),
-            '__all__ = [\n{}\n]'.format(
-                ',\n'.join('    "{}"'.format(x) for x in components))
+    with open(os.path.join(project_shortname, "_imports_.py"), "w") as f:
+        imports_string = "{}\n\n{}".format(
+            "\n".join("from .{0} import {0}".format(x) for x in components),
+            "__all__ = [\n{}\n]".format(
+                ",\n".join('    "{}"'.format(x) for x in components)
+            ),
         )
 
         f.write(imports_string)
@@ -160,37 +148,33 @@ def generate_imports(project_shortname, components):
 def generate_classes_files(project_shortname, metadata, *component_generators):
     components = []
     for component_path, component_data in metadata.items():
-        component_name = component_path.split('/')[-1].split('.')[0]
+        component_name = component_path.split("/")[-1].split(".")[0]
         components.append(component_name)
 
         for generator in component_generators:
             generator(
                 component_name,
-                component_data['props'],
-                component_data['description'],
-                project_shortname
+                component_data["props"],
+                component_data["description"],
+                project_shortname,
             )
 
     return components
 
 
 def generate_class(typename, props, description, namespace):
-    """
-    Generate a python class object given a class string
-
+    """Generate a Python class object given a class string.
     Parameters
     ----------
     typename
     props
     description
     namespace
-
     Returns
     -------
-
     """
     string = generate_class_string(typename, props, description, namespace)
-    scope = {'Component': Component, '_explicitize_args': _explicitize_args}
+    scope = {"Component": Component, "_explicitize_args": _explicitize_args}
     # pylint: disable=exec-used
     exec(string, scope)
     result = scope[typename]
@@ -198,26 +182,20 @@ def generate_class(typename, props, description, namespace):
 
 
 def required_props(props):
-    """
-    Pull names of required props from the props object
-
+    """Pull names of required props from the props object.
     Parameters
     ----------
     props: dict
-
     Returns
     -------
     list
         List of prop names (str) that are required for the Component
     """
-    return [prop_name for prop_name, prop in list(props.items())
-            if prop['required']]
+    return [prop_name for prop_name, prop in list(props.items()) if prop["required"]]
 
 
 def create_docstring(component_name, props, description):
-    """
-    Create the Dash component docstring
-
+    """Create the Dash component docstring.
     Parameters
     ----------
     component_name: str
@@ -226,7 +204,6 @@ def create_docstring(component_name, props, description):
         Dictionary with {propName: propMetadata} structure
     description: str
         Component description
-
     Returns
     -------
     str
@@ -236,55 +213,50 @@ def create_docstring(component_name, props, description):
     props = reorder_props(props=props)
 
     return (
-        """A{n} {name} component.\n{description}
-
-Keyword arguments:\n{args}"""
+        "A{n} {name} component.\n{description}\n\nKeyword arguments:\n{args}"
     ).format(
-        n='n' if component_name[0].lower() in ['a', 'e', 'i', 'o', 'u']
-        else '',
+        n="n" if component_name[0].lower() in "aeiou" else "",
         name=component_name,
         description=description,
-        args='\n'.join(
+        args="\n".join(
             create_prop_docstring(
                 prop_name=p,
-                type_object=prop['type'] if 'type' in prop
-                else prop['flowType'],
-                required=prop['required'],
-                description=prop['description'],
-                default=prop.get('defaultValue'),
+                type_object=prop["type"] if "type" in prop else prop["flowType"],
+                required=prop["required"],
+                description=prop["description"],
+                default=prop.get("defaultValue"),
                 indent_num=0,
-                is_flow_type='flowType' in prop and 'type' not in prop)
-            for p, prop in list(filter_props(props).items())))
+                is_flow_type="flowType" in prop and "type" not in prop,
+            )
+            for p, prop in filter_props(props).items()
+        ),
+    )
 
 
 def prohibit_events(props):
-    """
-    Events have been removed. Raise an error if we see dashEvents or fireEvents
-
+    """Events have been removed. Raise an error if we see dashEvents or
+    fireEvents.
     Parameters
     ----------
     props: dict
         Dictionary with {propName: propMetadata} structure
-
     Raises
     -------
     ?
     """
-    if 'dashEvents' in props or 'fireEvents' in props:
+    if "dashEvents" in props or "fireEvents" in props:
         raise NonExistentEventException(
-            'Events are no longer supported by dash. Use properties instead, '
-            'eg `n_clicks` instead of a `click` event.')
+            "Events are no longer supported by dash. Use properties instead, "
+            "eg `n_clicks` instead of a `click` event."
+        )
 
 
 def parse_wildcards(props):
-    """
-    Pull out the wildcard attributes from the Component props
-
+    """Pull out the wildcard attributes from the Component props.
     Parameters
     ----------
     props: dict
         Dictionary with {propName: propMetadata} structure
-
     Returns
     -------
     list
@@ -298,45 +270,38 @@ def parse_wildcards(props):
 
 
 def reorder_props(props):
-    """
-    If "children" is in props, then move it to the
-    front to respect dash convention
-
+    """If "children" is in props, then move it to the front to respect dash
+    convention, then 'id', then the remaining props sorted by prop name
     Parameters
     ----------
     props: dict
         Dictionary with {propName: propMetadata} structure
-
     Returns
     -------
     dict
         Dictionary with {propName: propMetadata} structure
     """
-    if 'children' in props:
-        # Constructing an OrderedDict with duplicate keys, you get the order
-        # from the first one but the value from the last.
-        # Doing this to avoid mutating props, which can cause confusion.
-        props = OrderedDict([('children', '')] + list(props.items()))
 
-    return props
+    # Constructing an OrderedDict with duplicate keys, you get the order
+    # from the first one but the value from the last.
+    # Doing this to avoid mutating props, which can cause confusion.
+    props1 = [("children", "")] if "children" in props else []
+    props2 = [("id", "")] if "id" in props else []
+    return OrderedDict(props1 + props2 + sorted(list(props.items())))
 
 
 def filter_props(props):
-    """
-    Filter props from the Component arguments to exclude:
+    """Filter props from the Component arguments to exclude:
         - Those without a "type" or a "flowType" field
         - Those with arg.type.name in {'func', 'symbol', 'instanceOf'}
-
     Parameters
     ----------
     props: dict
         Dictionary with {propName: propMetadata} structure
-
     Returns
     -------
     dict
         Filtered dictionary with {propName: propMetadata} structure
-
     Examples
     --------
     ```python
@@ -370,23 +335,22 @@ def filter_props(props):
     filtered_props = copy.deepcopy(props)
 
     for arg_name, arg in list(filtered_props.items()):
-        if 'type' not in arg and 'flowType' not in arg:
+        if "type" not in arg and "flowType" not in arg:
             filtered_props.pop(arg_name)
             continue
 
         # Filter out functions and instances --
         # these cannot be passed from Python
-        if 'type' in arg:  # These come from PropTypes
-            arg_type = arg['type']['name']
-            if arg_type in {'func', 'symbol', 'instanceOf'}:
+        if "type" in arg:  # These come from PropTypes
+            arg_type = arg["type"]["name"]
+            if arg_type in {"func", "symbol", "instanceOf"}:
                 filtered_props.pop(arg_name)
-        elif 'flowType' in arg:  # These come from Flow & handled differently
-            arg_type_name = arg['flowType']['name']
-            if arg_type_name == 'signature':
+        elif "flowType" in arg:  # These come from Flow & handled differently
+            arg_type_name = arg["flowType"]["name"]
+            if arg_type_name == "signature":
                 # This does the same as the PropTypes filter above, but "func"
                 # is under "type" if "name" is "signature" vs just in "name"
-                if 'type' not in arg['flowType'] \
-                        or arg['flowType']['type'] != 'object':
+                if "type" not in arg["flowType"] or arg["flowType"]["type"] != "object":
                     filtered_props.pop(arg_name)
         else:
             raise ValueError
@@ -394,12 +358,28 @@ def filter_props(props):
     return filtered_props
 
 
-# pylint: disable=too-many-arguments
-def create_prop_docstring(prop_name, type_object, required, description,
-                          default, indent_num, is_flow_type=False):
+def fix_keywords(txt):
     """
-    Create the Dash component prop docstring
+    replaces javascript keywords true, false, null with Python keywords
+    """
+    fix_word = {"true": "True", "false": "False", "null": "None"}
+    for js_keyword, python_keyword in fix_word.items():
+        txt = txt.replace(js_keyword, python_keyword)
+    return txt
 
+
+# pylint: disable=too-many-arguments
+# pylint: disable=too-many-locals
+def create_prop_docstring(
+    prop_name,
+    type_object,
+    required,
+    description,
+    default,
+    indent_num,
+    is_flow_type=False,
+):
+    """Create the Dash component prop docstring.
     Parameters
     ----------
     prop_name: str
@@ -419,177 +399,203 @@ def create_prop_docstring(prop_name, type_object, required, description,
         (creates 2 spaces for every indent)
     is_flow_type: bool
         Does the prop use Flow types? Otherwise, uses PropTypes
-
     Returns
     -------
     str
         Dash component prop docstring
     """
     py_type_name = js_to_py_type(
-        type_object=type_object,
-        is_flow_type=is_flow_type,
-        indent_num=indent_num + 1)
-    indent_spacing = '  ' * indent_num
+        type_object=type_object, is_flow_type=is_flow_type, indent_num=indent_num
+    )
+    indent_spacing = "  " * indent_num
 
-    if default is None:
-        default = ''
-    else:
-        default = default['value']
+    default = default["value"] if default else ""
+    default = fix_keywords(default)
 
-    if default in ['true', 'false']:
-        default = default.title()
-
-    is_required = 'optional'
+    is_required = "optional"
     if required:
-        is_required = 'required'
-    elif default and default not in ['null', '{}', '[]']:
-        is_required = 'default {}'.format(
-            default.replace('\n', '\n' + indent_spacing)
+        is_required = "required"
+    elif default and default not in ["None", "{}", "[]"]:
+        is_required = "default {}".format(default.replace("\n", ""))
+
+    # formats description
+    period = "." if description else ""
+    description = description.strip().strip(".").replace('"', r"\"") + period
+    desc_indent = indent_spacing + "    "
+    description = fill(
+        description,
+        initial_indent=desc_indent,
+        subsequent_indent=desc_indent,
+        break_long_words=False,
+        break_on_hyphens=False,
+    )
+    description = "\n{}".format(description) if description else ""
+    colon = ":" if description else ""
+    description = fix_keywords(description)
+
+    if "\n" in py_type_name:
+        # corrects the type
+        dict_or_list = "list of dicts" if py_type_name.startswith("list") else "dict"
+
+        # format and rewrite the intro to the nested dicts
+        intro1, intro2, dict_descr = py_type_name.partition("with keys:")
+        intro = "".join(["`{}`".format(prop_name), " is a ", intro1, intro2])
+        intro = fill(
+            intro,
+            initial_indent=desc_indent,
+            subsequent_indent=desc_indent,
+            break_long_words=False,
+            break_on_hyphens=False,
         )
 
-    if '\n' in py_type_name:
-        return '{indent_spacing}- {name} (dict; {is_required}): ' \
-            '{description}{period}' \
-            '{name} has the following type: {type}'.format(
+        # captures optional nested dict description and puts the "or" condition on a new line
+        if "| dict with keys:" in dict_descr:
+            dict_part1, dict_part2 = dict_descr.split(" |", 1)
+            dict_part2 = "".join([desc_indent, "Or", dict_part2])
+            dict_descr = "{}\n\n  {}".format(dict_part1, dict_part2)
+
+        # ensures indent is correct if there is a second nested list of dicts
+        current_indent = dict_descr.lstrip("\n").find("-")
+        if current_indent == len(indent_spacing):
+            dict_descr = "".join(
+                "\n\n    " + line for line in dict_descr.splitlines() if line != ""
+            )
+
+        return (
+            "\n{indent_spacing}- {name} ({dict_or_list}; {is_required}){colon}"
+            "{description}"
+            "\n\n{intro}{dict_descr}".format(
                 indent_spacing=indent_spacing,
                 name=prop_name,
-                type=py_type_name,
-                description=description.strip().strip('.'),
-                period='. ' if description else '',
-                is_required=is_required)
-    return '{indent_spacing}- {name} ({type}' \
-        '{is_required}){description}'.format(
+                colon=colon,
+                description=description,
+                intro=intro,
+                dict_descr=dict_descr,
+                dict_or_list=dict_or_list,
+                is_required=is_required,
+            )
+        )
+    return (
+        "\n{indent_spacing}- {name} ({type}{is_required}){colon}"
+        "{description}".format(
             indent_spacing=indent_spacing,
             name=prop_name,
-            type='{}; '.format(py_type_name) if py_type_name else '',
-            description=(
-                ': {}'.format(description) if description != '' else ''
-            ),
-            is_required=is_required)
+            type="{}; ".format(py_type_name) if py_type_name else "",
+            colon=colon,
+            description=description,
+            is_required=is_required,
+        )
+    )
 
 
-def map_js_to_py_types_prop_types(type_object):
-    """Mapping from the PropTypes js type object to the Python type"""
+def map_js_to_py_types_prop_types(type_object, indent_num):
+    """Mapping from the PropTypes js type object to the Python type."""
 
     def shape_or_exact():
-        return 'dict containing keys {}.\n{}'.format(
-            ', '.join(
-                "'{}'".format(t) for t in list(type_object['value'].keys())
+        return "dict with keys:\n{}".format(
+            "\n".join(
+                create_prop_docstring(
+                    prop_name=prop_name,
+                    type_object=prop,
+                    required=prop["required"],
+                    description=prop.get("description", ""),
+                    default=prop.get("defaultValue"),
+                    indent_num=indent_num + 2,
+                )
+                for prop_name, prop in sorted(list(type_object["value"].items()))
             ),
-            'Those keys have the following types:\n{}'.format(
-                '\n'.join(
-                    create_prop_docstring(
-                        prop_name=prop_name,
-                        type_object=prop,
-                        required=prop['required'],
-                        description=prop.get('description', ''),
-                        default=prop.get('defaultValue'),
-                        indent_num=1
-                    ) for prop_name, prop in
-                    list(type_object['value'].items())))
-            )
+        )
 
     return dict(
-        array=lambda: 'list',
-        bool=lambda: 'boolean',
-        number=lambda: 'number',
-        string=lambda: 'string',
-        object=lambda: 'dict',
-        any=lambda: 'boolean | number | string | dict | list',
-        element=lambda: 'dash component',
-        node=lambda: 'a list of or a singular dash '
-                     'component, string or number',
-
+        array=lambda: "list",
+        bool=lambda: "boolean",
+        number=lambda: "number",
+        string=lambda: "string",
+        object=lambda: "dict",
+        any=lambda: "boolean | number | string | dict | list",
+        element=lambda: "dash component",
+        node=lambda: "a list of or a singular dash component, string or number",
         # React's PropTypes.oneOf
-        enum=lambda: 'a value equal to: {}'.format(
-            ', '.join(
-                '{}'.format(str(t['value']))
-                for t in type_object['value'])),
-
+        enum=lambda: "a value equal to: {}".format(
+            ", ".join("{}".format(str(t["value"])) for t in type_object["value"])
+        ),
         # React's PropTypes.oneOfType
-        union=lambda: '{}'.format(
-            ' | '.join(
-                '{}'.format(js_to_py_type(subType))
-                for subType in type_object['value']
-                if js_to_py_type(subType) != '')),
-
+        union=lambda: "{}".format(
+            " | ".join(
+                "{}".format(js_to_py_type(subType))
+                for subType in type_object["value"]
+                if js_to_py_type(subType) != ""
+            )
+        ),
         # React's PropTypes.arrayOf
         arrayOf=lambda: (
-            "list" + ((" of {}").format(
-                js_to_py_type(type_object["value"]) + 's'
-                if js_to_py_type(type_object["value"]).split(' ')[0] != 'dict'
-                else js_to_py_type(type_object["value"]).replace(
-                        'dict', 'dicts', 1
+            "list"
+            + (
+                " of {}".format(
+                    js_to_py_type(type_object["value"]) + "s"
+                    if js_to_py_type(type_object["value"]).split(" ")[0] != "dict"
+                    else js_to_py_type(type_object["value"]).replace("dict", "dicts", 1)
                 )
+                if js_to_py_type(type_object["value"]) != ""
+                else ""
             )
-                      if js_to_py_type(type_object["value"]) != ""
-                      else "")
         ),
-
         # React's PropTypes.objectOf
-        objectOf=lambda: (
-            'dict with strings as keys and values of type {}'
-            ).format(
-                js_to_py_type(type_object['value'])),
-
+        objectOf=lambda: "dict with strings as keys and values of type {}".format(
+            js_to_py_type(type_object["value"])
+        ),
         # React's PropTypes.shape
         shape=shape_or_exact,
         # React's PropTypes.exact
-        exact=shape_or_exact
+        exact=shape_or_exact,
     )
 
 
 def map_js_to_py_types_flow_types(type_object):
-    """Mapping from the Flow js types to the Python type"""
-
+    """Mapping from the Flow js types to the Python type."""
     return dict(
-        array=lambda: 'list',
-        boolean=lambda: 'boolean',
-        number=lambda: 'number',
-        string=lambda: 'string',
-        Object=lambda: 'dict',
-        any=lambda: 'bool | number | str | dict | list',
-        Element=lambda: 'dash component',
-        Node=lambda: 'a list of or a singular dash '
-                     'component, string or number',
-
+        array=lambda: "list",
+        boolean=lambda: "boolean",
+        number=lambda: "number",
+        string=lambda: "string",
+        Object=lambda: "dict",
+        any=lambda: "bool | number | str | dict | list",
+        Element=lambda: "dash component",
+        Node=lambda: "a list of or a singular dash component, string or number",
         # React's PropTypes.oneOfType
-        union=lambda: '{}'.format(
-            ' | '.join(
-                '{}'.format(js_to_py_type(subType))
-                for subType in type_object['elements']
-                if js_to_py_type(subType) != '')),
-
+        union=lambda: "{}".format(
+            " | ".join(
+                "{}".format(js_to_py_type(subType))
+                for subType in type_object["elements"]
+                if js_to_py_type(subType) != ""
+            )
+        ),
         # Flow's Array type
-        Array=lambda: 'list{}'.format(
-            ' of {}s'.format(
-                js_to_py_type(type_object['elements'][0]))
-            if js_to_py_type(type_object['elements'][0]) != ''
-            else ''),
-
+        Array=lambda: "list{}".format(
+            " of {}s".format(js_to_py_type(type_object["elements"][0]))
+            if js_to_py_type(type_object["elements"][0]) != ""
+            else ""
+        ),
         # React's PropTypes.shape
-        signature=lambda indent_num: 'dict containing keys {}.\n{}'.format(
-            ', '.join("'{}'".format(d['key'])
-                      for d in type_object['signature']['properties']),
-            '{}Those keys have the following types:\n{}'.format(
-                '  ' * indent_num,
-                '\n'.join(
-                    create_prop_docstring(
-                        prop_name=prop['key'],
-                        type_object=prop['value'],
-                        required=prop['value']['required'],
-                        description=prop['value'].get('description', ''),
-                        default=prop.get('defaultValue'),
-                        indent_num=indent_num,
-                        is_flow_type=True)
-                    for prop in type_object['signature']['properties']))),
+        signature=lambda indent_num: "dict with keys:\n{}".format(
+            "\n".join(
+                create_prop_docstring(
+                    prop_name=prop["key"],
+                    type_object=prop["value"],
+                    required=prop["value"]["required"],
+                    description=prop["value"].get("description", ""),
+                    default=prop.get("defaultValue"),
+                    indent_num=indent_num + 2,
+                    is_flow_type=True,
+                )
+                for prop in type_object["signature"]["properties"]
+            ),
+        ),
     )
 
 
 def js_to_py_type(type_object, is_flow_type=False, indent_num=0):
-    """
-    Convert JS types to Python types for the component definition
-
+    """Convert JS types to Python types for the component definition.
     Parameters
     ----------
     type_object: dict
@@ -598,23 +604,30 @@ def js_to_py_type(type_object, is_flow_type=False, indent_num=0):
         Does the prop use Flow types? Otherwise, uses PropTypes
     indent_num: int
         Number of indents to use for the docstring for the prop
-
     Returns
     -------
     str
         Python type string
     """
-    js_type_name = type_object['name']
-    js_to_py_types = map_js_to_py_types_flow_types(type_object=type_object) \
-        if is_flow_type \
-        else map_js_to_py_types_prop_types(type_object=type_object)
 
-    if 'computed' in type_object and type_object['computed'] \
-            or type_object.get('type', '') == 'function':
-        return ''
+    js_type_name = type_object["name"]
+    js_to_py_types = (
+        map_js_to_py_types_flow_types(type_object=type_object)
+        if is_flow_type
+        else map_js_to_py_types_prop_types(
+            type_object=type_object, indent_num=indent_num
+        )
+    )
+
+    if (
+        "computed" in type_object
+        and type_object["computed"]
+        or type_object.get("type", "") == "function"
+    ):
+        return ""
     if js_type_name in js_to_py_types:
-        if js_type_name == 'signature':  # This is a Flow object w/ signature
+        if js_type_name == "signature":  # This is a Flow object w/ signature
             return js_to_py_types[js_type_name](indent_num)
         # All other types
         return js_to_py_types[js_type_name]()
-    return ''
+    return ""

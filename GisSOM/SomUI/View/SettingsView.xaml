@@ -10,10 +10,10 @@
         <StackPanel>
             <TextBlock Margin="20,2,2,2">Current python path:</TextBlock>
             <TextBlock Margin="20,2,2,2" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Text="{Binding PythonPath}"></TextBlock>
-            <Button Margin="20"  Width="180" HorizontalAlignment="Left" Style="{StaticResource AccentedSquareButtonStyle}" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding SelectPythonFileCommand}">
+            <Button Margin="20"  Width="180" HorizontalAlignment="Left" Style="{StaticResource MahApps.Styles.Button.Square.Accent}" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding SelectPythonFileCommand}">
                 <TextBlock>Change python path</TextBlock>
             </Button>
-            <Button Margin="20"  Width="240" HorizontalAlignment="Left" Style="{StaticResource AccentedSquareButtonStyle}" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding ForcePythonReinstallCommand}">
+            <Button Margin="20"  Width="240" HorizontalAlignment="Left" Style="{StaticResource MahApps.Styles.Button.Square.Accent}" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding ForcePythonReinstallCommand}">
                 <TextBlock Text="Re-install python packages">
                     <TextBlock.ToolTip> Force re-installation of required python pacakges.</TextBlock.ToolTip>
                 </TextBlock>

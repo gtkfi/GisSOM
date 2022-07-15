@@ -1,0 +1,14 @@
+{
+    "workbench.colorTheme": "Default Dark+",
+    "launch": {
+        "configurations": [
+            {
+                "name":"Python: Current File22",
+                "type":"python",
+                "request":"launch",
+                "program":"${file}",
+                "args": ["--input_file","C:/Users/shautala/OneDrive - Valtori GTK/Documents/TestData/Lapland_csv_grid - Copy.csv", "--output_folder=","C:/Users/shautala/AppData/Local/Temp/GisSOM", "--eastingIndex","0", "--northingIndex", "1", "--normalized","true", "--min_N","0", "--max_N","1", "--exclude_list","True,True,True,False,False,False", "--scale_min_list","0,0,0,0,0,0", "--scale_max_list","1,1,1,1,1,1", "--log_transform_list","False,False,False,False,False,False", "--winsor_list","False,False,False,False,False,False", "--winsor_min_list","0,0,0,0,0,0", "--winsor_max_list","0,0,0,0,0,0", "--label_index","2"]
+            }
+        ]
+    }
+}

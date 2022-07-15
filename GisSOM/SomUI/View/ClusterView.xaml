@@ -78,15 +78,16 @@
             </WrapPanel>
         </UniformGrid>
             <Button DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Content="Run clustering" Width="200" Command="{Binding RunClusteringCommand}"></Button>
-            
+            <Button DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Content="Save clustering dictionary" Width="200" Command="{Binding SaveClusterFileCommand}"></Button>
+            <Button DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Content="Load clustering dictionary" Width="200" Command="{Binding LoadClusterFileCommand}"></Button>
             <UniformGrid>
                 <ListBox Name="MyListBox" 
                          IsEnabled="False"
                          ItemTemplate="{StaticResource DefaultTemplate}" 
                          DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" 
-                         ItemsSource="{Binding Path=ClusterPlotList, UpdateSourceTrigger=PropertyChanged}"
-                         SelectedIndex="{Binding SelectedClusterIndex}"
+                         ItemsSource="{Binding Path=ClusterPlotList, UpdateSourceTrigger=PropertyChanged}"                         
                          HorizontalAlignment="Center">
+<!--SelectedIndex="{Binding SelectedClusterIndex}"-->
                     <ListBox.ItemsPanel>
                         <ItemsPanelTemplate>
                             <UniformGrid/> <!--Merkittäkööt muistiin jälkipolville, että tässä oli StackPanel Horizontal Alignmentilla/Orientationilla.-->
@@ -97,14 +98,13 @@
             <!--<Slider Width="400" HorizontalAlignment="Center" Minimum="2" Maximum="25" TickPlacement="BottomRight" TickFrequency="1" IsSnapToTickEnabled="True" /> --><!--Jos tässä ois aina accurate numba of clustahs niin tää vois olla ihan legit kontrolli.-->
             <WrapPanel Width="400">
                 <TextBlock>Select number of clusters to use:</TextBlock>
-                <mah:NumericUpDown DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}"  Width="100" Margin="20,0,0,0" HasDecimals="False" Minimum="{Binding Model.KMeans_min_last_calculation}"  Value="{Binding SelectedClusterIndex, Mode=TwoWay}"></mah:NumericUpDown>
+                <mah:NumericUpDown DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}"  Width="100" Margin="20,0,0,0" NumericInputMode="Numbers" Minimum="{Binding Model.KMeans_min_last_calculation}"  Value="{Binding SelectedClusterIndex, Mode=TwoWay}"></mah:NumericUpDown>
                 <!--Min ja max bindiin-->
                 <!--Maximum="{Binding Model.KMeans_max_last_calculation}"--><!--This is disabled, until RunStats.txt or some other place reliably provides the current kmeans min and max
                 , and these are read also when doing clustering on Older results loaded in.-->
             </WrapPanel>
-            <Button DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Content="Use selected" Width="200" Command="{Binding SaveClusterCommand}"></Button>
-            <Button DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Content="Save result" Width="200" Command="{Binding SaveClusterFileCommand}"></Button>
-            <Button DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Content="Load result" Width="200" Command="{Binding LoadClusterFileCommand}"></Button>
+            <Button DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Content="Visualize selected" Width="200" Command="{Binding SaveClusterCommand}"></Button>
+
             <mah:ProgressRing DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsActive="{Binding IsBusy, Mode=TwoWay}" />
         </StackPanel>
     </Grid>

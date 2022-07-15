@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Media;
 using GalaSoft.MvvmLight;
+using SomUI.Service;
 
 namespace SomUI.Model
 {
     public class SomModel : ObservableObject
     {
         private string inputFile;
+        private string originalData;
         private string somResultsFolder;
         private string output_file_geospace;
         private string output_file_somspace;
@@ -18,16 +21,22 @@ namespace SomUI.Model
         private string outputFolderTimestamped;
         private int som_x;
         private int som_y;
-        private int epochs; 
+        private int epochs;
         private List<string> inrasterlist = new List<string> { "" };
+        private ObservableCollection<BoolStringHelper> scatterPlotList = new ObservableCollection<BoolStringHelper> { };
+        private ObservableCollection<BoolStringHelper> boxPlotList = new ObservableCollection<BoolStringHelper> { };
+        private ObservableCollection<DataColumn> columnDataList = new ObservableCollection<DataColumn> { };
+        private ObservableCollection<string> interactiveResultColumnList = new ObservableCollection<string> { };
         private string interactiveType;
         private string isLogTransformed;
-        private string isWinsorized; 
+        private string isWinsorized;
         private string winsorMin;
         private string winsorMax;
         private string isExcluded;
         private ImageSource dataHistogram;
         private ImageSource interactiveResultSomPlot;
+        private ImageSource newLabelPlot;
+        private ImageSource newLabelLegend;
         private int eastingColumnIndex;
         private int northingColumnIndex;
         private int labelColumnIndex;
@@ -37,7 +46,7 @@ namespace SomUI.Model
         private int kmeans_min;
         private int kmeans_min_last_calculation;
         private int kmeans_max_last_calculation;
-        private int kmeans_max;     
+        private int kmeans_max;
         private int kmeans_initializations;
         private string noDataValue;
         private string neighborhood;
@@ -47,13 +56,16 @@ namespace SomUI.Model
         private string trainingRateFunction;
         private double trainingRateInitial;
         private double trainingRateFinal;
-
+        private string dataShape;
         private string gridShape; //squqre or hexa
         private string initialization;
-
+        private string runId;
         private bool isSpatial;
         private bool isNormalized;
-
+        private int normalizationMin;
+        private int normalizationMax;
+        private int selectedInteractiveColumn;
+        private string newLabelData;
         public string NoDataValue
         {
             get { return noDataValue; }
@@ -190,7 +202,7 @@ namespace SomUI.Model
             get { return output_folder; }
             set
             {
-                Set<string>(()=>this.Output_Folder, ref this.output_folder,value);
+                Set<string>(() => this.Output_Folder, ref this.output_folder, value);
             }
         }
         public string OutputFolderTimestamped
@@ -247,7 +259,7 @@ namespace SomUI.Model
                 Set<int>(() => this.KMeans_initializations, ref kmeans_initializations, value);
             }
         }
-        
+
 
         public string KMeans
         {
@@ -285,7 +297,31 @@ namespace SomUI.Model
             }
             set
             {
-                Set<ImageSource>(() => this.DataHistogram, ref dataHistogram, value);                             
+                Set<ImageSource>(() => this.DataHistogram, ref dataHistogram, value);
+            }
+        }
+
+        public ImageSource NewLabelPlot
+        {
+            get
+            {
+                return newLabelPlot;
+            }
+            set
+            {
+                Set<ImageSource>(() => this.NewLabelPlot, ref newLabelPlot, value);
+            }
+        }
+
+        public ImageSource NewLabelLegend
+        {
+            get
+            {
+                return newLabelLegend;
+            }
+            set
+            {
+                Set<ImageSource>(() => this.NewLabelLegend, ref newLabelLegend, value);
             }
         }
 
@@ -320,7 +356,7 @@ namespace SomUI.Model
                 }
             }
         }
-        public bool IsSpatial 
+        public bool IsSpatial
         {
             get
             {
@@ -353,7 +389,8 @@ namespace SomUI.Model
             set
             {
                 Set<string>(() => this.IsWinsorized, ref isWinsorized, value);
-                if (value== "True"){
+                if (value == "True")
+                {
                     IsLogTransformed = "False";
                 }
 
@@ -368,7 +405,20 @@ namespace SomUI.Model
             set
             {
                 Set<string>(() => this.InputFile, ref inputFile, value);
-                
+
+            }
+        }
+
+        public string OriginalData
+        {
+            get
+            {
+                return originalData;
+            }
+            set
+            {
+                Set<string>(() => this.OriginalData, ref originalData, value);
+
             }
         }
 
@@ -458,5 +508,98 @@ namespace SomUI.Model
                 Set<string>(() => this.ClusterFilePath, ref clusterFilePath, value);
             }
         }
+        public string DataShape
+        {
+            get { return dataShape; }
+            set
+            {
+                Set<string>(() => this.DataShape, ref dataShape, value);
+            }
+        }
+
+        public int NormalizationMin
+        {
+            get { return normalizationMin; }
+            set { Set<int>(() => this.NormalizationMin, ref normalizationMin, value); }
+
+        }
+        public int NormalizationMax
+        {
+            get { return normalizationMax; }
+            set { Set<int>(() => this.NormalizationMax, ref normalizationMax, value); }
+
+        }
+        public ObservableCollection<BoolStringHelper> ScatterPlotList
+        {
+            get
+            {
+                return scatterPlotList;
+            }
+            set
+            {
+                Set(() => ScatterPlotList, ref scatterPlotList, value);
+            }
+        }
+        public ObservableCollection<BoolStringHelper> BoxPlotList
+        {
+            get
+            {
+                return boxPlotList;
+            }
+            set
+            {
+                Set(() => BoxPlotList, ref boxPlotList, value);
+            }
+        }
+        public ObservableCollection<DataColumn> ColumnDataList
+        {
+            get
+            {
+                return columnDataList;
+            }
+            set
+            {
+                Set(() => ColumnDataList, ref columnDataList, value);
+            }
+        }
+
+        public string RunId
+        {
+            get { return runId; }
+            set
+            {
+                Set<string>(() => this.RunId, ref runId, value);
+            }
+        }
+        public string NewLabelData
+        {
+            get { return newLabelData; }
+            set
+            {
+                Set<string>(() => this.NewLabelData, ref newLabelData, value);
+            }
+        }
+        public int SelectedInteractiveColumn
+        {
+            get { return selectedInteractiveColumn; }
+            set
+            {
+                Set<int>(() => this.SelectedInteractiveColumn, ref selectedInteractiveColumn, value);
+            }
+        }
+
+
+        public ObservableCollection<string> InteractiveResultColumnList
+        {
+            get
+            {
+                return interactiveResultColumnList;
+            }
+            set
+            {
+                Set (() => InteractiveResultColumnList, ref interactiveResultColumnList, value);
+            }
+        }
+
     }
-}
+    }

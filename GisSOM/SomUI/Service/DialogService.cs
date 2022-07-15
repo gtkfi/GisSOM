@@ -12,6 +12,7 @@ using ToastNotifications.Core;
 using ToastNotifications.Lifetime;
 using ToastNotifications.Messages;
 using ToastNotifications.Position;
+using System.Configuration;
 
 namespace SomUI.Service
 {
@@ -64,15 +65,19 @@ namespace SomUI.Service
 
         public string SelectFolderDialog(string selectedPath = "", Environment.SpecialFolder rootFolder = Environment.SpecialFolder.MyComputer)
         {
-
+            //var configFile = ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
             FolderBrowserDialog folderBrowserDialog = new FolderBrowserDialog()
             {
-                SelectedPath = selectedPath,
+                SelectedPath = Properties.Settings.Default.outputFolder,//configFile.AppSettings.Settings["outputFolder"].Value,
                 RootFolder = rootFolder
             };
 
             if (folderBrowserDialog.ShowDialog() == DialogResult.OK)
-            {
+            {            
+                //configFile.AppSettings.Settings["OutputFolder"].Value = folderBrowserDialog.SelectedPath;
+                //configFile.Save();
+                Properties.Settings.Default.outputFolder= folderBrowserDialog.SelectedPath;
+                Properties.Settings.Default.Save();
                 return folderBrowserDialog.SelectedPath;
             }
             return default(string);
