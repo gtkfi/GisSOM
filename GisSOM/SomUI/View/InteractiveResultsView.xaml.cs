@@ -25,33 +25,14 @@ namespace SomUI.View
     /// </summary>
     public partial class InteractiveResultsView : UserControl
     {
-        string CurrentAddress="";
+        /// <summary>
+        /// Initialize a new instance of InteractiveResultsView
+        /// </summary>
         public InteractiveResultsView()
         {
-            InitializeComponent();
-            //this.Browser.BrowserSettings.ApplicationCache = CefSharp.CefState.Disabled;
-
-            //this.Browser.AddressChanged += BrowserAddressChanged;
-            //string address = "";
+            InitializeComponent();          
             this.Browser.PreviewMouseWheel += CefBrowserPreviewMouseWheel;
-            this.Browser.KeyUp += CefBrowserKeyUp;
-            //this.Browser.LoadingStateChanged += (sender, args) =>
-            //{
-            //    //Wait for the Page to finish loading
-            //    if (args.IsLoading == false)
-            //    {
-            //        App.Current.Dispatcher.Invoke((Action)delegate
-            //        {
-            //            if (this.Browser.WebBrowser.Address == "http://localhost:8050/shutdown")
-            //            {
-            //                this.Browser.Load("http://localhost:8050/");
-            //            }
-                            
-            //        });
-                    
-            //    }
-            //};
-            
+            this.Browser.KeyUp += CefBrowserKeyUp;                    
         }
 
         private async void Stop(object sender, RoutedEventArgs e)
@@ -71,13 +52,6 @@ namespace SomUI.View
                       this.Browser.Visibility = Visibility.Hidden;
                   });
                 }
-                //Cef.GetGlobalCookieManager().DeleteCookies("", "");
-                //CefSharp.WebBrowserExtensions.Reload(this.Browser, true);
-                //Cef.GetGlobalCookieManager().DeleteCookies("", "");
-                //Thread.Sleep(5000);
-                //Cef.GetGlobalCookieManager().DeleteCookies("", "");
-                //CefSharp.WebBrowserExtensions.Reload(this.Browser, true);
-
 
             });
            
@@ -137,22 +111,8 @@ namespace SomUI.View
                     httpWebResponse.Close();
                     return null;
                 }
-                /*
-                HttpWebResponse httpWebResponse = (HttpWebResponse)req.GetResponse();
-                if (httpWebResponse.StatusDescription == "OK")
-                {
-                    Cef.GetGlobalCookieManager().DeleteCookies("", "");
-                    CefSharp.WebBrowserExtensions.Reload(this.Browser, true);
-                    httpWebResponse.Close();
-                    return "OK";
-                }
-                if (httpWebResponse == null) return null;
-                System.IO.StreamReader sr = new System.IO.StreamReader(httpWebResponse.GetResponseStream());
-                httpWebResponse.Close();
-                return null;
-                */
             }
-            catch (Exception e)
+            catch (Exception)
             {
                 Cef.GetGlobalCookieManager().DeleteCookies("", "");
                 CefSharp.WebBrowserExtensions.Reload(this.Browser, true);

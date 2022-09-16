@@ -20,6 +20,9 @@ namespace SomUI.View
     /// </summary>
     public partial class SomInputView : UserControl
     {
+        /// <summary>
+        /// Initalizes a new instance of SomInputView class
+        /// </summary>
         public SomInputView()
         {
             InitializeComponent();

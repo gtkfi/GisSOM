@@ -52,7 +52,7 @@ namespace SomUI.ViewModel
         private bool isSelectedEasting;
         private bool isSelectedNorthing;
         private bool isSelectedLabel;
-        private bool showSettingsFlyout;
+        //private bool showSettingsFlyout;
         private string pythonPath; //Deprecated
         private string pythonLogText;
         private double normalizationMin;
@@ -118,6 +118,11 @@ namespace SomUI.ViewModel
         public RelayCommand<DataColumn> UnCheckNorthingCommand { get; }
         public RelayCommand<DataColumn> UnCheckLabelCommand { get; }
         public RelayCommand AddLabelDataCommand { get; }
+
+        /// <summary>
+        /// Initialize a new instance of SomViewModel class
+        /// </summary>
+        /// <param name="dialogService">helper class for showing dialogs and messages on screen</param>
         public SomViewModel(IDialogService dialogService)
         {
             this.logger = NLog.LogManager.GetCurrentClassLogger();
@@ -144,8 +149,7 @@ namespace SomUI.ViewModel
             flyOutText = "";
             isSelectedLabel = false;
             statusFlyOutOpen = false;
-            showSettingsFlyout = false;
-            selectedColumnIndex = 0; //tästä poistettiin -2 .NET version päivityksen yhteydessä. Ei tuolla taida surempaa merkitystä olla?
+            selectedColumnIndex = 0; 
             this.dialogService = dialogService;
             model = new SomModel
             {
@@ -195,7 +199,6 @@ namespace SomUI.ViewModel
             try
             {
                 Directory.CreateDirectory(Path.Combine(Model.Output_Folder, "DataPreparation"));
-                //Directory.CreateDirectory(Path.Combine(Model.Output_Folder, "DataForOriginalPlots", "DataPreparation"));
             }
             catch (Exception ex)
             {
@@ -215,18 +218,7 @@ namespace SomUI.ViewModel
             {
                 logger.Error(ex, "Failed to clear temp folder.");
             }
-            //di = new DirectoryInfo(Path.Combine(Model.Output_Folder, "DataForOriginalPlots", "DataPreparation"));
-            //try
-            //{
-            //    foreach (FileInfo file in di.GetFiles())
-            //    {
-            //        file.Delete();
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    logger.Error(ex, "Failed to clear temp folder.");
-            //}
+
             di = new DirectoryInfo(Path.Combine(Model.Output_Folder, "DataPreparation"));
 
             RunToolCommand = new RelayCommand(RunTool, CanRunTool);
@@ -236,69 +228,29 @@ namespace SomUI.ViewModel
             OpenManualCommand = new RelayCommand(OpenManual);
             SelectFilesCommand = new RelayCommand(SelectImgFiles, CanRunTool);
             SelectGeoTiffFileCommand = new RelayCommand(SelectGeoTiffFile, CanRunTool);
-            DrawCommand = new RelayCommand(EditAndDraw, CanRunTool);
             DrawScatterplotsCommand = new RelayCommand(DrawScatterPlots, CanRunTool);
-            SaveChangesCommand = new RelayCommand(SaveChanges, CanRunTool);
             SelectFolderCommand = new RelayCommand(SelectFolder);
             LaunchInWebBrowserCommand = new RelayCommand(LaunchInWebBrowser);
             RunClusteringCommand = new RelayCommand(CalcAndDrawClusters, CanRunTool);
             WriteGeotifCommand = new RelayCommand(WriteGeotif);
             SaveClusterCommand = new RelayCommand(SaveCluster, CanRunTool);
             SelectSomCommand = new RelayCommand(SelectSomFile, CanRunTool);
-            SelectPythonFileCommand = new RelayCommand(SelectPythonFile);
             SelectSomResultFolderCommand = new RelayCommand(SelectSomResultFolder, CanRunTool);
             DrawClusterPlotsCommand = new RelayCommand(DrawClusterPlots, CanRunTool);
             OpenPlotCommand = new RelayCommand<ImageSource>(OpenPlotExternally);
-            SaveFileCommand = new RelayCommand(SaveFile);
             SaveClusterFileCommand = new RelayCommand(SaveClusterFile);
             LoadClusterFileCommand = new RelayCommand(LoadClusterFile);
             ShowResultsInFileSystemCommand = new RelayCommand<string>((string s) => ShowResultsInFileSystem(s));
-            RemoveTifCommand = new RelayCommand<DataColumn>((DataColumn d) => RemoveTifFromInput(d));
             ShowModelDialog = new RelayCommand(OpenModelDialog);
-            ShowSettingsFlyOutCommand = new RelayCommand(ShowSettingsFlyOutMethod, CanRunTool);
-            SelectAllCommand = new RelayCommand<ObservableCollection<BoolStringHelper>>((ObservableCollection<BoolStringHelper> collection) => SelectAll(collection));
-            DeSelectAllCommand = new RelayCommand<ObservableCollection<BoolStringHelper>>((ObservableCollection<BoolStringHelper> collection) => DeSelectAll(collection));
-            UnCheckEastingCommand = new RelayCommand<DataColumn>((DataColumn d) => UnCheckEasting(d));
-            UnCheckNorthingCommand = new RelayCommand<DataColumn>((DataColumn d) => UnCheckNorthing(d));
-            UnCheckLabelCommand = new RelayCommand<DataColumn>((DataColumn d) => UnCheckLabel(d));
             AddLabelDataCommand = new RelayCommand(AddDataLabelColumn);
             DrawResultsInteractiveCommand = new RelayCommand(DrawResultsInteractive);
-            KillPythonProcessesCommand = new RelayCommand(KillPythonProcesses);
-            if (File.Exists(Path.Combine(Model.Output_Folder, "settingsFile.txt"))) //Deprecated
-            {
-                pythonPath = File.ReadAllText(Path.Combine(Model.Output_Folder, "settingsFile.txt"));//Deprecated
-            }
+
+            //if (File.Exists(Path.Combine(Model.Output_Folder, "settingsFile.txt"))) //Deprecated
+            //{
+            //    pythonPath = File.ReadAllText(Path.Combine(Model.Output_Folder, "settingsFile.txt"));//Deprecated
+            //}
         }
 
-        /// <summary>
-        /// Function to split the input .lrn file to individual columns that are used by the EditColumn function and python script. 
-        /// Columns are saved as 2D numpy arrays of float-32. 
-        /// The beginning of the column contains information on the column (col name atleast) and data preparation procedures: 
-        /// wheter the column was winsorized(and winsor min max values), if column was log transformed or not, is column excluded or not
-        /// </summary>
-        private async void SplitToColumns()
-        {
-            try
-            {
-                RunningProcessCount++;
-                await Task.Run(async () =>
-                {
-                    Task t = SomTool.SplitLrnFile(Model, ScriptOutputForSplitToColumns, ScriptError);
-                    await t;
-                    RunningProcessCount--;
-                });
-            }
-            catch (Exception ex)
-            {
-                logger.Error("Failed to read data:" + ex);
-                PythonLogText += "Failed to read data:" + ex;
-                App.Current.Dispatcher.Invoke((Action)delegate         //delegate to access different thread
-                {
-                    dialogService.ShowNotification("Failed to read data.", "Error");
-                });
-                RunningProcessCount--;
-            }
-        }
 
         private async void DataPreparationInteractive()
         {
@@ -325,76 +277,7 @@ namespace SomUI.ViewModel
                 });
                 //RunningProcessCount--;
             }
-        }
-
-        /// <summary>
-        /// Draw histogram of the data column selected in the GUI data preparation stage.
-        /// </summary>
-        private async void DrawHistogram()
-        {
-            try
-            {
-                RunningProcessCount++;
-                DataHistogram = await SomTool.DrawHistogram(Model, SelectedColumnIndex, IsSelectedNorthing, IsSelectedEasting);
-                RunningProcessCount--;
-                if (DataHistogram == null && SelectedColumnIndex != -1)
-                {
-                    logger.Error("Failed to draw dataistogram");
-                    App.Current.Dispatcher.Invoke((Action)delegate         //delegate to access different thread
-                    {
-                        dialogService.ShowNotification("Failed to draw histogram.", "Error");
-                    });
-
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.Error("Failed to draw dataistogram");
-                PythonLogText += "Failed to draw dataistogram";
-                App.Current.Dispatcher.Invoke((Action)delegate         //delegate to access different thread
-                {
-                    dialogService.ShowNotification("Failed to draw histogram.", "Error");
-                });
-            }
-        }
-
-        /// <summary>
-        /// Function to edit data columns in the preparation stage: applying log transform, winsoring, excluding a column, selecting x and y columns.
-        /// Proper column is loaded according to SelectedColumnIndex parameter, and the respective data operations are passed on as parameters (User selects these in the UI and they are bound to Model).
-        /// </summary>
-        private void EditColumn()
-        {
-            SomTool.EditColumn(Model, SelectedColumnIndex, IsSelectedNorthing, IsSelectedEasting, IsSelectedLabel, ScriptOutput, ScriptError);
-        }
-
-        /// <summary>
-        /// Function to save the changes made in data preparation stage to the data file. Saves the data as EditedData.lrn
-        /// </summary>
-        private async void SaveChanges()
-        {
-            if (Model.IsSpatial && ((Model.ColumnDataList.All(x => x.IsEasting == false)) || (Model.ColumnDataList.All(x => x.IsNorthing == false))))
-            {//if data is set as spatial data, and no x or y column has been selected
-                dialogService.ShowNotification("Please select X and Y columns or set the dataset to non-spatial data before proceeding.", "Error");
-            }
-            else
-            {
-                RunningProcessCount++;
-
-                if (Model.ColumnDataList.All(x => x.IsLabel == false))
-                {
-                    Model.LabelColumnIndex = -2;
-                }
-
-                PythonLogText = "";
-                ServiceLocator.SetLocatorProvider(() => SimpleIoc.Default);
-                EditColumn();
-                SomTool.SaveChanges(Model, SelectedColumnIndex, IsSelectedNorthing, IsSelectedEasting, IsSelectedLabel, ScriptOutput, ScriptError);
-                ServiceLocator.SetLocatorProvider(() => SimpleIoc.Default);
-                var main = ServiceLocator.Current.GetInstance<MainViewModel>();
-                main.ChangeToSomParameterView();
-                RunningProcessCount--;
-            }
-        }
+        }        
 
         /// <summary>
         /// Run nextsom_wrap python script
@@ -425,11 +308,7 @@ namespace SomUI.ViewModel
             {
                 Model.OutputFolderTimestamped = Path.Combine(Model.Output_Folder, "Out_" + Model.RunId);
             }
-
-
             CreateFolderStructure(Model.OutputFolderTimestamped);
-            //RegisterFolderWatcher(Model.OutputFolderTimestamped);   // DEPRECATED
-
             try
             {
 
@@ -448,8 +327,6 @@ namespace SomUI.ViewModel
                     await t;
                     if (stopRun == true)
                     {
-                        //stopRun = false;
-                        //runningProcessCount--;
                         return;
                     }
                     if (IsGeoTiffFile)
@@ -512,10 +389,6 @@ namespace SomUI.ViewModel
         /// </summary>
         private async void DrawResults(string redraw)
         {
-            //string GeoPlotDirectory = Path.Combine(Model.OutputFolderTimestamped, "Geo");
-            //string SomPlotDirectory = Path.Combine(Model.OutputFolderTimestamped, "Som");
-            //string BoxPlotDirectory = Path.Combine(Model.OutputFolderTimestamped, "Boxplot");
-            //string ScatterPlotDirectory = Path.Combine(Model.OutputFolderTimestamped, "Scatterplot");
             await Task.Run(async () =>
             {
                 RunningProcessCount++;
@@ -526,6 +399,9 @@ namespace SomUI.ViewModel
             });
 
         }
+        /// <summary>
+        /// Run python script for drawing interactive result plot.
+        /// </summary>
         private async void DrawResultsInteractive()
         {
 
@@ -559,6 +435,10 @@ namespace SomUI.ViewModel
                 RunningProcessCount--;
             });
         }
+
+        /// <summary>
+        /// Write som results out in GeoTiff format 
+        /// </summary>
         private async void WriteGeotif()
         {
             await Task.Run(async () =>
@@ -582,6 +462,10 @@ namespace SomUI.ViewModel
             SomTool.DrawClusters(Model, ClusterPlotList, ScriptOutput, ScriptError);
             RunningProcessCount--;
         }
+
+        /// <summary>
+        /// Draw Scatterplots of som results
+        /// </summary>
         private async void DrawScatterPlots()
         {
 
@@ -596,12 +480,11 @@ namespace SomUI.ViewModel
                 RunningProcessCount++;
                 Task t = SomTool.DrawScatterPlots(Model, ScriptOutputForPlots, ScriptError);
                 await t;
-
-                //DrawClusters();  
                 RunningProcessCount--;
             });
 
         }
+
         /// <summary>
         /// Save selected clustering result to som calculation result txt files.
         /// </summary>
@@ -620,15 +503,7 @@ namespace SomUI.ViewModel
                 RunningProcessCount--;
             });
         }
-        /// <summary>
-        /// Function to draw selected cluster
-        /// </summary>
-        private async void RunDashDraw()
-        {
-            RunningProcessCount++;
-            SomTool.RunDashDraw(Model, ScriptOutput, ScriptError);
-            RunningProcessCount--;
-        }
+
 
         #region Loading files and folders
         /// <summary>
@@ -652,7 +527,6 @@ namespace SomUI.ViewModel
         /// <summary>
         /// Function to load CSV files as input data. 
         /// </summary>
-        /// 
         private void SelectCsvFile(string dataShape)
         {
             try
@@ -666,9 +540,9 @@ namespace SomUI.ViewModel
                     Model.LabelColumnIndex = -2;
                     Model.EastingColumnIndex = 0;
                     Model.NorthingColumnIndex = 1;
-                    IsSelectedEasting = false;
-                    IsSelectedNorthing = false;
-                    IsSelectedLabel = false;
+                    //IsSelectedEasting = false;
+                    //IsSelectedNorthing = false;
+                    //IsSelectedLabel = false;
                     Model.ColumnDataList.Clear();
                     model.InputFile = inputFile;
                     model.InputFile = inputFile.Replace("\\", "/");
@@ -706,16 +580,17 @@ namespace SomUI.ViewModel
                     Model.LabelColumnIndex = -2;
                     Model.EastingColumnIndex = 0;
                     Model.NorthingColumnIndex = 1;
-                    IsSelectedEasting = false;
-                    IsSelectedNorthing = false;
-                    IsSelectedLabel = false;
+                    //IsSelectedEasting = false;
+                    //IsSelectedNorthing = false;
+                    //IsSelectedLabel = false;
                     model.InputFile = inputFile;
                     model.InputFile = inputFile.Replace("\\", "/");
                     model.InRasterList = new List<string> { inputFile };
                     //FileSelected = true;
                     ClearFolder(Path.Combine(Model.Output_Folder, "DataPreparation"));
-                    ReadColumnNames();
-                    SplitToColumns();
+                    //ReadColumnNames();
+                    //SplitToColumns();
+                    DataPreparationInteractive();
                     IsGeoTiffFile = false;
                     IsCsvFile = false;
                     Model.IsSpatial = true;
@@ -734,25 +609,12 @@ namespace SomUI.ViewModel
             var oldFolder = Model.Output_Folder;
             try
             {
-                string outputFolder = dialogService.SelectFolderDialog("c:\\", Environment.SpecialFolder.MyComputer);//Tähän C:\\ tilalle se DefaultFolder? ja sit se asetetaan kans aina. vai pitääkö tää ehkä tehdä dialogservicen puolella?
+                string outputFolder = dialogService.SelectFolderDialog("c:\\", Environment.SpecialFolder.MyComputer);
                 if (!string.IsNullOrEmpty(outputFolder))
                 {
-
-                    //CreateFolderStructure(Model.Output_Folder);//Create folder structure for new output folder
-
-                    //DirectoryInfo di = new DirectoryInfo(oldFolderPath);
                     Model.Output_Folder = Path.Combine(outputFolder, "GisSOM");
-                    //if (Directory.Exists(oldFolderPath))
-                    //{
-                    //    foreach (FileInfo f in di.GetFiles())
-                    //{
-                    //f.CopyTo(Path.Combine(Model.Output_Folder, "DataForOriginalPlots", "DataPreparation", f.Name), true);
-                    //}
-                    //}
                     Directory.CreateDirectory(Path.Combine(Model.Output_Folder, "DataPreparation"));
                     var oldFolderPath = Path.Combine(oldFolder, "DataPreparation");
-
-                    //Directory.CreateDirectory(Path.Combine(root, "Interactive"));
                     DirectoryInfo di_original = new DirectoryInfo(oldFolderPath);
                     if (Directory.Exists(oldFolderPath))
                     {
@@ -788,7 +650,6 @@ namespace SomUI.ViewModel
                 {
                     model.InRasterList = files;
                     IsImgFile = true;
-                    //FileSelected = true;
                 }
             }
             catch (Exception ex)
@@ -797,7 +658,7 @@ namespace SomUI.ViewModel
             }
         }
         /// <summary>
-        /// Method to open dialog for selecting a .tif file.
+        /// Method to open dialog for selecting a .tif file as input.
         /// </summary>
         private void SelectGeoTiffFile()
         {
@@ -811,18 +672,8 @@ namespace SomUI.ViewModel
                     if (inputFiles.Count > 0)
                     {
                         if (IsGeoTiffFile == false)
-                        { //clear ColumnNames list if geotiff file was not previously selected (no lrn files creeping in to this list
-                            //Model.LabelColumnIndex = -2;
-                            //Model.EastingColumnIndex = 0;
-                            //Model.NorthingColumnIndex = 1;
-                            //IsSelectedEasting = false;
-                            //IsSelectedNorthing = false;
-                            //IsSelectedLabel = false;
-                            //ColumnNames.Clear();
+                        { 
                             Model.InRasterList.Clear();
-                            //Model.ColumnDataList.Clear();
-                            //Model.ColumnDataList.Add(new DataColumn("x", true, false, false, false, 0, 1, false, false, 0, 1));
-                            //Model.ColumnDataList.Add(new DataColumn("y", false, true, false, false, 0, 1, false, false, 0, 1));
                             ClearFolder(Path.Combine(Model.Output_Folder, "DataPreparation"));
                         }
                         IsGeoTiffFile = true;
@@ -838,12 +689,9 @@ namespace SomUI.ViewModel
                         {
                             Model.InputFile += Model.InputFile == null ? s : "," + s;
                         }
-                        //FileSelected = true;
                         Model.OriginalData = Model.InputFile;
-                        //ReadGeoTiffColumnNames();
                         if (Model.InRasterList.Count > 1)
                         {
-                            //SplitToColumns();
                             DataPreparationInteractive();
 
                         }
@@ -892,114 +740,76 @@ namespace SomUI.ViewModel
             }
         }
 
-        private void RemoveTifFromInput(DataColumn d)//string s)
-        {
-            string s = d.Name;
-            try
-            {
-                if (s != "x" && s != "y")
-                {
+        //private void RemoveTifFromInput(DataColumn d)//string s)
+        //{
+        //    string s = d.Name;
+        //    try
+        //    {
+        //        if (s != "x" && s != "y")
+        //        {
 
-                    var dataPrepFolder = Path.Combine(Model.Output_Folder, "DataPreparation");
-                    DirectoryInfo di = new DirectoryInfo(dataPrepFolder);
+        //            var dataPrepFolder = Path.Combine(Model.Output_Folder, "DataPreparation");
+        //            DirectoryInfo di = new DirectoryInfo(dataPrepFolder);
 
-                    string oldFileName;
-                    bool move = false;
-                    for (int i = 0; i < ColumnNames.Count(); i++)
-                    {
-                        if (ColumnNames[i] == s)
-                        {
-                            move = true;
-                            if (i == ColumnNames.Count() - 1)
-                            {
-                                //last column, delete now.
-                                File.Delete(Path.Combine(dataPrepFolder, "outfile" + i + ".npy"));
-                            }
-                            Model.ColumnDataList.Remove(d);
-                        }
-                        else if (move == true)
-                        {
-                            FileInfo[] fi = di.GetFiles();
+        //            string oldFileName;
+        //            bool move = false;
+        //            for (int i = 0; i < ColumnNames.Count(); i++)
+        //            {
+        //                if (ColumnNames[i] == s)
+        //                {
+        //                    move = true;
+        //                    if (i == ColumnNames.Count() - 1)
+        //                    {
+        //                        //last column, delete now.
+        //                        File.Delete(Path.Combine(dataPrepFolder, "outfile" + i + ".npy"));
+        //                    }
+        //                    Model.ColumnDataList.Remove(d);
+        //                }
+        //                else if (move == true)
+        //                {
+        //                    FileInfo[] fi = di.GetFiles();
 
-                            foreach (FileInfo f in di.GetFiles())
-                            {
-                                oldFileName = f.Name;
-                                var fileNumber = oldFileName.Substring(7, 1);
-                                if (Int32.Parse(fileNumber) >= i)
-                                {
-                                    var newFileName = f.Name.Replace(fileNumber.ToString(), (Int32.Parse(fileNumber) - 1).ToString());
-                                    MoveWithReplace(Path.Combine(dataPrepFolder, oldFileName), Path.Combine(dataPrepFolder, newFileName));
-                                }
-                            }
-                            break;
-                        }
-                    }
+        //                    foreach (FileInfo f in di.GetFiles())
+        //                    {
+        //                        oldFileName = f.Name;
+        //                        var fileNumber = oldFileName.Substring(7, 1);
+        //                        if (Int32.Parse(fileNumber) >= i)
+        //                        {
+        //                            var newFileName = f.Name.Replace(fileNumber.ToString(), (Int32.Parse(fileNumber) - 1).ToString());
+        //                            MoveWithReplace(Path.Combine(dataPrepFolder, oldFileName), Path.Combine(dataPrepFolder, newFileName));
+        //                        }
+        //                    }
+        //                    break;
+        //                }
+        //            }
 
 
 
-                    for (int i = 0; i < Model.InRasterList.Count; i++)
-                    {
-                        string fileName = Model.InRasterList[i].Substring((Model.InRasterList[i].Length - s.Length));
-                        if (fileName == s)
-                        {//if name matches, remove from input tif lists 
-                            Model.InRasterList.Remove(Model.InRasterList[i]);
-                            ColumnNames.Remove(s);
-                        }
-                    }
-                    Model.InputFile = null;
-                    foreach (string str in Model.InRasterList)
-                    {
-                        Model.InputFile += Model.InputFile == null ? str : "," + str;
-                    }
-                }
-                else { throw new Exception("Can't remove x or y column."); }
-                SelectedColumnIndex = 2;
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex, "Failed to remove input column");
-            }
-        }
+        //            for (int i = 0; i < Model.InRasterList.Count; i++)
+        //            {
+        //                string fileName = Model.InRasterList[i].Substring((Model.InRasterList[i].Length - s.Length));
+        //                if (fileName == s)
+        //                {//if name matches, remove from input tif lists 
+        //                    Model.InRasterList.Remove(Model.InRasterList[i]);
+        //                    ColumnNames.Remove(s);
+        //                }
+        //            }
+        //            Model.InputFile = null;
+        //            foreach (string str in Model.InRasterList)
+        //            {
+        //                Model.InputFile += Model.InputFile == null ? str : "," + str;
+        //            }
+        //        }
+        //        else { throw new Exception("Can't remove x or y column."); }
+        //        SelectedColumnIndex = 2;
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        logger.Error(ex, "Failed to remove input column");
+        //    }
+        //}
 
-        /// <summary>
-        /// Select python exe path manually. Deprecated.
-        /// </summary>
-        public void SelectPythonFile()
-        {
-
-            try
-            {
-                string exeFile = dialogService.OpenFileDialog("", "EXE files|*.exe;", true, true);
-                if (!string.IsNullOrEmpty(exeFile))
-                {
-                    PythonPath = exeFile;
-                    OpenModelDialog();
-                    try
-                    {
-                        System.IO.File.WriteAllText(Path.Combine(Model.Output_Folder, "settingsFile.txt"), pythonPath);
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.Error("Could not write settings to file: " + ex);
-                        ShowErrorFlyout("Could not write settings to file.");
-                    }
-                    try
-                    {
-                        var metroWindow = (Application.Current.MainWindow as MetroWindow);
-                        var dialog = metroWindow.GetCurrentDialogAsync<BaseMetroDialog>();
-                        metroWindow.HideMetroDialogAsync(dialog.Result);
-                    }
-                    catch (Exception)
-                    {
-
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex, "Failed to show OpenFileDialog");
-            }
-        }
+       
         #endregion
 
 
@@ -1007,82 +817,83 @@ namespace SomUI.ViewModel
         /// <summary>
         /// Function to read column names from .lrn data file.
         /// </summary>
-        private void ReadColumnNames()
-        {
-            try
-            {
-                System.IO.StreamReader file = new System.IO.StreamReader(Model.InputFile);
-                string line = null;
+        //private void ReadColumnNames()
+        //{
+        //    try
+        //    {
+        //        System.IO.StreamReader file = new System.IO.StreamReader(Model.InputFile);
+        //        string line = null;
 
-                while (true)
-                {
-                    line = file.ReadLine();
-                    System.Console.WriteLine(line);
-                    if (!(line.StartsWith("#") || line.StartsWith("%")))
-                    {
-                        break;
-                    }
-                }
-                file.Close();
-                System.Console.ReadLine();
-                string[] words = line.Split(' ');
-                if (words.Length < 2)
-                    words = line.Split('\t');
-                ColumnNames.Clear();
-                for (int i = 1; i < words.Length; i++)
-                {
-                    ColumnNames.Add(words[i]);
-                    Model.ColumnDataList.Add(new DataColumn(words[i], false, false, false, false, 0, 1, false, false, 0, 1));
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex, "Input file not found or malformed.");
-            }
-        }
+        //        while (true)
+        //        {
+        //            line = file.ReadLine();
+        //            System.Console.WriteLine(line);
+        //            if (!(line.StartsWith("#") || line.StartsWith("%")))
+        //            {
+        //                break;
+        //            }
+        //        }
+        //        file.Close();
+        //        System.Console.ReadLine();
+        //        string[] words = line.Split(' ');
+        //        if (words.Length < 2)
+        //            words = line.Split('\t');
+        //        ColumnNames.Clear();
+        //        for (int i = 1; i < words.Length; i++)
+        //        {
+        //            ColumnNames.Add(words[i]);
+        //            Model.ColumnDataList.Add(new DataColumn(words[i], false, false, false, false, 0, 1, false, false, 0, 1));
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        logger.Error(ex, "Input file not found or malformed.");
+        //    }
+        //}
+
         /// <summary>
         /// Method to add geotif column names to list in data preparation view.
         /// </summary>
-        private void ReadGeoTiffColumnNames()
-        {
-            ColumnNames.Clear();
-            ColumnNames.Add("x");
-            ColumnNames.Add("y");
-            Model.ColumnDataList.Clear();
-            Model.ColumnDataList.Add(new DataColumn("x", true, false, false, false, 0, 1, false, false, 0, 1));
-            Model.ColumnDataList.Add(new DataColumn("y", false, true, false, false, 0, 1, false, false, 0, 1));
-            foreach (string s in Model.InRasterList)
-            {
-                ColumnNames.Add(Path.GetFileName(s));
-                Model.ColumnDataList.Add(new DataColumn(Path.GetFileName(s), false, false, false, false, 0, 1, false, false, 0, 1));
-            }
-        }
+        //private void ReadGeoTiffColumnNames()
+        //{
+        //    ColumnNames.Clear();
+        //    ColumnNames.Add("x");
+        //    ColumnNames.Add("y");
+        //    Model.ColumnDataList.Clear();
+        //    Model.ColumnDataList.Add(new DataColumn("x", true, false, false, false, 0, 1, false, false, 0, 1));
+        //    Model.ColumnDataList.Add(new DataColumn("y", false, true, false, false, 0, 1, false, false, 0, 1));
+        //    foreach (string s in Model.InRasterList)
+        //    {
+        //        ColumnNames.Add(Path.GetFileName(s));
+        //        Model.ColumnDataList.Add(new DataColumn(Path.GetFileName(s), false, false, false, false, 0, 1, false, false, 0, 1));
+        //    }
+        //}
         /// <summary>
         /// Method to add csv column names to list in data preparation view.
         /// </summary>
-        private void ReadCsvColumnNames()
-        {
-            try
-            {
-                System.IO.StreamReader file = new System.IO.StreamReader(Model.InputFile);
-                string line = file.ReadLine();
-                string[] words = line.Split(',');
-                ColumnNames.Clear();
-                for (int i = 0; i < words.Length; i++)
-                {
-                    ColumnNames.Add(words[i]);
-                    Model.ColumnDataList.Add(new DataColumn(words[i], false, false, false, false, 0, 1, false, false, 0, 1));
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex, "Error in reading input file");
-                if (ex.Message.Contains("another process"))
-                    dialogService.ShowNotification("The file is being used in another process. Please close it and try again.", "Error");
-                else
-                    dialogService.ShowNotification("Error in reading input file", "Error");
-            }
-        }
+        //private void ReadCsvColumnNames()
+        //{
+        //    try
+        //    {
+        //        System.IO.StreamReader file = new System.IO.StreamReader(Model.InputFile);
+        //        string line = file.ReadLine();
+        //        string[] words = line.Split(',');
+        //        ColumnNames.Clear();
+        //        for (int i = 0; i < words.Length; i++)
+        //        {
+        //            ColumnNames.Add(words[i]);
+        //            Model.ColumnDataList.Add(new DataColumn(words[i], false, false, false, false, 0, 1, false, false, 0, 1));
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        logger.Error(ex, "Error in reading input file");
+        //        if (ex.Message.Contains("another process"))
+        //            dialogService.ShowNotification("The file is being used in another process. Please close it and try again.", "Error");
+        //        else
+        //            dialogService.ShowNotification("Error in reading input file", "Error");
+        //    }
+        //}
         #endregion
 
 
@@ -1119,29 +930,29 @@ namespace SomUI.ViewModel
             dialogService.ShowMessageDialog();
         }
 
-        public void OnSomPlotChanged(object source, FileSystemEventArgs e)
-        {
-            DateTime lastWriteTime = File.GetLastWriteTime(e.FullPath);
-            if (lastWriteTime.ToString() != lastRead.ToString())
-            {
+        //public void OnSomPlotChanged(object source, FileSystemEventArgs e)
+        //{
+        //    DateTime lastWriteTime = File.GetLastWriteTime(e.FullPath);
+        //    if (lastWriteTime.ToString() != lastRead.ToString())
+        //    {
 
-                if (Model.KMeans != "False" && Model.IsSpatial == true)
-                {
-                    try
-                    {
-                        //RunDashDraw();
-                        var imageSource = BitmapFromUri(new Uri(Path.Combine(Model.OutputFolderTimestamped, "somplot_interactive.png")));
-                        Model.InteractiveResultSomPlot = imageSource;
-                        RaisePropertyChanged("Model.InteractiveResultSomPlot");
-                    }
-                    catch (Exception ex)
-                    {
-                        ShowErrorFlyout("Could not create bitmap: ", ex.Message);
-                    }
-                    lastRead = lastWriteTime;
-                }
-            }
-        }
+        //        if (Model.KMeans != "False" && Model.IsSpatial == true)
+        //        {
+        //            try
+        //            {
+        //                //RunDashDraw();
+        //                var imageSource = BitmapFromUri(new Uri(Path.Combine(Model.OutputFolderTimestamped, "somplot_interactive.png")));
+        //                Model.InteractiveResultSomPlot = imageSource;
+        //                RaisePropertyChanged("Model.InteractiveResultSomPlot");
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                ShowErrorFlyout("Could not create bitmap: ", ex.Message);
+        //            }
+        //            lastRead = lastWriteTime;
+        //        }
+        //    }
+        //}
 
 
         /// <summary>
@@ -1180,7 +991,7 @@ namespace SomUI.ViewModel
         }
 
 
-        private void VisualizeExistingResult()
+        private void VisualizeExistingResult() //This might need some reworking? with switching data prep to interactive page?
         {
 
             try
@@ -1277,7 +1088,7 @@ namespace SomUI.ViewModel
 
                     Model.InputFile = Path.Combine(Model.OutputFolderTimestamped, "InputData.lrn");
 
-                    ReadColumnNames();
+                    //ReadColumnNames();
                     Model.ColumnDataList[0].IsEasting = true;
                     Model.ColumnDataList[1].IsNorthing = true;
                     System.IO.StreamReader file = new System.IO.StreamReader(Model.InputFile);
@@ -1301,7 +1112,7 @@ namespace SomUI.ViewModel
                             Model.InteractiveResultColumnList.Add(Model.ColumnDataList[i].Name);
                         }
                     }
-                    RegisterFolderWatcher(Model.OutputFolderTimestamped);  // DEPRECATED
+                    //RegisterFolderWatcher(Model.OutputFolderTimestamped);  // DEPRECATED
                     //doc = new XmlDocument();
                     //doc.Load(Path.Combine(Model.OutputFolderTimestamped, "DataStats.xml"));
                     //XmlNode node = doc.DocumentElement.SelectSingleNode("dataShape");
@@ -1349,15 +1160,6 @@ namespace SomUI.ViewModel
 
 
         /// <summary>
-        /// Stub function to Edit Column and draw histogram, in that order. Should be expanded or removed?
-        /// </summary>
-        public void EditAndDraw()
-        {
-            EditColumn();
-            DrawHistogram();
-        }
-
-        /// <summary>
         /// Select and get images of a folder containing Som results.
         /// </summary>
         private void SelectSomResultFolder()
@@ -1398,10 +1200,7 @@ namespace SomUI.ViewModel
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-        public void ShowSettingsFlyOutMethod()
-        {
-            ShowSettingsFlyOut = true;
-        }
+
         private async void CalcAndDrawClusters()
         {
             RunClustering();
@@ -1412,18 +1211,18 @@ namespace SomUI.ViewModel
             PythonLogText += output + "\r\n";
         }
 
-        private void ShowErrorFlyout(string msg)
-        {
-            if (msg.ToLower().Contains("error"))
-            {
-                if (StatusFlyOutOpen == false)
-                {
-                    FlyOutText = msg;
-                    StatusFlyOutOpen = true;
-                }
-            }
-        }
-        private void ShowErrorFlyout(string msg, string errors)
+        //private void ShowErrorFlyout(string msg)
+        //{
+        //    if (msg.ToLower().Contains("error"))
+        //    {
+        //        if (StatusFlyOutOpen == false)
+        //        {
+        //            FlyOutText = msg;
+        //            StatusFlyOutOpen = true;
+        //        }
+        //    }
+        //}
+        private void ShowErrorFlyout(string msg, string errors="")
         {
             if (!String.IsNullOrEmpty(errors))
                 Display(errors);
@@ -1445,6 +1244,7 @@ namespace SomUI.ViewModel
                 StatusFlyOutOpen = true;
             }
         }
+
         //For sending the shutdown message to the interactive plot.
         //private void HttpPost(string URI, string Parameters)// async Task 
         //{
@@ -1475,6 +1275,8 @@ namespace SomUI.ViewModel
         //    }
         //}
 
+
+
         /// <summary>
         /// Draw bitmap from file path. Bitmaps are used, so files used as image sources are not locked, and image elements can be updated in runtime.
         /// </summary>
@@ -1492,6 +1294,12 @@ namespace SomUI.ViewModel
             return bitmap;
         }
 
+        ///There really shouldn't be 2 of these methods, replace with 1 that has size limit as parameter? Or is the one without size limit even used?
+        /// <summary>
+        /// Draw bitmap from file path, where pixel width is limited to 400. Bitmaps are used, so files used as image sources are not locked, and image elements can be updated in runtime.
+        /// </summary>
+        /// <param name="source"> File path</param>
+        /// <returns> Bitmap created from file path</returns>
         public static ImageSource BitmapFromUriWithLimitedSize(Uri source)
         {
             var bitmap = new BitmapImage();
@@ -1506,6 +1314,10 @@ namespace SomUI.ViewModel
         }
 
 
+        /// <summary>
+        /// Delete all files in given folder path
+        /// </summary>
+        /// <param name="dirPath"></param>
         public void ClearFolder(string dirPath)
         {
 
@@ -1568,20 +1380,20 @@ namespace SomUI.ViewModel
             }
         }
 
-        private void SaveFile()
-        {
-            try
-            {
-                string savePath = dialogService.SaveFileDialog("", "png|*.png;", true, true, "Image");
-                FileInfo fi = new FileInfo(Path.Combine(Model.OutputFolderTimestamped, "somplot_interactive.png"));
-                fi.CopyTo(savePath, true);
+        //private void SaveFile()
+        //{
+        //    try
+        //    {
+        //        string savePath = dialogService.SaveFileDialog("", "png|*.png;", true, true, "Image");
+        //        FileInfo fi = new FileInfo(Path.Combine(Model.OutputFolderTimestamped, "somplot_interactive.png"));
+        //        fi.CopyTo(savePath, true);
 
-            }
-            catch (Exception ex)
-            {
-                logger.Error(ex, "Failed to save interactive plot.");
-            }
-        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        logger.Error(ex, "Failed to save interactive plot.");
+        //    }
+        //}
         private void SaveClusterFile()
         {
             try
@@ -1616,29 +1428,11 @@ namespace SomUI.ViewModel
         }
 
 
-        // DEPRECATED
-        private void RegisterFolderWatcher(string folderPath)
-        {
-            somPlotWatcher = new FileSystemWatcher
-            {
-                Path = Path.Combine(folderPath, "Interactive"),
-                NotifyFilter = NotifyFilters.LastWrite
-                | NotifyFilters.FileName | NotifyFilters.DirectoryName
 
-            };
-            //NotifyFilter = NotifyFilters.LastAccess | NotifyFilters.LastWrite
-            //    | NotifyFilters.FileName | NotifyFilters.DirectoryName
-            somPlotWatcher.Changed += new FileSystemEventHandler(OnSomPlotChanged);
-            //somPlotWatcher.Changed += new FileSystemEventHandler(OnChanged);
-            somPlotWatcher.Created += new FileSystemEventHandler(OnChanged);
-            somPlotWatcher.Deleted += new FileSystemEventHandler(OnChanged);
-            somPlotWatcher.Renamed += new RenamedEventHandler(OnRenamed);
-            somPlotWatcher.EnableRaisingEvents = true;
-
-        }
-
-
-        public string BrowserToolTip//hacky solution for refreshing browser tooltip
+        /// <summary>
+        /// Hacky solution for refreshing browser tooltip, to "send a message to the UI"
+        /// </summary>
+        public string BrowserToolTip
         {
             get
             {
@@ -1650,6 +1444,10 @@ namespace SomUI.ViewModel
                 RaisePropertyChanged("BrowserToolTip");
             }
         }
+
+        /// <summary>
+        /// Hacky solution for refreshing browser tooltip, to "send a message to the UI"
+        /// </summary>
         public string DataPrepBrowserToolTip
         {
             get
@@ -1662,86 +1460,72 @@ namespace SomUI.ViewModel
                 RaisePropertyChanged("DataPrepBrowserToolTip");
             }
         }
-        //public int RunningProcessCount
-        //{
-        //    get { return runningProcessCount; }
-        //    set
-        //    {
-        //        if (value == runningProcessCount)
-        //            return;
-        //        else
-        //            runningProcessCount = value;
-        //        if (runningProcessCount == 0)
-        //            IsBusy = false;
-        //        else
-        //            IsBusy = true;
-        //    }
-        //}
+
 
         /// <summary>
         /// Get and set selectedColumnIndex, for keeping track of seleced data column in DataPreparationView
         /// </summary>
-        public int SelectedColumnIndex
-        {
-            get { return selectedColumnIndex; }
-            set
-            {
-                if (value == selectedColumnIndex) return;
-                //EditColumn(); //TEMP  //Saves the edits to previously selected column before changing columnIndex
-                selectedColumnIndex = value;
-                OnPropertyChanged();
-                RaisePropertyChanged("SelectedColumnIndex");
-                //DrawHistogram(); //TEMP
-                if (value >= 0)
-                {
-                    NormalizationMin = Model.ColumnDataList[value].NormalizationMin;
-                    NormalizationMax = Model.ColumnDataList[value].NormalizationMax;
-                }
+        //public int SelectedColumnIndex
+        //{
+        //    get { return selectedColumnIndex; }
+        //    set
+        //    {
+        //        if (value == selectedColumnIndex) return;
+        //        //EditColumn(); //TEMP  //Saves the edits to previously selected column before changing columnIndex
+        //        selectedColumnIndex = value;
+        //        OnPropertyChanged();
+        //        RaisePropertyChanged("SelectedColumnIndex");
+        //        //DrawHistogram(); //TEMP
+        //        if (value >= 0)
+        //        {
+        //            NormalizationMin = Model.ColumnDataList[value].NormalizationMin;
+        //            NormalizationMax = Model.ColumnDataList[value].NormalizationMax;
+        //        }
 
-                //if (value == Model.LabelColumnIndex)
-                //    IsSelectedLabel = true;
-                //else
-                //    IsSelectedLabel = false;
+        //        //if (value == Model.LabelColumnIndex)
+        //        //    IsSelectedLabel = true;
+        //        //else
+        //        //    IsSelectedLabel = false;
 
-            }
-        }
+        //    }
+        //}
         /// <summary>
         /// Name of Input file columns, used by listbox in DataPreparationView
         /// </summary>
-        public ObservableCollection<string> ColumnNames
-        {
-            get { return columnNames; }
-            set
-            {
-                if (value == columnNames) return;
-                columnNames = value;
-            }
-        }
+        //public ObservableCollection<string> ColumnNames
+        //{
+        //    get { return columnNames; }
+        //    set
+        //    {
+        //        if (value == columnNames) return;
+        //        columnNames = value;
+        //    }
+        //}
 
-        public ObservableCollection<DataColumn> ColumnData
-        {
-            get { return columnData; }
-            set
-            {
-                if (value == columnData) return;
-                columnData = value;
-            }
-        }
+        //public ObservableCollection<DataColumn> ColumnData
+        //{
+        //    get { return columnData; }
+        //    set
+        //    {
+        //        if (value == columnData) return;
+        //        columnData = value;
+        //    }
+        //}
 
         /// <summary>
         /// Getting and setting the source for the histogram shown in data preparation stage
         /// </summary>
-        public ImageSource DataHistogram
-        {
-            get { return dataHistogram; }
-            set
-            {
-                if (value == dataHistogram) return;
-                dataHistogram = value;
-                OnPropertyChanged();
-                RaisePropertyChanged("DataHistogram");
-            }
-        }
+        //public ImageSource DataHistogram
+        //{
+        //    get { return dataHistogram; }
+        //    set
+        //    {
+        //        if (value == dataHistogram) return;
+        //        dataHistogram = value;
+        //        OnPropertyChanged();
+        //        RaisePropertyChanged("DataHistogram");
+        //    }
+        //}
 
         /// <summary>
         /// Get and set the _bitMapPath property
@@ -1867,47 +1651,58 @@ namespace SomUI.ViewModel
                 selectedClusterIndex = value;
             }
         }
-        public bool IsSelectedNorthing
-        {
-            get { return isSelectedNorthing; }
-            set
-            {
-                if (isSelectedNorthing == value) return;
-                isSelectedNorthing = value;
-                if (isSelectedNorthing == true)
-                {
-                    IsSelectedEasting = false;
-                }
-                OnPropertyChanged();
-                RaisePropertyChanged("IsSelectedNorthing");
-            }
-        }
-        public bool IsSelectedEasting
-        {
-            get { return isSelectedEasting; }
-            set
-            {
-                if (isSelectedEasting == value) return;
-                isSelectedEasting = value;
-                if (isSelectedEasting == true)
-                {
-                    IsSelectedNorthing = false;
-                }
-                OnPropertyChanged();
-                RaisePropertyChanged("IsSelectedNorthing");
-            }
-        }
-        public bool IsSelectedLabel
-        {
-            get { return isSelectedLabel; }
-            set
-            {
-                if (isSelectedLabel == value) return;
-                isSelectedLabel = value;
-                OnPropertyChanged();
-                RaisePropertyChanged("IsSelectedLabel");
-            }
-        }
+        /// <summary>
+        /// Is selected column set as northing(y) column
+        /// </summary>
+        //public bool IsSelectedNorthing
+        //{
+        //    get { return isSelectedNorthing; }
+        //    set
+        //    {
+        //        if (isSelectedNorthing == value) return;
+        //        isSelectedNorthing = value;
+        //        if (isSelectedNorthing == true)
+        //        {
+        //            IsSelectedEasting = false;
+        //        }
+        //        OnPropertyChanged();
+        //        RaisePropertyChanged("IsSelectedNorthing");
+        //    }
+        //}
+
+        /// <summary>
+        /// Is selected column set as easting(x) column
+        /// </summary>
+        //public bool IsSelectedEasting
+        //{
+        //    get { return isSelectedEasting; }
+        //    set
+        //    {
+        //        if (isSelectedEasting == value) return;
+        //        isSelectedEasting = value;
+        //        if (isSelectedEasting == true)
+        //        {
+        //            IsSelectedNorthing = false;
+        //        }
+        //        OnPropertyChanged();
+        //        RaisePropertyChanged("IsSelectedNorthing");
+        //    }
+        //}
+
+        /// <summary>
+        /// Is selected column set as label column
+        /// </summary>
+        //public bool IsSelectedLabel
+        //{
+        //    get { return isSelectedLabel; }
+        //    set
+        //    {
+        //        if (isSelectedLabel == value) return;
+        //        isSelectedLabel = value;
+        //        OnPropertyChanged();
+        //        RaisePropertyChanged("IsSelectedLabel");
+        //    }
+        //}
         public string FlyOutText
         {
             get { return flyOutText; }
@@ -1928,29 +1723,20 @@ namespace SomUI.ViewModel
                 OnPropertyChanged();
             }
         }
-        public bool ShowSettingsFlyOut//Rename this, so the method can be named properly
-        {
-            get { return showSettingsFlyout; }
-            set
-            {
-                if (showSettingsFlyout == value) return;
-                showSettingsFlyout = value;
-                OnPropertyChanged();
-            }
-        }
-        public string PythonPath //Deprecated
-        {
-            get
-            {
-                return pythonPath;
-            }
-            set
-            {
-                if (pythonPath == value) return;
-                pythonPath = value;
-                OnPropertyChanged();
-            }
-        }
+        //public bool ShowSettingsFlyOut//Rename this, so the method can be named properly
+        //{
+        //    get { return showSettingsFlyout; }
+        //    set
+        //    {
+        //        if (showSettingsFlyout == value) return;
+        //        showSettingsFlyout = value;
+        //        OnPropertyChanged();
+        //    }
+        //}
+
+        /// <summary>
+        /// Python process output log text displayed in UI
+        /// </summary>
         public string PythonLogText
         {
             get { return pythonLogText; }
@@ -1961,30 +1747,35 @@ namespace SomUI.ViewModel
                 OnPropertyChanged();
             }
         }
+        /// <summary>
+        /// Min value for data scaling
+        /// </summary>
+        //public double NormalizationMin
+        //{
+        //    get { return normalizationMin; }
+        //    set
+        //    {
+        //        if (normalizationMin == value) return;
+        //        normalizationMin = value;
+        //        OnPropertyChanged();
+        //        Model.ColumnDataList[SelectedColumnIndex].NormalizationMin = value;
+        //    }
+        //}
 
-        public double NormalizationMin
-        {
-            get { return normalizationMin; }
-            set
-            {
-                if (normalizationMin == value) return;
-                normalizationMin = value;
-                OnPropertyChanged();
-                Model.ColumnDataList[SelectedColumnIndex].NormalizationMin = value;
-            }
-        }
-
-        public double NormalizationMax
-        {
-            get { return normalizationMax; }
-            set
-            {
-                if (normalizationMax == value) return;
-                normalizationMax = value;
-                OnPropertyChanged();
-                Model.ColumnDataList[SelectedColumnIndex].NormalizationMax = value;
-            }
-        }
+        /// <summary>
+        /// Max value for data scaling
+        /// </summary>
+        //public double NormalizationMax
+        //{
+        //    get { return normalizationMax; }
+        //    set
+        //    {
+        //        if (normalizationMax == value) return;
+        //        normalizationMax = value;
+        //        OnPropertyChanged();
+        //        Model.ColumnDataList[SelectedColumnIndex].NormalizationMax = value;
+        //    }
+        //}
 
 
         private void AddToImageCollection(ObservableCollection<ImageSource> ImageCollection, string PlotDirectory)
@@ -2037,6 +1828,9 @@ namespace SomUI.ViewModel
 
         }
 
+        /// <summary>
+        /// Number of running python processes
+        /// </summary>
         public int RunningProcessCount
         {
             get { return runningProcessCount; }
@@ -2081,7 +1875,11 @@ namespace SomUI.ViewModel
                     PythonLogText += e.Data + "\r\n";
                     if (!e.Data.ToLower().Contains("POST") && !e.Data.ToLower().Contains("typeerror") && e.Data.ToLower().Contains("error"))
                     {
-                        //dialogService.ShowNotification("Failed to draw interactive plot.See the log file for details.", "Error");
+                        App.Current.Dispatcher.Invoke((Action)delegate         //delegate to access different thread
+                        {
+                            dialogService.ShowNotification(e.Data, "Error");
+                        });
+                       
                     }
                 }
             });
@@ -2140,6 +1938,13 @@ namespace SomUI.ViewModel
                 {
                     logger.Error(e.Data);
                     PythonLogText += e.Data + "\r\n";
+                    if (e.Data.Contains("ValueError")) { 
+                        App.Current.Dispatcher.Invoke((Action)delegate         //delegate to access different thread
+                        {
+                            dialogService.ShowNotification(e.Data, "Error");
+                        });
+                        IsBusy = false;
+                    }
                 }
             });
         }
@@ -2155,7 +1960,15 @@ namespace SomUI.ViewModel
                 if (!String.IsNullOrEmpty(e.Data))// && !e.Data.ToLower().Contains("matplotlibdata") && !e.Data.ToLower().Contains("return_n_iter") && !e.Data.ToLower().Contains("HTTP") && !e.Data.ToLower().Contains("bad key") && !e.Data.ToLower().Contains("matplotlib source distribution"))
                 {
                     if (e.Data.ToLower().Contains("warning"))
-                        PythonLogText += e.Data + "\r\n";//only print warnings
+                        PythonLogText += e.Data + "\r\n";//only print warnings and errors to UI
+                    if (e.Data.ToLower().Contains("error"))
+                    {
+                        PythonLogText += e.Data + "\r\n";
+                        App.Current.Dispatcher.Invoke((Action)delegate         //delegate to access different thread
+                        {
+                            dialogService.ShowNotification(e.Data, "Error");
+                        });
+                    }
                     if (!String.IsNullOrEmpty(e.Data))
                     {
                         if (e.Data.Contains("Saved to .lrn File"))
@@ -2183,55 +1996,55 @@ namespace SomUI.ViewModel
         }
 
 
-        private void SelectAll(ObservableCollection<BoolStringHelper> collection)
-        {
-            for (int i = 0; i < collection.Count; i++)
-            {
-                collection[i].IsSelected = true;//.Item2 = true;
-            }
-        }
+        //private void SelectAll(ObservableCollection<BoolStringHelper> collection)
+        //{
+        //    for (int i = 0; i < collection.Count; i++)
+        //    {
+        //        collection[i].IsSelected = true;//.Item2 = true;
+        //    }
+        //}
 
-        private void DeSelectAll(ObservableCollection<BoolStringHelper> collection)
-        {
-            for (int i = 0; i < collection.Count; i++)
-            {
-                collection[i].IsSelected = false;
-            }
-        }
+        //private void DeSelectAll(ObservableCollection<BoolStringHelper> collection)
+        //{
+        //    for (int i = 0; i < collection.Count; i++)
+        //    {
+        //        collection[i].IsSelected = false;
+        //    }
+        //}
 
-        private void UnCheckNorthing(DataColumn item)
-        {
+        //private void UnCheckNorthing(DataColumn item)
+        //{
 
-            foreach (DataColumn c in Model.ColumnDataList)
-            {
-                if (item.Name != c.Name)
-                { //tai miten vertaatkaan
-                    c.IsNorthing = false;
-                }
-            }
-        }
-        private void UnCheckEasting(DataColumn item)
-        {
+        //    foreach (DataColumn c in Model.ColumnDataList)
+        //    {
+        //        if (item.Name != c.Name)
+        //        { //tai miten vertaatkaan
+        //            c.IsNorthing = false;
+        //        }
+        //    }
+        //}
+        //private void UnCheckEasting(DataColumn item)
+        //{
 
-            foreach (DataColumn c in Model.ColumnDataList)
-            {
-                if (item.Name != c.Name)
-                { //tai miten vertaatkaan
-                    c.IsEasting = false;
-                }
-            }
-        }
-        private void UnCheckLabel(DataColumn item)
-        {
+        //    foreach (DataColumn c in Model.ColumnDataList)
+        //    {
+        //        if (item.Name != c.Name)
+        //        { //tai miten vertaatkaan
+        //            c.IsEasting = false;
+        //        }
+        //    }
+        //}
+        //private void UnCheckLabel(DataColumn item)
+        //{
 
-            foreach (DataColumn c in Model.ColumnDataList)
-            {
-                if (item.Name != c.Name)
-                { //tai miten vertaatkaan
-                    c.IsLabel = false;
-                }
-            }
-        }
+        //    foreach (DataColumn c in Model.ColumnDataList)
+        //    {
+        //        if (item.Name != c.Name)
+        //        { //tai miten vertaatkaan
+        //            c.IsLabel = false;
+        //        }
+        //    }
+        //}
 
         private void ShowResultsInFileSystem(string s)
         {
@@ -2253,21 +2066,21 @@ namespace SomUI.ViewModel
         /// <summary>
         /// 
         /// </summary>
-        private async void KillPythonProcesses()
-        {
-            await Task.Run(async () =>
-            {
-                //BrowserToolTip = "";
-                RunningProcessCount++;
-                ServiceLocator.SetLocatorProvider(() => SimpleIoc.Default);
-                Task t = SomTool.KillRunningPythonProcesses();//SomTool.DrawResultsInteractive(Model, ScriptOutput, ScriptError);
-                stopRun = true;
+        //private async void KillPythonProcesses()
+        //{
+        //    await Task.Run(async () =>
+        //    {
+        //        //BrowserToolTip = "";
+        //        RunningProcessCount++;
+        //        ServiceLocator.SetLocatorProvider(() => SimpleIoc.Default);
+        //        Task t = SomTool.KillRunningPythonProcesses();//SomTool.DrawResultsInteractive(Model, ScriptOutput, ScriptError);
+        //        stopRun = true;
 
-                await t;
-                RunningProcessCount--;
-            });
+        //        await t;
+        //        RunningProcessCount--;
+        //    });
 
-        }
+        //}
         private async void SendHttpHealthChecks()
         {
             ServiceLocator.SetLocatorProvider(() => SimpleIoc.Default);

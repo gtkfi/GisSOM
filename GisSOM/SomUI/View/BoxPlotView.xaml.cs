@@ -20,6 +20,9 @@ namespace SomUI.View
     /// </summary>
     public partial class BoxPlotView : UserControl
     {
+        /// <summary>
+        /// Initalizes a new instance of BoxplotView class
+        /// </summary>
         public BoxPlotView()
         {
             InitializeComponent();

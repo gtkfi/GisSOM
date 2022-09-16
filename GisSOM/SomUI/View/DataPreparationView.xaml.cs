@@ -20,6 +20,9 @@ namespace SomUI.View
     /// </summary>
     public partial class DataPreparationView : UserControl
     {
+        /// <summary>
+        /// Initalizes a new instance of ´DataPreparationView class
+        /// </summary>
         public DataPreparationView()
         {
             InitializeComponent();
@@ -32,12 +35,6 @@ namespace SomUI.View
             if (this.webView.IsLoaded)
             {
                 this.webView.Reload();
-                //App.Current.Dispatcher.Invoke((Action)delegate
-                //{
-                //    this.Browser.Load("http://localhost:8050/");
-                //});
-
-                //this.Browser.Visibility = Visibility.Visible;
             }
 
 

@@ -5,32 +5,21 @@ Created on Fri Apr 22 12:38:19 2022
 @author: shautala
 """
 
-#import seaborn as sns
-#import math
-#import matplotlib.pyplot as plt
+
 import dash
 from dash import dcc
 from dash import html
-#import plotly.graph_objs as go
-#import pandas as pd
 import flask
 from gevent.pywsgi import WSGIServer
-#import numpy as np
-#import threading
-#import argparse
 import dash_bootstrap_components as dbc
 import io
 import base64
-#import sys
 import matplotlib.pyplot as plt
 from dash.dependencies import Input, Output, State
-#from nextsomcore.loadfile import load_input_file, read_coordinate_columns, read_data_columns, read_header
 from split_to_columns_interactive import readInputData
 from edit_column_interactive import edit_column
 from draw_histogram_interactive import draw_histogram
 from combine_to_lrn_file_interactive import combineToLrnFile
-#import dask
-#import dask.dataframe as dd
 import copy
 import argparse
 import threading
@@ -69,18 +58,7 @@ def generate_column_checklist_row(column_name,column_index):
             {'label':' x','value':'label'},
             {'label':' x','value':'exclude'}],'data', style={'display': 'inline-block','color':'white'})])#,style={'width': '10%'})])#,inline=True,),
              ])#,style=dict(display='flex'))
-
-#def generate_column_table_row(column_name,column_index):
-#    return html.Tr(children=[
-#        #html.Button(str(column_name),id=(str("btn_t_"+column_name)),style={'width': '30%'}),
-#        html.Label(str(column_name),id=(str("btn_t_"+column_name))),#,style={'width': '30%'},
-#        html.Div([dcc.RadioItems((str("rd_t_"+str(column_index))),[
-#            {'label':html.Div(['asdsad'], style={'color': 'LightGreen', 'font-size': 20,'marginRight':10}),'value':'data'},{'label':'','value':'x'},
-#            {'label':'','value':'y'},{'label':'','value':'label'},
-#            {'label':'','value':'exclude'}],'data',style={'width': '40%'})])#,inline=True,),
-#             ],style=dict(display='flex'))
-        
-        
+    
 def generate_column_selections(column_name,column_index):
     return html.Option([html.Div([dcc.RadioItems(id=(str("rd_"+column_name)),options=['data','x','y','label','exclude'])],style={'width': '40%'})])
 
@@ -143,11 +121,11 @@ def run():
                         
                         dcc.Checklist(id="ScaleChecklist",
                             options=[{"label":"Scale data","value":"scale"}],
-                            value=[],
+                            value=["scale"],
                             style={'marginTop':80}
                         ),
                         html.Div([dcc.Input(id='scalemin',type="number",value=0,style={'width': '20%', 'height': 30,'marginLeft':25,'marginBottom':5,'marginRight':10}),dash.html.Label("Scaling Min value")],style=dict(display='flex',marginTop=5)),
-                        html.Div([dcc.Input(id='scalemax',type="number",value=0,style={'width': '20%', 'height': 30,'marginLeft':25,'marginBottom':5,'marginRight':10}),dash.html.Label("Scaling max value")],style=dict(display='flex',marginBottom=10)),
+                        html.Div([dcc.Input(id='scalemax',type="number",value=1,style={'width': '20%', 'height': 30,'marginLeft':25,'marginBottom':5,'marginRight':10}),dash.html.Label("Scaling max value")],style=dict(display='flex',marginBottom=10)),
                         html.Div(id='dummy', style={'display': 'none'}),
                         html.Button('Next', id='submit-val')]),md=3),
                         html.Div(dcc.Loading(id="ls-loading-2", children=[html.Div(id="ls-loading-output-2")], type="circle",fullscreen=True,style={'opacity': '0.5'}))
@@ -287,8 +265,13 @@ def create_lrn(n_clicks,column_type_host,na_value,scaled,spatial):
             isScaled=True
         for i in range(0,len(headers)):       
             column_types.append(column_type_host[i]['props']['children'][0]['props']['children'][1]['props']['value'])
-        combineToLrnFile(input_file,output_folder,data["data"],column_types,isScaled,isSpatial,na_value)
-        print("Saved to .lrn file")
+        try:
+            combineToLrnFile(input_file,output_folder,data["data"],column_types,isScaled,isSpatial,na_value)
+            #print("Saved to .lrn file")
+        except ValueError as err:
+            print('Error:', err)
+        
+        
     else:
         firstLoad=False;
     return [""],n_clicks

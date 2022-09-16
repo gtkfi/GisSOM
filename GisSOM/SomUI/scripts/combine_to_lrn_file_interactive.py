@@ -9,13 +9,13 @@ For CSV files it is possible to use non-spatial data, in this case this script w
 with x- and y- cols filled with zeroes, for internal use. Final program output will not contain these dummy columns.
 """
 
-import argparse
+#import argparse
 from nextsomcore.loadfile import load_input_file
 import xml.etree.ElementTree as ET
 from xml.dom import minidom
 import numpy as np
 import pandas as pd
-import os
+#import os
 
 
 """
@@ -40,12 +40,10 @@ def write_nonspatial_from_csv(columns,inputFile,output_folder,isScaled,na_value,
     
     columns_sorted=[]
     columns_sorted.append(columns[:,int(eastingIndex)])
-    columns_sorted.append(columns[:,int(northingIndex)])
-    
+    columns_sorted.append(columns[:,int(northingIndex)])   
     for i in range(0,  len(columns[0])):
         if(i!=int(eastingIndex) and i!=int(northingIndex)):
             columns_sorted.append(columns[:,i]) 
-   
     for i in range(0, len(columns[0])):
         if(i==0):
             columns_sorted[0][7]="x"
@@ -92,7 +90,7 @@ def write_nonspatial_from_csv(columns,inputFile,output_folder,isScaled,na_value,
         for i in range(0,len(columns_in[0])):
             colForMinMax=columns_included[i][8:].astype(float)[~np.isnan(df_in[i][8:].astype(float))]
             data_min= min(colForMinMax)
-            data_max= max(colForMinMax)
+            data_max= max(colForMinMax)#Checkit seuraaville asioille: min ja max ei oo samat, koko columni ei oo NoDataa
             scale_min=float(columns_included[i][5])
             scale_max=float(columns_included[i][6])
             for j in range(8, len(columns_in)):
@@ -163,15 +161,6 @@ def write_spatial_from_csv(columns,inputFile,output_folder,isScaled,isSpatial,ea
     df_in=df_in[2:].apply(pd.to_numeric,errors='coerce')  
     df_in=pd.concat([df_in_header, df_in])
 
-
-
-
-
-
-
-
-
-
     writeXmlTree(columns_included,output_folder,isScaled,True,na_value)#true for IsSpatial
     
     if(isScaled==True):
@@ -180,7 +169,7 @@ def write_spatial_from_csv(columns,inputFile,output_folder,isScaled,isSpatial,ea
                 colForMinMax=columns_included[i][8:].astype(float)[~np.isnan(df_in[i][8:].astype(float))]
                 colForMinMax= list(filter(lambda x: x!=float(na_value), colForMinMax))               
                 data_min= min(colForMinMax)
-                data_max= max(colForMinMax)
+                data_max= max(colForMinMax)#Checkit seuraaville asioille: min ja max ei oo samat, koko columni ei oo NoDataa. Näissä tapauksissa columni excludeen/poistoon.
                 scale_min=float(columns_included[i][5])
                 scale_max=float(columns_included[i][6])
                 for j in range(8, len(columns_in[:,i])):
@@ -193,7 +182,7 @@ def write_spatial_from_csv(columns,inputFile,output_folder,isScaled,isSpatial,ea
             for i in range(0,len(columns_in[0])):
                 colForMinMax=df_in[i][8:].astype(float)[~np.isnan(df_in[i][8:].astype(float))]                
                 data_min= min(colForMinMax) 
-                data_max= max(colForMinMax)
+                data_max= max(colForMinMax)#Checkit seuraaville asioille: min ja max ei oo samat, koko columni ei oo NoDataa
                 scale_min=float(columns_included[i][5])
                 scale_max=float(columns_included[i][6])
                 for j in range(8, len(columns_in[:,i])):
@@ -245,7 +234,7 @@ def write_from_tif_input(columns, output_folder, inputFile,isScaled,na_value="")
         if(isScaled==True):           
             scale_min=float(columns[:,i][5])
             scale_max=float(columns[:,i][6])
-        if(columns[i,4]!='0'):
+        if(columns[:,i][4]=='1'): #if column is not excluded
             array_for_minmax= np.delete(columns[8:,i], np.where(columns[8:,i] == na_value)) #start from 8 to skip column headers
             data_min= min(array_for_minmax.astype(float))
             data_max= max(array_for_minmax.astype(float))            
@@ -265,8 +254,7 @@ def write_from_tif_input(columns, output_folder, inputFile,isScaled,na_value="")
     """
     id_col_with_header=np.vstack((coltypes[0],header['colnames'][0],np.c_[id_col]))  #create id column   
     
-
-    columns_stacked=np.vstack((columns[4,:],columns[:][7:]))#build a frankenstein out of coltytpes,colheaders and columns themselves
+    columns_stacked=np.vstack((columns[4,:],columns[:][7:]))#build a frankenstein's monster out of coltytpes,colheaders and columns themselves
     columns=np.hstack((id_col_with_header, columns_stacked))
     """
     AAAAA^
@@ -459,8 +447,8 @@ def combineToLrnFile(inputFile,output_folder,columns,column_type_list,isScaled,i
     eastingIndex=None
     northingIndex=None
     if(isSpatial==True):
-        if ('x' not in column_type_list and 'y' not in column_type_list):
-            raise Exception("Please select X and Y columns or set the dataset to non-spatial data before proceeding.")
+        if ('x' not in column_type_list or 'y' not in column_type_list):
+            raise ValueError("Please select X and Y columns or set the dataset to non-spatial data before proceeding.")
         eastingIndex=column_type_list.index("x")
         northingIndex=column_type_list.index("y")
         columns[:,eastingIndex][4]=0#set x, y and label columns as excluded
@@ -493,4 +481,6 @@ def combineToLrnFile(inputFile,output_folder,columns,column_type_list,isScaled,i
         if (isSpatial==True):
             write_spatial_from_csv(columns,inputFile,output_folder,isScaled,isSpatial,eastingIndex,northingIndex,labelIndex,na_value)#(inputFile,output_folder,columns,column_type_list,isScaled,na_value)
         else: #if easting index is none                    
-            write_nonspatial_from_csv(columns,inputFile,output_folder,isScaled,na_value,labelIndex)       
+            write_nonspatial_from_csv(columns,inputFile,output_folder,isScaled,na_value,labelIndex)     
+            
+    print("Saved to .lrn file")

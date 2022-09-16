@@ -63,6 +63,9 @@ namespace SomUI.ViewModel
             }
         }
 
+        /// <summary>
+        /// The view that's currently active in the UI
+        /// </summary>
         public UserControl ActiveView
         {
             get { return activeView; }
@@ -73,6 +76,10 @@ namespace SomUI.ViewModel
                 OnPropertyChanged();
             }
         }
+        /// <summary>
+        /// Whether user is allowed to change view, not yet implemented
+        /// </summary>
+        /// <returns></returns>
         private bool CanChangeView()
         {
             return true;//TODO: implement this.
@@ -81,15 +88,25 @@ namespace SomUI.ViewModel
         {
             ActiveView = somInputView;
         }
+        /// <summary>
+        /// Change active UI view to Som Parameter View
+        /// </summary>
         public void ChangeToSomParameterView()
         {
             ActiveView = somParameterView;
         }
+
+        /// <summary>
+        /// Change active UI view to Som Result View
+        /// </summary>
         public void ChangeToSomResultView()
         {
             ActiveView = somResultView;
         }
 
+        /// <summary>
+        /// Change active UI view to Data Preparation View
+        /// </summary>
         private void ChangeToDataPreparationView()
         {
             if(!ServiceLocator.Current.GetInstance<SomViewModel>().IsBusy)
@@ -100,6 +117,10 @@ namespace SomUI.ViewModel
             PropertyChangedEventHandler handler = PropertyChanged;
             if (handler != null) handler(this, new PropertyChangedEventArgs(propertyName));
         }
+
+        /// <summary>
+        /// InterTabClient for Dragablz tearable and dockable tabs
+        /// </summary>
         public IInterTabClient InterTabClient
         {
             get { return _interTabClient; }

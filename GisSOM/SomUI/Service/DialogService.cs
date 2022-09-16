@@ -115,51 +115,11 @@ namespace SomUI.Service
             return default(List<string>);
         }
 
-
-        //public List<string> CustomOpenFilesDialog(string initialPath= "", string filter="", bool checkFileExists=true, bool checkPathExists = true)
-        //{
-        //    OpenFileDialog openFileDialog = new OpenFileDialog()
-        //    {
-        //        InitialDirectory = initialPath,
-        //        Filter = filter,
-        //        CheckFileExists = checkFileExists,
-        //        CheckPathExists = checkPathExists,
-        //        Multiselect = false
-        //    };
-
-        //    if (openFileDialog.ShowDialog() == true)
-        //    {
-        //        if (openFileDialog.FilterIndex == 2)
-        //        {
-        //            openFileDialog.Multiselect = true;
-        //        }
-        //        else
-        //        {
-        //            openFileDialog.Multiselect = false; 
-        //        }
-
-        //        List<string> files = new List<string>();
-
-        //        foreach (string file in openFileDialog.FileNames)
-        //        {
-        //            files.Add(file);
-        //        }
-        //        return files;
-        //    }
-        //    return default(List<string>);
-        //}
         /// <summary>
         /// Show notification on UI.
         /// </summary>
         /// <param name="message">Message.</param>
-        /// <param name="level">Notification level.</param>
-        /// <param name="callbackAction">Callback action.</param>
-        /// <param name="timeout">Timeout.</param>
-        //public void ShowNotification(string message, NotificationLevel level, Action callbackAction = null, int timeout = 5)
-        //{
-        //    var mainWindow = System.Windows.Application.Current.MainWindow as MetroWindow;
-        //    mainWindow?.ShowToastNotification(message, level, callbackAction, timeout);
-        //}
+        /// <param name="notificationType">Notification type.</param>
         public void ShowNotification(string message, string notificationType)
         {
             if (_notifier != null)
