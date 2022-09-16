@@ -20,6 +20,9 @@ namespace SomUI.View
     /// </summary>
     public partial class SettingsView : UserControl
     {
+        /// <summary>
+        /// Initalizes a new instance of SettingsView class. DEPRECATED?
+        /// </summary>
         public SettingsView()
         {
             InitializeComponent();

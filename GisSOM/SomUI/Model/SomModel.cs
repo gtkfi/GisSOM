@@ -10,6 +10,9 @@ using SomUI.Service;
 
 namespace SomUI.Model
 {
+    /// <summary>
+    /// Initialize new instance of SomModel
+    /// </summary>
     public class SomModel : ObservableObject
     {
         private string inputFile;
@@ -66,11 +69,19 @@ namespace SomUI.Model
         private int normalizationMax;
         private int selectedInteractiveColumn;
         private string newLabelData;
+
+        /// <summary>
+        /// Numeric value used to mark NaN values in input data. This is often something like -9999, or a significantly larger negative number.
+        /// </summary>
         public string NoDataValue
         {
             get { return noDataValue; }
             set { Set<string>(() => this.NoDataValue, ref this.noDataValue, value); }
         }
+
+        /// <summary>
+        /// Optional parameter for providing an initial codebook used as basis for som calculation
+        /// </summary>
         public string InitialCodeBook
         {
             get { return initialCodeBook; }
@@ -79,6 +90,10 @@ namespace SomUI.Model
                 Set<string>(() => this.InitialCodeBook, ref this.initialCodeBook, value);
             }
         }
+
+        /// <summary>
+        /// Index of X coordinate column in input data
+        /// </summary>
         public int EastingColumnIndex
         {
             get { return eastingColumnIndex; }
@@ -88,6 +103,9 @@ namespace SomUI.Model
             }
         }
 
+        /// <summary>
+        /// Index of Y coordinate column input data
+        /// </summary>
         public int NorthingColumnIndex
         {
             get { return northingColumnIndex; }
@@ -97,6 +115,9 @@ namespace SomUI.Model
             }
         }
 
+        /// <summary>
+        /// Index of label column input data
+        /// </summary>
         public int LabelColumnIndex
         {
             get { return labelColumnIndex; }
@@ -106,6 +127,9 @@ namespace SomUI.Model
             }
         }
 
+        /// <summary>
+        /// Initialization for som map, "random" or "pca"
+        /// </summary>
         public string Initialization
         {
             get { return initialization; }
@@ -115,6 +139,9 @@ namespace SomUI.Model
             }
         }
 
+        /// <summary>
+        /// Shape of som grid (square or hexagonal. square is a regular square where diagonals are not neighbours, hexa is a honeycomb where each node has 6 neighbors.
+        /// </summary>
         public string GridShape
         {
             get { return gridShape; }
@@ -124,6 +151,9 @@ namespace SomUI.Model
             }
         }
 
+        /// <summary>
+        /// Trainingrate function for som training, "linear" or "exponential"
+        /// </summary>
         public string TrainingRateFunction
         {
             get { return trainingRateFunction; }
@@ -133,6 +163,9 @@ namespace SomUI.Model
             }
         }
 
+        /// <summary>
+        /// Initial learning rate
+        /// </summary>
         public double TrainingRateInitial
         {
             get { return trainingRateInitial; }
@@ -142,6 +175,9 @@ namespace SomUI.Model
             }
         }
 
+        /// <summary>
+        /// Final learning rate for som training
+        /// </summary>
         public double TrainingRateFinal
         {
             get { return trainingRateFinal; }
@@ -151,6 +187,9 @@ namespace SomUI.Model
             }
         }
 
+        /// <summary>
+        /// Initial neighborhood size
+        /// </summary>
         public int InitialNeighborhood
         {
             get { return initialNeighborhood; }
@@ -160,6 +199,9 @@ namespace SomUI.Model
             }
         }
 
+        /// <summary>
+        /// Final neighborhood size
+        /// </summary>
         public int FinalNeighborhood
         {
             get { return finalNeighborhood; }
@@ -169,6 +211,9 @@ namespace SomUI.Model
             }
         }
 
+        /// <summary>
+        /// Map type for som, "toroid" or "planar"
+        /// </summary>
         public string MapType
         {
             get { return maptype; }
@@ -179,7 +224,9 @@ namespace SomUI.Model
         }
 
 
-
+        /// <summary>
+        /// Interactive result plot image
+        /// </summary>
         public ImageSource InteractiveResultSomPlot
         {
             get { return interactiveResultSomPlot; }
@@ -188,6 +235,9 @@ namespace SomUI.Model
                 Set<ImageSource>(() => this.InteractiveResultSomPlot, ref this.interactiveResultSomPlot, value);
             }
         }
+        /// <summary>
+        /// Neighbourhood function used for som training, values "gaussian" or "bubble"
+        /// </summary>
         public string Neighborhood
         {
             get { return neighborhood; }
@@ -197,6 +247,9 @@ namespace SomUI.Model
             }
         }
 
+        /// <summary>
+        /// Output folder for the software
+        /// </summary>
         public string Output_Folder
         {
             get { return output_folder; }
@@ -205,6 +258,10 @@ namespace SomUI.Model
                 Set<string>(() => this.Output_Folder, ref this.output_folder, value);
             }
         }
+
+        /// <summary>
+        /// Output folder for a specific som run
+        /// </summary>
         public string OutputFolderTimestamped
         {
             get { return outputFolderTimestamped; }
@@ -213,6 +270,10 @@ namespace SomUI.Model
                 Set<string>(() => this.OutputFolderTimestamped, ref this.outputFolderTimestamped, value);
             }
         }
+
+        /// <summary>
+        /// Minimum number of clusters for k-means clustering
+        /// </summary>
         public int KMeans_min
         {
             get { return kmeans_min; }
@@ -223,6 +284,9 @@ namespace SomUI.Model
             }
         }
 
+        /// <summary>
+        /// Maximum number of clusters for k-means clustering
+        /// </summary>
         public int KMeans_max
         {
             get { return kmeans_max; }
@@ -232,6 +296,10 @@ namespace SomUI.Model
                 Set<int>(() => this.KMeans_max, ref kmeans_max, value);
             }
         }
+
+        /// <summary>
+        /// Minimum number of clusters for previous k-means calculation
+        /// </summary>
         public int KMeans_min_last_calculation
         {
             get { return kmeans_min_last_calculation; }
@@ -241,6 +309,10 @@ namespace SomUI.Model
                 Set<int>(() => this.KMeans_min_last_calculation, ref kmeans_min_last_calculation, value);
             }
         }
+
+        /// <summary>
+        /// Maximum number of clusters for previous k-means calculation
+        /// </summary>
         public int KMeans_max_last_calculation
         {
             get { return kmeans_max_last_calculation; }
@@ -250,6 +322,10 @@ namespace SomUI.Model
                 Set<int>(() => this.KMeans_max_last_calculation, ref kmeans_max_last_calculation, value);
             }
         }
+
+        /// <summary>
+        /// Number of initialiazations for each number of clusters
+        /// </summary>
         public int KMeans_initializations
         {
             get { return kmeans_initializations; }
@@ -260,7 +336,9 @@ namespace SomUI.Model
             }
         }
 
-
+        /// <summary>
+        /// Whether Kmeans calculation is ran or not
+        /// </summary>
         public string KMeans
         {
             get { return kmeans; }
@@ -270,16 +348,10 @@ namespace SomUI.Model
                 Set<string>(() => this.KMeans, ref kmeans, value);
             }
         }
-        //private List<List<string>> dataPreparationList = new List<List<string>>();
 
-        //public List<List<string>> DataPreparationList
-        //{
-        //    get { return dataPreparationList; }
-        //    set
-        //    {
-        //        Set<List<List<string>>>(() => this.DataPreparationList, ref dataPreparationList, value);
-        //    }
-        //}
+        /// <summary>
+        /// Whether selected data column is excluded or not
+        /// </summary>
         public string IsExcluded
         {
             get { return isExcluded; }
@@ -289,6 +361,10 @@ namespace SomUI.Model
                 Set<string>(() => this.IsExcluded, ref isExcluded, value);
             }
         }
+
+        /// <summary>
+        /// Histogram for data column value distribution, used in Data Preparation stage for input data columns.
+        /// </summary>
         public ImageSource DataHistogram
         {
             get
@@ -301,6 +377,9 @@ namespace SomUI.Model
             }
         }
 
+        /// <summary>
+        /// Resulting image plot after adding new label data to already calculated som
+        /// </summary>
         public ImageSource NewLabelPlot
         {
             get
@@ -313,6 +392,9 @@ namespace SomUI.Model
             }
         }
 
+        /// <summary>
+        /// Resulting image legend after adding new label data to already calculated som
+        /// </summary>
         public ImageSource NewLabelLegend
         {
             get
@@ -325,6 +407,9 @@ namespace SomUI.Model
             }
         }
 
+        /// <summary>
+        /// Lower used for winsorizing
+        /// </summary>
         public string WinsorMin
         {
             get { return winsorMin; }
@@ -333,6 +418,10 @@ namespace SomUI.Model
                 Set<string>(() => this.WinsorMin, ref winsorMin, value);
             }
         }
+
+        /// <summary>
+        /// Upper limit used for winsorizing
+        /// </summary>
         public string WinsorMax
         {
             get { return winsorMax; }
@@ -341,6 +430,10 @@ namespace SomUI.Model
                 Set<string>(() => this.WinsorMax, ref winsorMax, value);
             }
         }
+        
+        /// <summary>
+        /// Whether data is log transformed or not
+        /// </summary>
         public string IsLogTransformed
         {
             get
@@ -356,6 +449,10 @@ namespace SomUI.Model
                 }
             }
         }
+
+        /// <summary>
+        /// Whether data is spatial or not.
+        /// </summary>
         public bool IsSpatial
         {
             get
@@ -368,6 +465,9 @@ namespace SomUI.Model
             }
         }
 
+        /// <summary>
+        /// Whether data is scaled or not.
+        /// </summary>
         public bool IsNormalized
         {
             get
@@ -379,7 +479,28 @@ namespace SomUI.Model
                 Set<bool>(() => this.IsNormalized, ref isNormalized, value);
             }
         }
+        /// <summary>
+        /// Minimum value used for scaling data
+        /// </summary>
+        public int NormalizationMin
+        {
+            get { return normalizationMin; }
+            set { Set<int>(() => this.NormalizationMin, ref normalizationMin, value); }
 
+        }
+
+        /// <summary>
+        /// Maximum value used for scaling data
+        /// </summary>
+        public int NormalizationMax
+        {
+            get { return normalizationMax; }
+            set { Set<int>(() => this.NormalizationMax, ref normalizationMax, value); }
+
+        }
+        /// <summary>
+        /// Whether data is winsorized or not.
+        /// </summary>
         public string IsWinsorized
         {
             get
@@ -396,6 +517,10 @@ namespace SomUI.Model
 
             }
         }
+
+        /// <summary>
+        /// Path to input file used in som calculation
+        /// </summary>
         public string InputFile
         {
             get
@@ -408,7 +533,9 @@ namespace SomUI.Model
 
             }
         }
-
+        /// <summary>
+        /// Path to original input data that has not been modified in data preparation stage
+        /// </summary>
         public string OriginalData
         {
             get
@@ -422,6 +549,9 @@ namespace SomUI.Model
             }
         }
 
+        /// <summary>
+        /// Results folder for som calculation and plots
+        /// </summary>
         public string SomResultsFolder
         {
             get
@@ -434,6 +564,9 @@ namespace SomUI.Model
             }
         }
 
+        /// <summary>
+        /// Output file for som calculation geospace results
+        /// </summary>
         public string Output_file_geospace
         {
             get { return output_file_geospace; }
@@ -442,6 +575,10 @@ namespace SomUI.Model
                 Set<string>(() => this.Output_file_geospace, ref output_file_geospace, value);
             }
         }
+
+        /// <summary>
+        /// Output file for som calculation somspace results
+        /// </summary>
         public string Output_file_somspace
         {
             get { return output_file_somspace; }
@@ -450,6 +587,10 @@ namespace SomUI.Model
                 Set<string>(() => this.Output_file_somspace, ref output_file_somspace, value);
             }
         }
+
+        /// <summary>
+        /// Som X dimension
+        /// </summary>
         public int Som_x
         {
             get { return som_x; }
@@ -460,6 +601,10 @@ namespace SomUI.Model
                 Set<int>(() => this.Som_x, ref som_x, value);
             }
         }
+
+        /// <summary>
+        /// Som Y dimension
+        /// </summary>
         public int Som_y
         {
             get { return som_y; }
@@ -470,6 +615,10 @@ namespace SomUI.Model
                 Set<int>(() => this.Som_y, ref som_y, value);
             }
         }
+
+        /// <summary>
+        /// Number of epochs used in som training
+        /// </summary>
         public int Epochs
         {
             get { return epochs; }
@@ -480,6 +629,9 @@ namespace SomUI.Model
 
         }
 
+        /// <summary>
+        /// List of input rasters
+        /// </summary>
         public List<string> InRasterList
         {
             get
@@ -491,6 +643,10 @@ namespace SomUI.Model
                 Set<List<string>>(() => this.InRasterList, ref inrasterlist, value);
             }
         }
+
+        /// <summary>
+        /// Type of interactive plot selection: cluster or som. DEPRECATED?
+        /// </summary>
         public string InteractiveType
         {
             get { return interactiveType; }
@@ -500,6 +656,9 @@ namespace SomUI.Model
             }
         }
 
+        /// <summary>
+        /// Path to kmeans clustering output file
+        /// </summary>
         public string ClusterFilePath
         {
             get { return clusterFilePath; }
@@ -508,6 +667,10 @@ namespace SomUI.Model
                 Set<string>(() => this.ClusterFilePath, ref clusterFilePath, value);
             }
         }
+
+        /// <summary>
+        /// Shape of input data in case of CSV input: Grid, or Scatter.
+        /// </summary>
         public string DataShape
         {
             get { return dataShape; }
@@ -517,18 +680,9 @@ namespace SomUI.Model
             }
         }
 
-        public int NormalizationMin
-        {
-            get { return normalizationMin; }
-            set { Set<int>(() => this.NormalizationMin, ref normalizationMin, value); }
-
-        }
-        public int NormalizationMax
-        {
-            get { return normalizationMax; }
-            set { Set<int>(() => this.NormalizationMax, ref normalizationMax, value); }
-
-        }
+        /// <summary>
+        /// List of output scatter plots
+        /// </summary>
         public ObservableCollection<BoolStringHelper> ScatterPlotList
         {
             get
@@ -540,6 +694,9 @@ namespace SomUI.Model
                 Set(() => ScatterPlotList, ref scatterPlotList, value);
             }
         }
+        /// <summary>
+        /// List of output box plots
+        /// </summary>
         public ObservableCollection<BoolStringHelper> BoxPlotList
         {
             get
@@ -571,6 +728,10 @@ namespace SomUI.Model
                 Set<string>(() => this.RunId, ref runId, value);
             }
         }
+
+        /// <summary>
+        /// Path to input file for adding new label data to an existing som result
+        /// </summary>
         public string NewLabelData
         {
             get { return newLabelData; }
@@ -579,6 +740,10 @@ namespace SomUI.Model
                 Set<string>(() => this.NewLabelData, ref newLabelData, value);
             }
         }
+
+        /// <summary>
+        /// Index of selected column for interactive plot. DEPRECATED?
+        /// </summary>
         public int SelectedInteractiveColumn
         {
             get { return selectedInteractiveColumn; }
@@ -588,7 +753,9 @@ namespace SomUI.Model
             }
         }
 
-
+        /// <summary>
+        /// DEPRECATED?
+        /// </summary>
         public ObservableCollection<string> InteractiveResultColumnList
         {
             get

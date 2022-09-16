@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 
 namespace SomUI.Service
 {
+    ///
     public class BoolStringHelper : INotifyPropertyChanged
     {
         private string name;

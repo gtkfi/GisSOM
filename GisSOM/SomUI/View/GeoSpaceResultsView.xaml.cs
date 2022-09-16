@@ -20,6 +20,9 @@ namespace SomUI.View
     /// </summary>
     public partial class GeoSpaceResultsView : UserControl
     {
+        /// <summary>
+        /// Initalizes a new instance of GeoSpaceResultsView class
+        /// </summary>
         public GeoSpaceResultsView()
         {
             InitializeComponent();

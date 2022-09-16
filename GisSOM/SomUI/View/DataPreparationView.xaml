@@ -365,7 +365,7 @@
                                       VerticalAlignment="Stretch"
                                       Width="Auto"
                                       Margin="0,50,0,0"
-                                      MinHeight="1000"               
+                                      MinHeight="600"               
                                       ToolTip="{Binding DataPrepBrowserToolTip,NotifyOnTargetUpdated=True}"  TargetUpdated="ToolTip_SourceUpdated"
                                       />
                     <!--ToolTip="{Binding DataPrepBrowserToolTip,NotifyOnTargetUpdated=True}"  TargetUpdated="ToolTip_SourceUpdated"-->

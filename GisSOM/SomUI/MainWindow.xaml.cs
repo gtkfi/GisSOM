@@ -29,6 +29,9 @@ namespace SomUI
     /// </summary>
     public partial class MainWindow : MetroWindow
     {
+        /// <summary>
+        /// Initalizes a new instance of MainWindow class
+        /// </summary>
         public MainWindow()
         {
             InitializeComponent();

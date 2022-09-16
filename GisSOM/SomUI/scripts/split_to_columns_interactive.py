@@ -17,7 +17,6 @@ from nextsomcore.loadfile import load_input_file, read_coordinate_columns
 import pandas as pd
 import sys
 
-
 #Slightly modified versions of functions by the same names in loadfile.py
 def _read_csv_columns(inputFile, columns, fmt=''): 
     if not type(columns) in (list, tuple):
@@ -59,6 +58,7 @@ def readInputData(inputFile,inputType):
         colnames_coords=["x","y"]   #add x and y column names to colnames
         colnames_data=header['colnames']
         colnames=np.append(colnames_coords,colnames_data)  
+        checkHeaderValidity(colnames)
         falses=[]   #create a row of "false" values, will be used to initialize data transformation values (no transformations done by default)            
         for i in range(0, len(colnames)):
             falses.append("false")  
@@ -80,6 +80,7 @@ def readInputData(inputFile,inputType):
     elif(inputType=="csv"):     
         columns=read_csv_columns(inputFile) 
         colnames=columns['colnames']
+        checkHeaderValidity(colnames)
         falses=[]   #create a row of "false" values, will be used to initialize data transformation values (no transformations done by default)             
         for i in range(0, len(colnames)):
             falses.append("false")   
@@ -90,3 +91,13 @@ def readInputData(inputFile,inputType):
         allButFirstTwoRowsLabel= np.concatenate((colNamesAndTypes,columns['labelData']),axis=0)   #stack header of the label data        
         data={"data":allButFirstTwoRows,"label":allButFirstTwoRowsLabel,"noDataValue":""}
         return(data)
+    
+    #Add informative errors on bad data: on numeric headers, on data with a fully nodata variable (or variable whose values are all the same), empty variable header. Empty cell?
+    #checkHeaderValidity?
+def checkHeaderValidity(colnames):
+    for colname in colnames:
+        if(colname[0].isdigit()):
+            raise ValueError("Header can not begin with numeric character:"+colname)
+        elif(len(colname)==0):
+            raise ValueError("Input file contains empty headers")
+            

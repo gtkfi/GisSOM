@@ -20,6 +20,9 @@ namespace SomUI.View
     /// </summary>
     public partial class ScatterPlotView : UserControl
     {
+        /// <summary>
+        /// Initalizes a new instance of ScatterPlotView class
+        /// </summary>
         public ScatterPlotView()
         {
             InitializeComponent();

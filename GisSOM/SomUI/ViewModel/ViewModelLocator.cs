@@ -33,45 +33,28 @@ namespace SomUI.ViewModel
         public ViewModelLocator()
         {
             ServiceLocator.SetLocatorProvider(() => SimpleIoc.Default);
-
-            ////if (ViewModelBase.IsInDesignModeStatic)
-            ////{
-            ////    // Create design time view services and models
-            ////    SimpleIoc.Default.Register<IDataService, DesignDataService>();
-            ////}
-            ////else
-            ////{
-            ////    // Create run time view services and models
-            ////    SimpleIoc.Default.Register<IDataService, DataService>();
-            ////}
-            //SimpleIoc.Default.Unregister<ILogger>();
             SimpleIoc.Default.Register<ILogger>(() => LogManager.GetCurrentClassLogger());          
             SimpleIoc.Default.Register<MainViewModel>();
             SimpleIoc.Default.Register<SomViewModel>();
             SimpleIoc.Default.Register<TabViewModel>();
-            //SimpleIoc.Default.Register<SomPythonViewModel>();
             SimpleIoc.Default.Register<IDialogService, DialogService>();
             var logger = LogManager.GetCurrentClassLogger();
-            //logger.Trace("I am ViewModelLocator");
         }
 
+        /// <summary>
+        /// getter for MainViewModel
+        /// </summary>
         public MainViewModel Main
         {
             get
             {
-                //var logger = LogManager.GetCurrentClassLogger();
-                //logger.Trace("Get MainViewModel has been called from ViewModelLocator");
                 return ServiceLocator.Current.GetInstance<MainViewModel>();
             }
         }
-        //public SomPythonViewModel SomPythonViewModel
-        //{
-        //    get
-        //    {
-        //        return ServiceLocator.Current.GetInstance<SomPythonViewModel>();
-        //    }
-        //}
 
+        /// <summary>
+        /// Getter for SomViewModel, which contains most core functionality for the UI
+        /// </summary>
         public SomViewModel SomViewModel
         {
             get
@@ -80,6 +63,9 @@ namespace SomUI.ViewModel
             }
         }
 
+        /// <summary>
+        /// View model for managing Dragablz dragable and tearable tabs
+        /// </summary>
         public TabViewModel TabViewModel
         {
             get
@@ -88,6 +74,9 @@ namespace SomUI.ViewModel
             }
         }
 
+        /// <summary>
+        /// Clear ViewModels, unimplemented at the moment
+        /// </summary>
         public static void Cleanup()
         {
             // TODO Clear the ViewModels

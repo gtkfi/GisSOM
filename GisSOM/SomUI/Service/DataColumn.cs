@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 
 namespace SomUI.Service
 {
+    /// <summary>
+    /// Is this whole thing deprecated now after modifying data preparation stage?
+    /// </summary>
     public class DataColumn : INotifyPropertyChanged
     {
         private string name;
