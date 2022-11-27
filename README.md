@@ -50,7 +50,7 @@ private bool usePyExes = false;
 
 <sup>All set for debugging!</sup>
 
-## Contirubte  
+## Contribute  
 
 If you want to contribute to GisSOM, you can just fork the repository, and submit a pull request with your changes.  
   
