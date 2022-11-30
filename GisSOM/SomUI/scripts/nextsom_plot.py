@@ -29,8 +29,6 @@ import pickle
 import pandas as pd
 from matplotlib.offsetbox import AnchoredOffsetbox, TextArea, VPacker # HPacker,
 from matplotlib.ticker import FormatStrFormatter
-#from loadfile import read_header
-#from nextsomcore import loadfile
 import math
 from matplotlib.lines import Line2D
 from plotting_functions import plot_hexa
@@ -46,19 +44,14 @@ parser.add_argument('--som_x',nargs='?', help='som x dimension')
 parser.add_argument('--som_y',nargs='?', help='som y dimension')
 parser.add_argument('--input_file',nargs='?', help='Input file(*.lrn)')
 parser.add_argument('--dir',nargs='?', help='Input file(*.lrn)')
-parser.add_argument('--original_data_dir', default=None, dest="original_data_dir", help='location of input columns with original data')
 parser.add_argument('--grid_type',nargs='?', help='grid type (square or hexa)')
 parser.add_argument('--redraw',nargs='?', help=' #whether to draw all plots, or only those required for clustering (true: draw all. false:draw only for clustering).')
 parser.add_argument('--outgeofile', default=None, dest="outgeofile", help='#som geospace results txt file')
-parser.add_argument('--eastingIndex', default=None, dest="eastingIndex", help='index of easting column')
-parser.add_argument('--northingIndex', default=None, dest="northingIndex", help='index of northing column')
-parser.add_argument('--labelIndex', default=None, dest="labelIndex", help='index of label column')
 parser.add_argument('--dataType', default=None, dest="dataType", help='Data type (scatter or grid)')
 parser.add_argument('--noDataValue', default='NA', dest="noDataValue", help='noData value')
 args=parser.parse_args()
 
 outsomfile=args.outsomfile  #somspace results txt file
-original_data_dir=args.original_data_dir
 somx=int(args.som_x)        
 somy=int(args.som_y)        
 input_file=args.input_file  #original input file 
@@ -70,14 +63,8 @@ outgeofile=None
 eastingIndex=None
 northingIndex=None
 if args.outgeofile is not None:
-    outgeofile=args.outgeofile        #geospace results txt file 
-if args.eastingIndex is not None:
-    eastingIndex=args.eastingIndex    
-if args.northingIndex is not None:
-    northingIndex=args.northingIndex  
-if args.labelIndex is not None:
-    labelIndex=args.labelIndex
-
+    outgeofile=args.outgeofile      
+labelIndex="-2" #TODO: Now that labelIndex is no longer a parameter, this system should be removed.
     
 
 
@@ -170,7 +157,7 @@ with open(input_file,encoding='utf-8-sig') as fh:
 colnames=header_line.split("\t")
 if('label' in colnames):
     labelIndex=colnames.index('label')
-if (labelIndex!="-2"):#eli tän checkin sijaan pitäs kattoa onko input filessä 'label' nimistä columnia hedereissä.
+#if (labelIndex!="-2"):#eli tän checkin sijaan pitäs kattoa onko input filessä 'label' nimistä columnia hedereissä.
     annot_strings={}
     annot_strings_for_dict={}
     annot_data=[]
