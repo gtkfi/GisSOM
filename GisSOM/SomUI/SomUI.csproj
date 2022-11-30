@@ -370,6 +370,7 @@
     <None Include="scripts\Executables\dash\html\dash_html_components.min.js.map" />
     <None Include="scripts\Executables\dash\html\metadata.json" />
     <None Include="scripts\Executables\dash\html\package-info.json" />
+    <None Include="scripts\Executables\data_preparation_interactive.exe.manifest" />
     <None Include="scripts\Executables\draw_histogram.exe.manifest" />
     <None Include="scripts\Executables\draw_scatterplots.exe.manifest" />
     <None Include="scripts\Executables\edit_column.exe.manifest" />
@@ -8417,19 +8418,10 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="scripts\input_example.lrn" />
-    <None Include="scripts\lrnfile.pyc">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="scripts\MANIFEST.in" />
     <None Include="scripts\nextsomcore.egg-info\PKG-INFO" />
     <None Include="scripts\nextsomcore\data\input_example.lrn" />
     <None Include="scripts\nextsomcore\data\input_example2.lrn" />
-    <None Include="scripts\nextsomcore\lrnfile.pyc">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-    <None Include="scripts\nextsomcore\nextsomcore.pyc">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="scripts\nextsomcore\__init__.pyc" />
     <None Include="scripts\nextsomcore\__pycache__\nextsomcore.cpython-36.pyc" />
     <None Include="scripts\nextsomcore\__pycache__\__init__.cpython-36.pyc" />
@@ -8497,6 +8489,7 @@
     <Content Include="scripts\Executables\dash\extract-meta.js" />
     <Resource Include="scripts\Executables\dash\favicon.ico" />
     <Content Include="scripts\Executables\dash\html\dash_html_components.min.js" />
+    <Content Include="scripts\Executables\data_preparation_interactive.exe" />
     <Content Include="scripts\Executables\draw_histogram.exe" />
     <Content Include="scripts\Executables\draw_scatterplots.exe" />
     <Content Include="scripts\Executables\edit_column.exe" />
