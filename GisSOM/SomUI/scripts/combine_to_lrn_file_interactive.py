@@ -83,10 +83,8 @@ def write_nonspatial_from_csv(columns,inputFile,output_folder,isScaled,na_value,
     df_in_header=df_in[:2]
     df_in=df_in[2:].apply(pd.to_numeric,errors='coerce')  
     df_in=pd.concat([df_in_header, df_in])
-
-    for i in range(len(df_in.columns)):
-        if (df_in.columns[i] != eastingIndex) and (df_in.columns[i] != northingIndex) and (df_in.columns[i] != labelIndex):
-            check_column_duplicates(df_in,i)
+    
+    check_column_duplicates(df_in, eastingIndex, northingIndex, labelIndex)
     
     writeXmlTree(columns_included,output_folder,isScaled,False,na_value)#false for IsSpatial
     
@@ -163,6 +161,8 @@ def write_spatial_from_csv(columns,inputFile,output_folder,isScaled,isSpatial,ea
     df_in_header=df_in[:2]
     df_in=df_in[2:].apply(pd.to_numeric,errors='coerce')  
     df_in=pd.concat([df_in_header, df_in])
+    
+    check_column_duplicates(df_in, eastingIndex, northingIndex, labelIndex)
 
     writeXmlTree(columns_included,output_folder,isScaled,True,na_value)#true for IsSpatial
     
@@ -429,11 +429,14 @@ def checkForDuplicateCoords(columns):
         columns=np.vstack((columns[0:2],columns[values]))
     return columns
 
-def check_column_duplicates(df, i):
-    df = df.iloc[8:]
-    array = df[i].to_numpy()
-    if (array[0] == array).all():
-        raise ValueError('All rows in column number {} are {}.'.format(i+1, array[0]))
+def check_column_duplicates(df_in, eastingIndex, northingIndex, labelIndex):
+    for i in range(len(df_in.columns)):
+        if (df_in.columns[i] != eastingIndex) and (df_in.columns[i] != northingIndex) and (df_in.columns[i] != labelIndex):
+            #check_column_duplicates(df_in,i)
+            df = df_in.iloc[8:]
+            array = df[i].to_numpy()
+            if (array[0] == array).all():
+                raise ValueError('All rows in a column are {}.'.format(array[0]))
     
 def combineToLrnFile(inputFile,output_folder,columns,column_type_list,isScaled,isSpatial,na_value=""):
 
