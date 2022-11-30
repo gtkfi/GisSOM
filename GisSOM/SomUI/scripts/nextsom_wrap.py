@@ -18,15 +18,8 @@ import pickle
 #import time
 
 
-"""Parse command line arguments
-
-Arguments used:
-input_file - Input file in lrn-format
-output_file_geospace - File to be used to save SOM results
-output_file_somspace - File to be used to save SOM results
-som_x - X-size of the map.
-som_y - Y-size of the map.
-epochs - Number of rounds the training is performed.
+"""
+Parse command line arguments
 """
 def parse_command_line():
     parser = argparse.ArgumentParser(description='Script for generating self organizing maps')
@@ -278,7 +271,7 @@ def run_xml(args):
 
 
 """
-Main entry point.
+main
     
 """
 def main():

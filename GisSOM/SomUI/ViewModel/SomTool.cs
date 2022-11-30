@@ -356,14 +356,14 @@ namespace SomUI.ViewModel
                 else
                     myProcessStartInfo.Arguments = "-u" + " " + "\"" + somPlotScriptPath + "\"" + " " + "--outsomfile=" + "\"" + Model.Output_file_somspace + "\"" + " " + "--som_x=" + Model.Som_x + " " + "--som_y=" + Model.Som_y + " " + "--input_file=" + "\"" + inputFile + "\"" + " " + "--dir=" + "\"" + Model.OutputFolderTimestamped + "\"" + " " + "--grid_type=" + Model.GridShape + " --noDataValue=\"" + Model.NoDataValue + "\"";
 
-                myProcessStartInfo.Arguments += " " + "--labelIndex=" + "\"" + Model.LabelColumnIndex + "\"";
-                myProcessStartInfo.Arguments += " " + "--original_data_dir=" + "\"" + Model.Output_Folder + "\"";
+                //myProcessStartInfo.Arguments += " " + "--labelIndex=" + "\"" + Model.LabelColumnIndex + "\"";
+                //myProcessStartInfo.Arguments += " " + "--original_data_dir=" + "\"" + Model.Output_Folder + "\"";
                 myProcessStartInfo.Arguments += " " + "--dataType=" + "\"" + Model.DataShape + "\"";
                 if(Model.IsSpatial==true)
                 {
                     myProcessStartInfo.Arguments += " " + "--outgeofile=" + "\"" + Model.Output_file_geospace + "\"";
-                    myProcessStartInfo.Arguments += " " + "--eastingIndex=" + "\"" + Model.EastingColumnIndex + "\"";
-                    myProcessStartInfo.Arguments += " " + "--northingIndex=" + "\"" + Model.NorthingColumnIndex + "\"";                   
+                    //myProcessStartInfo.Arguments += " " + "--eastingIndex=" + "\"" + Model.EastingColumnIndex + "\"";
+                    //myProcessStartInfo.Arguments += " " + "--northingIndex=" + "\"" + Model.NorthingColumnIndex + "\"";                   
                 }
               myProcessStartInfo.Arguments = myProcessStartInfo.Arguments.Replace("\\", "/");
                 using (var myProcess = new Process())

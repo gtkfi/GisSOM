@@ -17,16 +17,6 @@ import numpy as np
 import pandas as pd
 #import os
 
-
-"""
-Write lrn file from csv input. Diverges into write_spatial_from_csv and write_nonspatal_from_csv, depending on input type.
-"""
-def write_from_csv_input(columns,inputFile,output_folder,isScaled,eastingIndex=None,northingIndex=None,labelIndex=None,na_value=""):
-    if eastingIndex is not None:
-        write_spatial_from_csv(output_folder,eastingIndex,northingIndex,labelIndex, na_value,columns,isScaled)
-    else:                 
-        write_nonspatial_from_csv()
-        
     
     
 """
