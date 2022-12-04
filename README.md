@@ -1,6 +1,8 @@
-# GisSOM
-
 <img src="GisSOM-logo.png" height="200">
+
+# GisSOM  
+
+
 
 GisSOM performs unsupervised self-organizing maps (SOM) clustering to a given dataset. Results are presented in the SOM coordinates, and also spatial coordinates if given. Also scatter and boxplots are used to visualize the per cluster data distribution.  
 
