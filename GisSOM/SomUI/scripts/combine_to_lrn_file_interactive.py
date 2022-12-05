@@ -74,6 +74,7 @@ def write_nonspatial_from_csv(columns,input_file,output_folder,is_scaled,na_valu
     df_in=df_in[2:].apply(pd.to_numeric,errors='coerce')  
     df_in=pd.concat([df_in_header, df_in])
     
+    check_column_duplicates(df_in, eastingIndex, northingIndex, labelIndex)
     write_xml_tree(columns_included,output_folder,is_scaled,False,na_value)#false for is_spatial
     
     if(is_scaled is not None):
@@ -150,6 +151,8 @@ def write_spatial_from_csv(columns,input_file,output_folder,is_scaled,is_spatial
     df_in_header=df_in[:2]
     df_in=df_in[2:].apply(pd.to_numeric,errors='coerce')  
     df_in=pd.concat([df_in_header, df_in])
+    
+    check_column_duplicates(df_in, eastingIndex, northingIndex, labelIndex)
 
     write_xml_tree(columns_included,output_folder,is_scaled,True,na_value)#true for Is Spatial
     
@@ -242,7 +245,9 @@ def write_from_tif_input(columns, output_folder, input_file,is_scaled,na_value="
     id_col_with_header=np.vstack((coltypes[0],header['colnames'][0],np.c_[id_col]))  #create id column       
     columns_stacked=np.vstack((columns[4,:],columns[:][7:]))#build a frankenstein's monster out of coltytpes,colheaders and columns themselves
     columns=np.hstack((id_col_with_header, columns_stacked))
-
+    """
+    AAAAA^
+    """
     df=pd.DataFrame(columns)
     df.apply(pd.to_numeric,errors='coerce')
     
@@ -414,7 +419,14 @@ def check_for_duplicate_coords(columns):
         columns=np.vstack((columns[0:2],columns[values]))
     return columns
 
-
+def check_column_duplicates(df_in, eastingIndex, northingIndex, labelIndex):
+    for i in range(len(df_in.columns)):
+        if (df_in.columns[i] != eastingIndex) and (df_in.columns[i] != northingIndex) and (df_in.columns[i] != labelIndex):
+            #check_column_duplicates(df_in,i)
+            df = df_in.iloc[8:]
+            array = df[i].to_numpy()
+            if (array[0] == array).all():
+                raise ValueError('All rows in a column are {}.'.format(array[0]))
     
 def combine_to_lrn_file(input_file,output_folder,columns,column_type_list,is_scaled,is_spatial,na_value=""):
 

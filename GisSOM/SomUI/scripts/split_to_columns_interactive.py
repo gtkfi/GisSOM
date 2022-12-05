@@ -86,10 +86,6 @@ def readInputData(inputFile,inputType):
             falses.append("false")   
             if(len(colnames[i].replace('\"', '').replace('%', '').replace(" ", "") )==0):
                 sys.exit("Error: Empty column headers") 
-                
-        #for x in range(columns['cols']):
-        #    if column_all_equal(columns['data'][:,x]):
-        #        raise TypeError('ERROR')
         colNamesAndTypes=np.vstack((falses,(np.full((1,len(colnames)),0)),(np.full((1,len(colnames)),0)),falses,(np.full((1,len(colnames)),0)),(np.full((1,len(colnames)),0)),(np.full((1,len(colnames)),1)),colnames))  #stack header rows (data transformation:(falses, zeros, zeros,falses), column types, column names
         allButFirstTwoRows= np.concatenate((colNamesAndTypes,columns['data']),axis=0) #stack header rows and data
         allButFirstTwoRowsLabel= np.concatenate((colNamesAndTypes,columns['labelData']),axis=0)   #stack header of the label data        
@@ -105,9 +101,3 @@ def checkHeaderValidity(colnames):
         elif(len(colname)==0):
             raise ValueError("Input file contains empty headers")
             
-def column_all_equal(column):
-    if type(column) is list:
-        group = column.groupby()
-        return next(group, True) and not next(group, False)
-    if type(column) is tuple:
-        return len(set(column)) == 1
