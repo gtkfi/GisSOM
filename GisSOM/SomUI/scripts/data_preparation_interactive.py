@@ -201,20 +201,20 @@ def update_histogram(value,src,dummy_trigger,noData):
 def load_edits(column):
     
     selected_column=data["data"][:,int(column)]
-    isWinsorized=selected_column[0]
-    winMin=selected_column[1]
-    winMax=selected_column[2]
-    isLogTransformed=selected_column[3]
+    is_winsorized=selected_column[0]
+    win_min=selected_column[1]
+    win_max=selected_column[2]
+    is_log_transformed=selected_column[3]
     #exclusion=selected_column[4]
-    scalemin=selected_column[5]
-    scalemax=selected_column[6]
-    logWinvalue=[]
-    if(isLogTransformed=='true'):
-        logWinvalue.append("log")
-    if(isWinsorized=='true'):
-        logWinvalue.append("winsorize")
+    scale_min=selected_column[5]
+    scale_max=selected_column[6]
+    log_win_value=[]
+    if(is_log_transformed=='true'):
+        log_win_value.append("log")
+    if(is_winsorized=='true'):
+        log_win_value.append("winsorize")#Why are these grouped in one variable?
     
-    return logWinvalue,winMin,winMax,scalemin,scalemax
+    return log_win_value,win_min,win_max,scale_min,scale_max
 
 
 @app.callback(

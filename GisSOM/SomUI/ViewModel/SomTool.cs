@@ -351,6 +351,31 @@ namespace SomUI.ViewModel
                 myProcessStartInfo.RedirectStandardError = true;
 
 
+
+                XmlDocument doc = new XmlDocument();
+
+                var dataStatsFilePath = Path.Combine(Model.OutputFolderTimestamped, "DataStats.xml");
+                try
+                {
+                    doc.Load(dataStatsFilePath);
+                    XmlNode root = doc.DocumentElement;
+                    XmlNode scaledNode = root.SelectSingleNode("descendant::" + "isScaled");
+                    Model.IsNormalized = bool.Parse(scaledNode.InnerText); //
+                    XmlNode spatialNode = root.SelectSingleNode("descendant::" + "isSpatial");
+                    Model.IsSpatial = bool.Parse(spatialNode.InnerText); //
+                    XmlNode nodataNode = root.SelectSingleNode("descendant::" + "noDataValue");
+                    Model.NoDataValue = nodataNode.InnerText;
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex, "Failed to read parameters from DataStats.txt -file. This may affect plotting results.");
+                    Model.IsNormalized = false;
+                    Model.IsSpatial = false;
+                    Model.NoDataValue = "";
+                }
+
+
+
                 if (usePyExes)
                     myProcessStartInfo.Arguments =  " "+"--outsomfile=" + "\"" + Model.Output_file_somspace + "\"" + " " + "--som_x=" + Model.Som_x + " " + "--som_y=" + Model.Som_y + " " + "\"" + "--input_file=" + inputFile + "\"" + " " + "\"" + "--dir=" + Model.OutputFolderTimestamped + "\"" + " " + "--grid_type=" + Model.GridShape + " --noDataValue=\"" + Model.NoDataValue + "\"";
                 else

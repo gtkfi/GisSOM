@@ -322,6 +322,10 @@ def writeXmlTree(columns_included, output_folder,isScaled,isSpatial,na_value="")
     spatialElement.text=str(isSpatial)
     root.append(spatialElement)
     
+    spatialElement=ET.Element("noDataValue")
+    spatialElement.text=str(na_value)
+    root.append(spatialElement)
+    
     xmlstr = minidom.parseString(ET.tostring(root,encoding='utf-8', method='xml')).toprettyxml(indent="   ")
     with open(output_folder+"/DataStats.xml", "w") as f:
         f.write(xmlstr)  
