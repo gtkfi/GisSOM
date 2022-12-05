@@ -70,10 +70,10 @@ def read_geotiff_coordinate_columns(geotiff_header):
             coordinates_x.append(j*gt[1]+gt[0])
             coordinates_y.append(i*gt[5]+gt[3])
     coordinates=np.column_stack((coordinates_x,coordinates_y)) #Coordinates are just indexes at this stage. TODO: use gt to tranform them back into real world values.
-    return {'data': coordinates, 'colnames': geotiff_header['colnames'], 'fmt': ''} 
+    return {'data': coordinates, 'colnames': geotiff_header['colnames'], 'fmt': '%f %f'} 
 
 def read_geotiff_data_columns(geotiff_header):
-    return {'data': geotiff_header['data'], 'colnames': geotiff_header['colnames'], 'fmt': ''} 
+    return {'data': geotiff_header['data'], 'colnames': geotiff_header['colnames'], 'fmt': ('%f ' * 3).rstrip()} 
 
 
 
