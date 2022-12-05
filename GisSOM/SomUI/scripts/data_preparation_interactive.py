@@ -19,7 +19,7 @@ from dash.dependencies import Input, Output, State
 from split_to_columns_interactive import readInputData
 from edit_column_interactive import edit_column
 from draw_histogram_interactive import draw_histogram
-from combine_to_lrn_file_interactive import combineToLrnFile
+from combine_to_lrn_file_interactive import combine_to_lrn_file
 import copy
 import argparse
 import threading
@@ -34,12 +34,12 @@ args=parser.parse_args()
 input_file=args.inputFile
 output_folder=args.outputFolder
 dataShape=args.dataShape
-inputType=input_file[-3:].lower()
+input_type=input_file[-3:].lower()
 selected_column='0'
 firstLoad=True#don't look at me i'm hideous
 firstLoad2=True
 
-data=readInputData(input_file,inputType)
+data=readInputData(input_file,input_type)
 data_original=copy.copy(data["data"])
 headers=data["data"][7,:]
 column_names=[]
@@ -145,9 +145,9 @@ def shutdown_server():
     http_server.stop()
 @server.route('/shutdown', methods=['POST'])
 def shutdown():
-    global healthCheckTimer
-    if healthCheckTimer is not None:
-        healthCheckTimer.cancel()
+    global health_check_timer
+    if health_check_timer is not None:
+        health_check_timer.cancel()
     shutdown_server()
     return 'Server shutting down...'
 """
@@ -161,11 +161,11 @@ def loadfile(filepath):
 
 @server.route('/deadman', methods=['POST'])
 def deadman():
-    global healthCheckTimer
-    healthCheckTimer.cancel()
-    healthCheckTimer = threading.Timer(35.0, shutdown_server)
-    healthCheckTimer.start()
-    return 'smooooooth'   
+    global health_check_timer
+    health_check_timer.cancel()
+    health_check_timer = threading.Timer(35.0, shutdown_server)
+    health_check_timer.start()
+    return 'OK'   
     
 
 @app.callback(
@@ -230,14 +230,14 @@ def load_edits(column):
 def save_edits(n_clicks,LogWin,minWin,maxWin,column,scalemin,scalemax):
     global firstLoad2 #this is not cool, but the only way I got it working. I couldn't find any decent way to prevent dash buttons from firing their event on page load.
     if(firstLoad2==False):
-        logTransformed='false'
+        log_transformed='false'
         winsorized='false'
         if "log" in LogWin:
-            logTransformed='true'
+            log_transformed='true'
         if "winsorize" in LogWin:
             winsorized='true'
         original_values=copy.copy(data_original[:,int(column)])
-        edited_column=edit_column(original_values,winsorized,minWin,maxWin,logTransformed,0,scalemin,scalemax,noData=None)
+        edited_column=edit_column(original_values,winsorized,minWin,maxWin,log_transformed,0,scalemin,scalemax,noData=None)
         data["data"][:,int(column)]=edited_column
     else:
         firstLoad2=False;
@@ -257,16 +257,16 @@ def create_lrn(n_clicks,column_type_host,na_value,scaled,spatial):
     global firstLoad #this is not cool, but the only way I got it working
     if(firstLoad==False):
         column_types=[]
-        isScaled=False
-        isSpatial=False
+        is_scaled=False
+        is_spatial=False
         if("spatial" in spatial):
-            isSpatial=True
+            is_spatial=True
         if "scale" in scaled:
-            isScaled=True
+            is_scaled=True
         for i in range(0,len(headers)):       
             column_types.append(column_type_host[i]['props']['children'][0]['props']['children'][1]['props']['value'])
         try:
-            combineToLrnFile(input_file,output_folder,data["data"],column_types,isScaled,isSpatial,na_value)
+            combine_to_lrn_file(input_file,output_folder,data["data"],column_types,is_scaled,is_spatial,na_value)
             #print("Saved to .lrn file")
         except ValueError as err:
             print('Error:', err)
@@ -288,8 +288,8 @@ def load_data(input_file):
     return #column names ja data. mietippä sit miten noita ajetaan, onko global muuttujaa (hyi) vai joku elementti, en tiä onko se sit sen parempi
 """    
 
-healthCheckTimer = threading.Timer(999.0, shutdown_server) #default timer for shutdown, if no message from UI is received
-healthCheckTimer.start() 
+health_check_timer = threading.Timer(999.0, shutdown_server) #default timer for shutdown, if no message from UI is received
+health_check_timer.start() 
 print("Data preaparation page ready")
 application = app.server    #Launch application. 
 if __name__ == '__main__':

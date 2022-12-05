@@ -22,9 +22,9 @@ import pandas as pd
 """
 Write lrn file from csv input, when input is nonspatial
 """
-def write_nonspatial_from_csv(columns,inputFile,output_folder,isScaled,na_value,labelIndex):
+def write_nonspatial_from_csv(columns,input_file,output_folder,is_scaled,na_value,label_index):
 
-    columns=createDummyCoordinates(columns) 
+    columns=create_dummy_coordinates(columns) 
     eastingIndex=0
     northingIndex=1
     
@@ -74,9 +74,9 @@ def write_nonspatial_from_csv(columns,inputFile,output_folder,isScaled,na_value,
     df_in=df_in[2:].apply(pd.to_numeric,errors='coerce')  
     df_in=pd.concat([df_in_header, df_in])
     
-    writeXmlTree(columns_included,output_folder,isScaled,False,na_value)#false for IsSpatial
+    write_xml_tree(columns_included,output_folder,is_scaled,False,na_value)#false for is_spatial
     
-    if(isScaled is not None):
+    if(is_scaled is not None):
         for i in range(0,len(columns_in[0])):
             colForMinMax=columns_included[i][8:].astype(float)[~np.isnan(df_in[i][8:].astype(float))]
             data_min= min(colForMinMax)
@@ -90,7 +90,7 @@ def write_nonspatial_from_csv(columns,inputFile,output_folder,isScaled,na_value,
                     #columns_in on df_in.values.
     df_in=pd.DataFrame(np.squeeze(np.stack(columns_in, axis=0))) 
     columns_in=df_in.values        
-    columns=combineCsvColumns(columns_ex,columns_in)
+    columns=combine_csv_columns(columns_ex,columns_in)
     
     for i in range(0, len(columns[1])): 
         columns[1][i]=columns[1][i].replace("\n","")
@@ -101,14 +101,14 @@ def write_nonspatial_from_csv(columns,inputFile,output_folder,isScaled,na_value,
 """
 Write lrn file from csv input, when input is spatial
 """    
-def write_spatial_from_csv(columns,inputFile,output_folder,isScaled,isSpatial,eastingIndex,northingIndex,labelIndex,na_value):#cols,inputFile,output_folder,isScaled,isSpatial,eastingIndex=None,northingIndex=None,label_index=None,na_value=""
+def write_spatial_from_csv(columns,input_file,output_folder,is_scaled,is_spatial,easting_index,northing_index,label_index,na_value):
     
 
     columns_sorted=[]
-    columns_sorted.append(columns[:,int(eastingIndex)])
-    columns_sorted.append(columns[:,int(northingIndex)])
+    columns_sorted.append(columns[:,int(easting_index)])
+    columns_sorted.append(columns[:,int(northing_index)])
     for i in range(0,  len(columns[0])):
-        if(i!=int(eastingIndex) and i!=int(northingIndex)):
+        if(i!=int(easting_index) and i!=int(northing_index)):
             columns_sorted.append(columns[:,i]) 
 
     for i in range(0, len(columns[0])):
@@ -142,8 +142,8 @@ def write_spatial_from_csv(columns,inputFile,output_folder,isScaled,isSpatial,ea
         tempCol[1]=True #assign True to header, so that the header is not labeled False even if it is 'nan', because that should be a valid header as well.
         df_in=df_in.loc[tempCol]   
     
-    rowsToDrop=df_ex.drop(df_in.index)
-    df_ex=df_ex.drop(rowsToDrop.index)  
+    rows_to_drop=df_ex.drop(df_in.index)
+    df_ex=df_ex.drop(rows_to_drop.index)  
     columns_ex=df_ex.values   
     columns_in=df_in.values   
     
@@ -151,9 +151,9 @@ def write_spatial_from_csv(columns,inputFile,output_folder,isScaled,isSpatial,ea
     df_in=df_in[2:].apply(pd.to_numeric,errors='coerce')  
     df_in=pd.concat([df_in_header, df_in])
 
-    writeXmlTree(columns_included,output_folder,isScaled,True,na_value)#true for IsSpatial
+    write_xml_tree(columns_included,output_folder,is_scaled,True,na_value)#true for Is Spatial
     
-    if(isScaled==True):
+    if(is_scaled==True):
         if(na_value != ''):
             for i in range(0,len(columns_in[0])):          
                 colForMinMax=columns_included[i][8:].astype(float)[~np.isnan(df_in[i][8:].astype(float))]
@@ -180,8 +180,8 @@ def write_spatial_from_csv(columns,inputFile,output_folder,isScaled,isSpatial,ea
     
     df_in=pd.DataFrame(np.squeeze(np.stack(columns_in, axis=0)))  
 
-    columns=combineCsvColumns(columns_ex,columns_in)
-    columns=checkForDuplicateCoords(columns)
+    columns=combine_csv_columns(columns_ex,columns_in)
+    columns=check_for_duplicate_coords(columns)
 
     for i in range(0, len(columns[1])): 
         columns[1][i]=columns[1][i].replace("\n","")
@@ -194,8 +194,8 @@ def write_spatial_from_csv(columns,inputFile,output_folder,isScaled,isSpatial,ea
 """
 Write lrn file from tif input
 """
-def write_from_tif_input(columns, output_folder, inputFile,isScaled,na_value=""):
-    header=load_input_file(inputFile) #this is probably unnecessary. remove.
+def write_from_tif_input(columns, output_folder, input_file,is_scaled,na_value=""):
+    header=load_input_file(input_file) #this is probably unnecessary. remove.
     id_col=[]
     for i in range(0, len(header['data'])):
         id_col.append(i)
@@ -218,17 +218,17 @@ def write_from_tif_input(columns, output_folder, inputFile,isScaled,na_value="")
     for i in range(0,len(columns[0])):
         if(columns[:,i][4]=='1'):#if column is not excluded
             columns_in.append(columns[:,i])
-    writeXmlTree(columns_in,output_folder,isScaled,True,na_value) #True for IsSpatial
+    write_xml_tree(columns_in,output_folder,is_scaled,True,na_value) #True for is_spatial
 
     for i in range(2, (len(header['colnames'])-1)):   #start from 2 to skip x and y columns
-        if(isScaled==True):           
+        if(is_scaled==True):           
             scale_min=float(columns[:,i][5])
             scale_max=float(columns[:,i][6])
         if(columns[:,i][4]=='1'): #if column is not excluded
             array_for_minmax= np.delete(columns[8:,i], np.where(columns[8:,i] == na_value)) #start from 8 to skip column headers
             data_min= min(array_for_minmax.astype(float))
             data_max= max(array_for_minmax.astype(float))            
-            if(isScaled==True):            
+            if(is_scaled==True):            
                 for j in range(8, len(columns)):
                      if(columns[j,i]!=na_value):
                          columns[j,i]=(scale_max-scale_min)*(columns[j,i].astype(float)-data_min)/(data_max-data_min)+scale_min  
@@ -239,16 +239,10 @@ def write_from_tif_input(columns, output_folder, inputFile,isScaled,na_value="")
         
         
     
-    """
-    AAAAAv
-    """
-    id_col_with_header=np.vstack((coltypes[0],header['colnames'][0],np.c_[id_col]))  #create id column   
-    
+    id_col_with_header=np.vstack((coltypes[0],header['colnames'][0],np.c_[id_col]))  #create id column       
     columns_stacked=np.vstack((columns[4,:],columns[:][7:]))#build a frankenstein's monster out of coltytpes,colheaders and columns themselves
     columns=np.hstack((id_col_with_header, columns_stacked))
-    """
-    AAAAA^
-    """
+
     df=pd.DataFrame(columns)
     df.apply(pd.to_numeric,errors='coerce')
     
@@ -267,7 +261,7 @@ def write_from_tif_input(columns, output_folder, inputFile,isScaled,na_value="")
 """
 Create xml-tree containing data transformation stage stats and and write it to file (DataStats.xml). This information is later used to reverseve (possible) scaling from the SOM calculation result data.
 """
-def writeXmlTree(columns_included, output_folder,isScaled,isSpatial,na_value=""):
+def write_xml_tree(columns_included, output_folder,is_scaled,is_spatial,na_value=""):
     root = ET.Element("data") 
     for i in range(0,len(columns_included)):
         if(na_value !=''):
@@ -286,7 +280,7 @@ def writeXmlTree(columns_included, output_folder,isScaled,isSpatial,na_value="")
         maxElement.text=str(data_max)      
         is_log_transformed=columns_included[i][3] 
         is_winsorized=columns_included[i][0]
-        if (isScaled==True):
+        if (is_scaled==True):
             scale_min=columns_included[i][5]
             scale_max=columns_included[i][6]
             scaleMinElement=ET.Element("scaleMin")
@@ -295,7 +289,7 @@ def writeXmlTree(columns_included, output_folder,isScaled,isSpatial,na_value="")
             scaleMaxElement.text=str(scale_max)
         winsorElement=ET.Element("winsorized")
         winsorElement.text=str(is_winsorized)
-        if(isScaled==True):
+        if(is_scaled==True):
             winsor_min=columns_included[i][1]
             winsor_max=columns_included[i][2]
             winsorMinElement=ET.Element("winsorMin")
@@ -304,22 +298,22 @@ def writeXmlTree(columns_included, output_folder,isScaled,isSpatial,na_value="")
             winsorMaxElement.text=str(winsor_max)
         logTransformElement=ET.Element("logTransform")
         logTransformElement.text=str(is_log_transformed)
-        if(isScaled==True):   
+        if(is_scaled==True):   
             newElement.append(scaleMinElement)
             newElement.append(scaleMaxElement)
         newElement.append(logTransformElement)
         newElement.append(winsorElement)
-        if(isScaled==True):
+        if(is_scaled==True):
             newElement.append(winsorMinElement)
         newElement.append(minElement)
         newElement.append(maxElement)
         root.append(newElement)
     
     scaledElement=ET.Element("isScaled")
-    scaledElement.text=str(isScaled)
+    scaledElement.text=str(is_scaled)
     root.append(scaledElement)     
     spatialElement=ET.Element("isSpatial")
-    spatialElement.text=str(isSpatial)
+    spatialElement.text=str(is_spatial)
     root.append(spatialElement)
     
     spatialElement=ET.Element("noDataValue")
@@ -337,7 +331,7 @@ def writeXmlTree(columns_included, output_folder,isScaled,isSpatial,na_value="")
 """
 Create data columsn with empty dummy coordinate data, used by nonspatial csv option.
 """
-def createDummyCoordinates(columns):
+def create_dummy_coordinates(columns):
     x_col=[]
     y_col=[]
     for i in range(0, len(columns)): 
@@ -350,9 +344,9 @@ def createDummyCoordinates(columns):
 
 
 """
-Populate dataframes used with csv option.
+Populate dataframes used with csv option. UNUSED? DEPRECATED?
 """
-def populateCsvDataFrames(columns_excluded,columns_included,columns_sorted,indexModifier=0):
+def populate_csv_DataFrames(columns_excluded,columns_included,columns_sorted,indexModifier=0):
     global df_ex
     global df_in
     global columns_ex
@@ -380,8 +374,8 @@ def populateCsvDataFrames(columns_excluded,columns_included,columns_sorted,index
         tempCol[1]=True #assign True to header, so that the header is not labeled False even if it is 'nan', because that should be a valid header as well.
         df_in=df_in.loc[tempCol]   
     
-    rowsToDrop=df_ex.drop(df_in.index)
-    df_ex=df_ex.drop(rowsToDrop.index)  
+    rows_to_drop=df_ex.drop(df_in.index)
+    df_ex=df_ex.drop(rows_to_drop.index)  
     columns_ex=df_ex.values   
     columns_in=df_in.values   
     df_in_header=df_in[:2]
@@ -391,7 +385,7 @@ def populateCsvDataFrames(columns_excluded,columns_included,columns_sorted,index
 """
 Combine used columns into a single numpy array
 """
-def combineCsvColumns(columns_ex,columns_in):
+def combine_csv_columns(columns_ex,columns_in):
 
     columns=np.hstack((columns_ex, columns_in)) #this can't be the most efficient way to do this. 
     columns=((pd.DataFrame(columns)).dropna()).values
@@ -408,7 +402,7 @@ def combineCsvColumns(columns_ex,columns_in):
     
         
 
-def checkForDuplicateCoords(columns):
+def check_for_duplicate_coords(columns):
     ##Check for duplicate coordinates
     d = dict()
     for i in range (2, len(columns)):# start at 2 because we are now working with trimmed columns
@@ -422,36 +416,29 @@ def checkForDuplicateCoords(columns):
 
 
     
-def combineToLrnFile(inputFile,output_folder,columns,column_type_list,isScaled,isSpatial,na_value=""):
+def combine_to_lrn_file(input_file,output_folder,columns,column_type_list,is_scaled,is_spatial,na_value=""):
 
-    fileType=inputFile[-3:].lower()
-
-	#4 on exclusion/inclusion, 5 on scalemin, 6 on scalemax, 7 on headerit, 8 on data.
-    
-    #kaikki indeksit pitää alottaa eri kohasta nyt sitten. ennen lienee ollut 0 tai 2? nyt joku 8. ellei niitä headereitä oteta sitten erikseen
-    
-    #mikä on sit column[3]??? isLogTransformed?
-    #data x y label exclude
+    file_type=input_file[-3:].lower()
 
     for i in range(0,len(column_type_list)):
         if column_type_list[i]=="exclude":             
             columns[:,i][4]=0
         else:
             columns[:,i][4]=1
-    eastingIndex=None
-    northingIndex=None
-    if(isSpatial==True):
+    easting_index=None
+    northing_index=None
+    if(is_spatial==True):
         if ('x' not in column_type_list or 'y' not in column_type_list):
             raise ValueError("Please select X and Y columns or set the dataset to non-spatial data before proceeding.")
-        eastingIndex=column_type_list.index("x")
-        northingIndex=column_type_list.index("y")
-        columns[:,eastingIndex][4]=0#set x, y and label columns as excluded
-        columns[:,northingIndex][4]=0
-    labelIndex=None
+        easting_index=column_type_list.index("x")
+        northing_index=column_type_list.index("y")
+        columns[:,easting_index][4]=0#set x, y and label columns as excluded
+        columns[:,northing_index][4]=0
+    label_index=None
     if('label' in column_type_list):
-        labelIndex=column_type_list.index("label")
-        columns[:,labelIndex][4]=0
-        columns[:,labelIndex][7]='label'
+        label_index=column_type_list.index("label")
+        columns[:,label_index][4]=0
+        columns[:,label_index][7]='label'
     
     if na_value !="":
         na_value=str(float(na_value))#make sure the string is in float format.
@@ -467,14 +454,14 @@ def combineToLrnFile(inputFile,output_folder,columns,column_type_list,isScaled,i
     eli nuo mukana kulkevat listat voi heittää kokonaan pois. mutta columns_included & columns_excluded jako tehdään yhä.
     """  
         
-    if(fileType=="tif"):
-        write_from_tif_input(columns,output_folder,inputFile,isScaled,na_value)#ain't no labels, varying x&y cols or option for nonspatial in GeoTIFFs(inputFile,output_folder,columns,column_type_list,isScaled,na_value=)
+    if(file_type=="tif"):
+        write_from_tif_input(columns,output_folder,input_file,is_scaled,na_value)#ain't no labels, varying x&y cols or option for nonspatial in GeoTIFFs
         
 
-    if(fileType=="csv"):
-        if (isSpatial==True):
-            write_spatial_from_csv(columns,inputFile,output_folder,isScaled,isSpatial,eastingIndex,northingIndex,labelIndex,na_value)#(inputFile,output_folder,columns,column_type_list,isScaled,na_value)
+    if(file_type=="csv"):
+        if (is_spatial==True):
+            write_spatial_from_csv(columns,input_file,output_folder,is_scaled,is_spatial,easting_index,northing_index,label_index,na_value)#
         else: #if easting index is none                    
-            write_nonspatial_from_csv(columns,inputFile,output_folder,isScaled,na_value,labelIndex)     
+            write_nonspatial_from_csv(columns,input_file,output_folder,is_scaled,na_value,label_index)     
             
     print("Saved to .lrn file")
