@@ -464,8 +464,7 @@ def combineToLrnFile(inputFile,output_folder,columns,column_type_list,isScaled,i
         columns[:,eastingIndex][4]=0#set x, y and label columns as excluded
         columns[:,northingIndex][4]=0
     labelIndex=None
-    if('label' in column_type_list):
-        labelIndex=column_type_list.index("label")
+
         columns[:,labelIndex][4]=0
         columns[:,labelIndex][7]='label'
     if('label' not in column_type_list):
