@@ -49,7 +49,7 @@ def write_nonspatial_from_csv(columns,inputFile,output_folder,isScaled,na_value,
             columns_excluded.append(columns_sorted[i])			              
         else:
             columns_included.append(columns_sorted[i])			             
-            
+
     df_ex=pd.DataFrame(np.squeeze(np.stack(columns_excluded, axis=1)))        #tässä on jo vähän hitaampi vaihe. testaile tätä isolla datalla. että mitkä stepit on hitaita, ja onko kaikki tarpeellisia. esim. onko dataframeksi muuttaminen raskasta ja/tai tarpeellista?      
     df_ex = df_ex.replace('NA','nan',  regex=True)   
     df_ex=df_ex.replace(np.nan, 'nan', regex=True)
@@ -64,7 +64,7 @@ def write_nonspatial_from_csv(columns,inputFile,output_folder,isScaled,na_value,
         tempCol=(df_in[:][i] !='nan')#create boolean array on wether data elements are valid numbers or 'nan'
         tempCol[1]=True #assign True to header, so that the header is not labeled False even if it is 'nan', because that should be a valid header as well.
         df_in=df_in.loc[tempCol]   
-    
+
     rowsToDrop=df_ex.drop(df_in.index)
     df_ex=df_ex.drop(rowsToDrop.index)  
     columns_ex=df_ex.values   
@@ -73,6 +73,8 @@ def write_nonspatial_from_csv(columns,inputFile,output_folder,isScaled,na_value,
     df_in_header=df_in[:2]
     df_in=df_in[2:].apply(pd.to_numeric,errors='coerce')  
     df_in=pd.concat([df_in_header, df_in])
+    
+    check_column_duplicates(df_in, eastingIndex, northingIndex, labelIndex)
     
     writeXmlTree(columns_included,output_folder,isScaled,False,na_value)#false for IsSpatial
     
@@ -96,7 +98,6 @@ def write_nonspatial_from_csv(columns,inputFile,output_folder,isScaled,na_value,
         columns[1][i]=columns[1][i].replace("\n","")
     np.savetxt(output_folder+"/DataPreparation/EditedData.lrn", columns, delimiter="\t",header=("%"+str(len(columns)-2)+"\n"+"%"+str(len(columns[0]))), fmt="%s",comments='') #number of cols-2 to take dummy coords into account  #header=(header['rows']+"\n"+str(header['cols'])), fmt="%s",comments='')   
     print("Saved to .lrn File")
-    
     
 """
 Write lrn file from csv input, when input is spatial
@@ -150,6 +151,8 @@ def write_spatial_from_csv(columns,inputFile,output_folder,isScaled,isSpatial,ea
     df_in_header=df_in[:2]
     df_in=df_in[2:].apply(pd.to_numeric,errors='coerce')  
     df_in=pd.concat([df_in_header, df_in])
+    
+    check_column_duplicates(df_in, eastingIndex, northingIndex, labelIndex)
 
     writeXmlTree(columns_included,output_folder,isScaled,True,na_value)#true for IsSpatial
     
@@ -416,7 +419,14 @@ def checkForDuplicateCoords(columns):
         columns=np.vstack((columns[0:2],columns[values]))
     return columns
 
-
+def check_column_duplicates(df_in, eastingIndex, northingIndex, labelIndex):
+    for i in range(len(df_in.columns)):
+        if (df_in.columns[i] != eastingIndex) and (df_in.columns[i] != northingIndex) and (df_in.columns[i] != labelIndex):
+            #check_column_duplicates(df_in,i)
+            df = df_in.iloc[8:]
+            array = df[i].to_numpy()
+            if (array[0] == array).all():
+                raise ValueError('All rows in a column are {}.'.format(array[0]))
     
 def combineToLrnFile(inputFile,output_folder,columns,column_type_list,isScaled,isSpatial,na_value=""):
 
@@ -444,11 +454,11 @@ def combineToLrnFile(inputFile,output_folder,columns,column_type_list,isScaled,i
         columns[:,eastingIndex][4]=0#set x, y and label columns as excluded
         columns[:,northingIndex][4]=0
     labelIndex=None
-    if('label' in column_type_list):
-        labelIndex=column_type_list.index("label")
+
         columns[:,labelIndex][4]=0
         columns[:,labelIndex][7]='label'
-    
+    if('label' not in column_type_list):
+        labelIndex = 2
     if na_value !="":
         na_value=str(float(na_value))#make sure the string is in float format.
     """
@@ -462,7 +472,7 @@ def combineToLrnFile(inputFile,output_folder,columns,column_type_list,isScaled,i
     
     eli nuo mukana kulkevat listat voi heittää kokonaan pois. mutta columns_included & columns_excluded jako tehdään yhä.
     """  
-        
+    
     if(fileType=="tif"):
         write_from_tif_input(columns,output_folder,inputFile,isScaled,na_value)#ain't no labels, varying x&y cols or option for nonspatial in GeoTIFFs(inputFile,output_folder,columns,column_type_list,isScaled,na_value=)
         
