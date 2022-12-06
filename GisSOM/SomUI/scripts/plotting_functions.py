@@ -41,10 +41,9 @@ def plot_hexa(somx,
             title='SOM Hit map',
             colmap='jet',
             ptype='scatter', 
-            labelIndex="-2",
-            
+            labelIndex="-2"
             ):
-
+    
     discrete_cmap=sns.cubehelix_palette(n_colors=clusters, start=1,rot=4, gamma=1.0, hue=3, light=0.77, dark=0.15, reverse=False, as_cmap=False)
     n_centers = grid['centers']
     x, y = grid['x'], grid['y']
@@ -54,10 +53,14 @@ def plot_hexa(somx,
         xinch=(y * w / y) / dpi
     yinch = (y * w / x) / dpi
 
-    fig = plt.figure(figsize=(xinch, yinch), dpi=dpi)
+
+    
+    fig = plt.figure(figsize=(float(xinch), float(yinch)), dpi=dpi)
     ax = fig.add_subplot(111, aspect='equal')
+    
     xpoints = n_centers[:, 0]
     ypoints = n_centers[:, 1]
+    #problem block
     ax.scatter(xpoints, ypoints, s=0.0, marker='s')
     ax.axis([min(xpoints)-1., max(xpoints)+1.,
              max(ypoints)+1., min(ypoints)-1.])
@@ -68,6 +71,8 @@ def plot_hexa(somx,
     # upper right for most image software, so we'll flip the y-coords
     width, height = fig.canvas.get_width_height()
     ypix = height - ypix
+    ###problem block
+    
     if(ptype=='scatter'): #if the data type is csv with gaps
         apothem_x=(xpix[1] - xpix[0]) 
         apothem_y=(ypix[1] - ypix[0]) 
@@ -147,6 +152,7 @@ def plot_hexa(somx,
     ax.set_title(title)
 
     return ax
+
 
 def dash_draw_scatter(geo_data,som_data,palette,cluster_ticks,cluster_tick_labels,title,outputColumn,somx,somy,clusters): 
     centers=[]     

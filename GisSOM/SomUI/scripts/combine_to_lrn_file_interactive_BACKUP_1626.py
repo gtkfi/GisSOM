@@ -25,14 +25,14 @@ Write lrn file from csv input, when input is nonspatial
 def write_nonspatial_from_csv(columns,input_file,output_folder,is_scaled,na_value,label_index):
 
     columns=create_dummy_coordinates(columns) 
-    easting_index=0
-    northing_index=1
+    eastingIndex=0
+    northingIndex=1
     
     columns_sorted=[]
-    columns_sorted.append(columns[:,int(easting_index)])
-    columns_sorted.append(columns[:,int(northing_index)])   
+    columns_sorted.append(columns[:,int(eastingIndex)])
+    columns_sorted.append(columns[:,int(northingIndex)])   
     for i in range(0,  len(columns[0])):
-        if(i!=int(easting_index) and i!=int(northing_index)):
+        if(i!=int(eastingIndex) and i!=int(northingIndex)):
             columns_sorted.append(columns[:,i]) 
     for i in range(0, len(columns[0])):
         if(i==0):
@@ -49,7 +49,7 @@ def write_nonspatial_from_csv(columns,input_file,output_folder,is_scaled,na_valu
             columns_excluded.append(columns_sorted[i])			              
         else:
             columns_included.append(columns_sorted[i])			             
-            
+
     df_ex=pd.DataFrame(np.squeeze(np.stack(columns_excluded, axis=1)))        #tässä on jo vähän hitaampi vaihe. testaile tätä isolla datalla. että mitkä stepit on hitaita, ja onko kaikki tarpeellisia. esim. onko dataframeksi muuttaminen raskasta ja/tai tarpeellista?      
     df_ex = df_ex.replace('NA','nan',  regex=True)   
     df_ex=df_ex.replace(np.nan, 'nan', regex=True)
@@ -64,7 +64,7 @@ def write_nonspatial_from_csv(columns,input_file,output_folder,is_scaled,na_valu
         tempCol=(df_in[:][i] !='nan')#create boolean array on wether data elements are valid numbers or 'nan'
         tempCol[1]=True #assign True to header, so that the header is not labeled False even if it is 'nan', because that should be a valid header as well.
         df_in=df_in.loc[tempCol]   
-    
+
     rowsToDrop=df_ex.drop(df_in.index)
     df_ex=df_ex.drop(rowsToDrop.index)  
     columns_ex=df_ex.values   
@@ -74,8 +74,13 @@ def write_nonspatial_from_csv(columns,input_file,output_folder,is_scaled,na_valu
     df_in=df_in[2:].apply(pd.to_numeric,errors='coerce')  
     df_in=pd.concat([df_in_header, df_in])
     
-    check_column_duplicates(df_in, easting_index, northing_index, label_index)
+<<<<<<< HEAD
     write_xml_tree(columns_included,output_folder,is_scaled,False,na_value)#false for is_spatial
+=======
+    check_column_duplicates(df_in, eastingIndex, northingIndex, labelIndex)
+    
+    writeXmlTree(columns_included,output_folder,isScaled,False,na_value)#false for IsSpatial
+>>>>>>> 0668f7692864579a5ffb376f737081440d4b5d1f
     
     if(is_scaled is not None):
         for i in range(0,len(columns_in[0])):
@@ -97,7 +102,6 @@ def write_nonspatial_from_csv(columns,input_file,output_folder,is_scaled,na_valu
         columns[1][i]=columns[1][i].replace("\n","")
     np.savetxt(output_folder+"/DataPreparation/EditedData.lrn", columns, delimiter="\t",header=("%"+str(len(columns)-2)+"\n"+"%"+str(len(columns[0]))), fmt="%s",comments='') #number of cols-2 to take dummy coords into account  #header=(header['rows']+"\n"+str(header['cols'])), fmt="%s",comments='')   
     print("Saved to .lrn File")
-    
     
 """
 Write lrn file from csv input, when input is spatial
@@ -152,7 +156,7 @@ def write_spatial_from_csv(columns,input_file,output_folder,is_scaled,is_spatial
     df_in=df_in[2:].apply(pd.to_numeric,errors='coerce')  
     df_in=pd.concat([df_in_header, df_in])
     
-    check_column_duplicates(df_in, easting_index, northing_index, label_index)
+    check_column_duplicates(df_in, eastingIndex, northingIndex, labelIndex)
 
     write_xml_tree(columns_included,output_folder,is_scaled,True,na_value)#true for Is Spatial
     
@@ -245,9 +249,7 @@ def write_from_tif_input(columns, output_folder, input_file,is_scaled,na_value="
     id_col_with_header=np.vstack((coltypes[0],header['colnames'][0],np.c_[id_col]))  #create id column       
     columns_stacked=np.vstack((columns[4,:],columns[:][7:]))#build a frankenstein's monster out of coltytpes,colheaders and columns themselves
     columns=np.hstack((id_col_with_header, columns_stacked))
-    """
-    AAAAA^
-    """
+
     df=pd.DataFrame(columns)
     df.apply(pd.to_numeric,errors='coerce')
     
@@ -419,9 +421,9 @@ def check_for_duplicate_coords(columns):
         columns=np.vstack((columns[0:2],columns[values]))
     return columns
 
-def check_column_duplicates(df_in, easting_index, northing_index, label_index):
+def check_column_duplicates(df_in, eastingIndex, northingIndex, labelIndex):
     for i in range(len(df_in.columns)):
-        if (df_in.columns[i] != easting_index) and (df_in.columns[i] != northing_index) and (df_in.columns[i] != label_index):
+        if (df_in.columns[i] != eastingIndex) and (df_in.columns[i] != northingIndex) and (df_in.columns[i] != labelIndex):
             #check_column_duplicates(df_in,i)
             df = df_in.iloc[8:]
             array = df[i].to_numpy()
@@ -442,6 +444,7 @@ def combine_to_lrn_file(input_file,output_folder,columns,column_type_list,is_sca
     if(is_spatial==True):
         if ('x' not in column_type_list or 'y' not in column_type_list):
             raise ValueError("Please select X and Y columns or set the dataset to non-spatial data before proceeding.")
+<<<<<<< HEAD
         easting_index=column_type_list.index("x")
         northing_index=column_type_list.index("y")
         columns[:,easting_index][4]=0#set x, y and label columns as excluded
@@ -452,6 +455,18 @@ def combine_to_lrn_file(input_file,output_folder,columns,column_type_list,is_sca
         columns[:,label_index][4]=0
         columns[:,label_index][7]='label'
     
+=======
+        eastingIndex=column_type_list.index("x")
+        northingIndex=column_type_list.index("y")
+        columns[:,eastingIndex][4]=0#set x, y and label columns as excluded
+        columns[:,northingIndex][4]=0
+    labelIndex=None
+
+        columns[:,labelIndex][4]=0
+        columns[:,labelIndex][7]='label'
+    if('label' not in column_type_list):
+        labelIndex = 2
+>>>>>>> 0668f7692864579a5ffb376f737081440d4b5d1f
     if na_value !="":
         na_value=str(float(na_value))#make sure the string is in float format.
     """
@@ -465,9 +480,15 @@ def combine_to_lrn_file(input_file,output_folder,columns,column_type_list,is_sca
     
     eli nuo mukana kulkevat listat voi heittää kokonaan pois. mutta columns_included & columns_excluded jako tehdään yhä.
     """  
+<<<<<<< HEAD
         
     if(file_type=="tif"):
         write_from_tif_input(columns,output_folder,input_file,is_scaled,na_value)#ain't no labels, varying x&y cols or option for nonspatial in GeoTIFFs
+=======
+    
+    if(fileType=="tif"):
+        write_from_tif_input(columns,output_folder,inputFile,isScaled,na_value)#ain't no labels, varying x&y cols or option for nonspatial in GeoTIFFs(inputFile,output_folder,columns,column_type_list,isScaled,na_value=)
+>>>>>>> 0668f7692864579a5ffb376f737081440d4b5d1f
         
 
     if(file_type=="csv"):
