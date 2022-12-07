@@ -24,8 +24,8 @@ namespace SomUI.ViewModel
     public class SomTool //: ViewModelBase, INotifyPropertyChanged
     {
         private readonly ILogger logger = NLog.LogManager.GetCurrentClassLogger();
-        private string pythonPath = "C:/Users/plehtone/AppData/Local/Microsoft/WindowsApps/python.exe"; // used for debugging.
-        private bool usePyExes = true;//for switching running of scripts between packed python executables and full python installation. used for debugging.
+        private string pythonPath = "C:/Users/shautala/AppData/Local/Programs/Python/Python39/python.exe"; // used for debugging.
+        private bool usePyExes = false;//for switching running of scripts between packed python executables and full python installation. used for debugging.
         private ObservableCollection<Process> PythonProcesses = new ObservableCollection<Process>();
 
         private event PropertyChangedEventHandler PropertyChanged;
@@ -349,6 +349,31 @@ namespace SomUI.ViewModel
                 myProcessStartInfo.CreateNoWindow = true;
                 myProcessStartInfo.RedirectStandardOutput = true;
                 myProcessStartInfo.RedirectStandardError = true;
+
+
+
+                XmlDocument doc = new XmlDocument();
+
+                var dataStatsFilePath = Path.Combine(Model.OutputFolderTimestamped, "DataStats.xml");
+                try
+                {
+                    doc.Load(dataStatsFilePath);
+                    XmlNode root = doc.DocumentElement;
+                    XmlNode scaledNode = root.SelectSingleNode("descendant::" + "isScaled");
+                    Model.IsNormalized = bool.Parse(scaledNode.InnerText); //
+                    XmlNode spatialNode = root.SelectSingleNode("descendant::" + "isSpatial");
+                    Model.IsSpatial = bool.Parse(spatialNode.InnerText); //
+                    XmlNode nodataNode = root.SelectSingleNode("descendant::" + "noDataValue");
+                    Model.NoDataValue = nodataNode.InnerText;
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex, "Failed to read parameters from DataStats.txt -file. This may affect plotting results.");
+                    Model.IsNormalized = false;
+                    Model.IsSpatial = false;
+                    Model.NoDataValue = "";
+                }
+
 
 
                 if (usePyExes)

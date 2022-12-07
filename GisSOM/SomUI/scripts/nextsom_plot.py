@@ -97,14 +97,15 @@ cluster_hit_count=[]
 
 
 #labeling clusters in colorbar with format "cluster number:  number of data points in this cluster".
-for i in range (clusters,0,-1):
-    cluster_array=som_dict['clusters'].transpose()#TODO: figure out if this a problem elsewhere.
-    cluster_ticks.append(i-1)   
-    count=0
-    for bmu in som_dict['bmus']:
-        if (cluster_array[bmu[0]][bmu[1]])+1==i:
-            count+=1
-    cluster_tick_labels.append(str(i-1)+ "   " +str(count)) 
+if(clusters>1):
+    for i in range (clusters,0,-1):
+        cluster_array=som_dict['clusters'].transpose()#TODO: figure out if this a problem elsewhere.
+        cluster_ticks.append(i-1)   
+        count=0
+        for bmu in som_dict['bmus']:
+            if (cluster_array[bmu[0]][bmu[1]])+1==i:
+                count+=1
+        cluster_tick_labels.append(str(i-1)+ "   " +str(count)) 
         
 palette=sns.cubehelix_palette(n_colors=clusters, start=1,rot=4, gamma=1.0, hue=3, light=0.77, dark=0.15, reverse=False, as_cmap=False)
 formatted_palette=[]
@@ -646,10 +647,10 @@ def draw_number_of_hits():
         mpl.rcParams.update({'font.size': 32})  
         if(somy/somx>1.5):
             mpl.rcParams.update({'font.size': int(48/(somy/somx))})  #scale header font down if plot is narrow (i.e. x<y). This was a problem only in this, because the title is so long compared to the others
-        ax.set_title("Number of hits per SOM cell")
+        #ax.set_title("Number of hits per SOM cell")
  
         mpl.rcParams.update({'font.size': 30})  
-    ax.figure.savefig(working_dir+'/Som/somplot_' +str(len(som_data[0])-2)+'.png',bbox_inches='tight')
+    #ax.figure.savefig(working_dir+'/Som/somplot_' +str(len(som_data[0])-2)+'.png',bbox_inches='tight')
     mpl.rcParams.update({'font.size': 12})
     plt.clf()
     plt.cla()
@@ -673,7 +674,7 @@ if outgeofile is not None: #if spatial, draw geo plots
         if(redraw!="false"):
             plot_geospace_results_grid(geo_data, geo_headers, som_data)
         print("GeoSpace plots finished")
-if(int(max(som_data[:,len(som_data[0])-1]))>0): #draw som cluster plot if there is more than 1 cluster
+if(clusters>1): #draw som cluster plot if there is more than 1 cluster
     draw_som_clusters(som_data, som_table, annot_ticks, som_headers)
 
 draw_umatrix(som_data, som_table,grid, annot_ticks, som_headers)

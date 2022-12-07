@@ -1986,9 +1986,7 @@ namespace SomUI.ViewModel
                             DataPrepBrowserToolTip = "";
                             //refresh browser.
                         }
-                        //ei nyt ihan näin yksioikinen kase enää
-                        Model.NoDataValue = e.Data; //TODO //FIX  //BUG
-
+                        //Model.NoDataValue = e.Data; //Moved to XML.
                         //dialogService.ShowNotification("Failed to draw interactive plot.See the log file for details.", "Error");
                     }
                 }
