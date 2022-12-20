@@ -15,7 +15,7 @@
         FontSize="16"
         Closing="MainWindow_Closing"
         xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
-        DataContext="{Binding Source={StaticResource Locator}, Path=Main}" >
+        DataContext="{Binding Source={StaticResource Locator}, Path=Main}">
     <!--<i:Interaction.Triggers DataContext="{Binding Source={StaticResource Locator},Path=SomViewModel}">
         <i:EventTrigger EventName="Loaded" >
             <i:InvokeCommandAction Command="{Binding }" />

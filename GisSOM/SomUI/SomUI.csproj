@@ -8940,9 +8940,6 @@
     <Resource Include="scripts\nextsomcore\data\input_example_som_result.txt" />
     <Resource Include="scripts\nextsomcore\data\output1_example.txt" />
     <Resource Include="scripts\nextsomcore\data\output2_example.txt" />
-    <Resource Include="scripts\GisSOM_python_requirements.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
     <Content Include="scripts\draw_scatterplots.py">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

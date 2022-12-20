@@ -1,0 +1,11 @@
+{
+  "base_url": "/",
+  "hostname": "localhost",
+  "notebook_dir": "C:\\EsriTraining\\EAPA\\Data\\Projects\\Interacting with Maps",
+  "password": false,
+  "pid": 15688,
+  "port": 8778,
+  "secure": false,
+  "token": "",
+  "url": "http://localhost:8778/"
+}

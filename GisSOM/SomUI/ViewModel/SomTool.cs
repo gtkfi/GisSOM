@@ -25,7 +25,7 @@ namespace SomUI.ViewModel
     {
         private readonly ILogger logger = NLog.LogManager.GetCurrentClassLogger();
         private string pythonPath = "C:/Users/shautala/AppData/Local/Programs/Python/Python39/python.exe"; // used for debugging.
-        private bool usePyExes = false;//for switching running of scripts between packed python executables and full python installation. used for debugging.
+        private bool usePyExes = true;//for switching running of scripts between packed python executables and full python installation. used for debugging.
         private ObservableCollection<Process> PythonProcesses = new ObservableCollection<Process>();
 
         private event PropertyChangedEventHandler PropertyChanged;
@@ -45,7 +45,7 @@ namespace SomUI.ViewModel
 
 
         /// <summary>
-        /// Draw interactive plots
+        /// Launch interactive Data Preparation page
         /// </summary>
         /// <param name="Model">SomModel</param>
         /// <param name="ScriptOutput"></param>
@@ -892,7 +892,7 @@ namespace SomUI.ViewModel
         }
         
 
-        //This is running synchronosly atm. fix or remove altogether. is this necessary?
+        //This is running synchronosly atm. fix or remove altogether. is this really necessary?
         public async void AsyncHttpPost(string Uri, string Parameters)
         {
             Task.Run(async () =>
@@ -906,8 +906,6 @@ namespace SomUI.ViewModel
         /// <param name="URI"></param>
         public void HttpPost(string URI)// string Parameters, string method = "POST")
         {
-            //await Task.Run(async () =>
-            //{ HttpWebResponse httpWebResponse
                 try
                 {
                     System.Net.WebRequest req = System.Net.WebRequest.Create(URI);
@@ -915,14 +913,6 @@ namespace SomUI.ViewModel
                     req.Timeout = 10000;
                     req.ContentType = "application/x-www-form-urlencoded";
                     req.Method = "POST";
-                    //byte[] bytes; //= System.Text.Encoding.ASCII.GetBytes();
-                    //req.ContentLength = bytes.Length;
-                    //System.IO.Stream os = req.GetRequestStream();
-                    //os.Write(bytes, 0, bytes.Length);
-                    
-
-
-
                     using (HttpWebResponse httpWebResponse = (HttpWebResponse)req.GetResponse())
                     {
                     if (httpWebResponse.StatusDescription == "OK")
@@ -936,7 +926,8 @@ namespace SomUI.ViewModel
             }
                 catch (Exception e)
                 {
-                logger.Error(e);
+                if(!e.Message.ToLower().Contains("unable to connect")) //this isn't really cool, but spamming error messages to the log isn't good either. <- This would not be necessary if lifetime of interactive plots was managed in some other way than httpposts (proper binding to main process lifetime)
+                    logger.Error(e);
             }
         }
 
