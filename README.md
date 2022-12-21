@@ -60,6 +60,7 @@ If you want to contribute to GisSOM, you can just fork the repository, and submi
   
 ## History
 21.12.2022 GisSOM version 1.3.0  
+NOTE: Running the software requires read/write permissions, so make sure the installation path is to a folder with these permissions.  
 -Rework data preparation stage  
 -Add more informative errors on bad input data  
 
