@@ -101,7 +101,7 @@
                 </StatusBarItem>
             </StatusBar>
 
-        <dragablz:TabablzControl mah:TabControlHelper.IsUnderlined="True"  Grid.Row="1" Margin="0,3,0,0" BorderThickness="0" Style="{StaticResource MahAppsTabablzControlStyle}" ItemContainerStyle="{StaticResource MahAppsTrapezoidDragableTabItemStyle}"><!--Tällä pitäis olla joku source collection mitä pitäs käydä käpistelemässä ja pitäis lisätä manuaalisesti kadonnut tabi?-->
+        <dragablz:TabablzControl mah:TabControlHelper.Underlined="SelectedTabItem"  Grid.Row="1" Margin="0,3,0,0" BorderThickness="0" Style="{StaticResource MahAppsTabablzControlStyle}" ItemContainerStyle="{StaticResource MahAppsTrapezoidDragableTabItemStyle}"><!--Tällä pitäis olla joku source collection mitä pitäs käydä käpistelemässä ja pitäis lisätä manuaalisesti kadonnut tabi?-->
             <dragablz:TabablzControl.InterTabController>
                 <dragablz:InterTabController DataContext="{Binding Source={StaticResource Locator}, Path=TabViewModel}" InterTabClient="{Binding InterTabClient}" />
             </dragablz:TabablzControl.InterTabController>            

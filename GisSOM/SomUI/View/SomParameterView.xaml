@@ -162,7 +162,7 @@
                             VerticalAlignment="Center"  
                             DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}"  
                             IsDefault="True" Command="{Binding SelectFolderCommand}" 
-                            mah:ButtonHelper.PreserveTextCase="True">
+                            mah:ControlsHelper.ContentCharacterCasing="Normal">
                                     <!-- Command="{Binding SelectFileCommand}" Tämä sit toteuttaa vielä-->
                                     <Button.ToolTip>
                                         <TextBlock Text="{Binding Model.Output_Folder}"></TextBlock>
@@ -175,7 +175,7 @@
                         <UniformGrid Margin="0,-30,0,0">
                             <WrapPanel></WrapPanel>
                             <WrapPanel>
-                                <ToggleButton Name="AdvancedButton" FontSize="16" Style="{StaticResource MetroFlatToggleButton}" Content="Show Advanced parameters">
+                                    <ToggleButton Name="AdvancedButton" FontSize="16" Style="{StaticResource MahApps.Styles.ToggleButton.Flat}" Content="Show Advanced parameters">
                                     <ToggleButton.ToolTip>Advanced parameters for SOM calculation</ToggleButton.ToolTip>
                                 </ToggleButton>
                                 <!--DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsChecked="{Binding ShowAdvancedParams}"-->
@@ -190,8 +190,8 @@
                                         <Button
                                         Padding="20,10,20,10"
                                         Name="cancelButton"
-                                        mah:ButtonHelper.PreserveTextCase="True"
-                                        Style="{StaticResource AccentedSquareButtonStyle}"
+                                        mah:ControlsHelper.ContentCharacterCasing="Normal"
+                                        Style="{StaticResource MahApps.Styles.Button.Square.Accent}"
                                         BorderThickness="0"
                                         Visibility="{Binding IsBusy, Converter={StaticResource BoolToCollapsedVisibilityConverter}}"
                                         Command="{Binding KillPythonProcessesCommand}"                                    
@@ -200,8 +200,8 @@
                                         <Button
                         Padding="20,10,20,10"
                                     Name="runButton"
-                                    mah:ButtonHelper.PreserveTextCase="True"
-                        Style="{StaticResource AccentedSquareButtonStyle}"
+                                    mah:ControlsHelper.ContentCharacterCasing="Normal"
+                        Style="{StaticResource MahApps.Styles.Button.Square.Accent}"
                         BorderThickness="0"
                         Command="{Binding RunToolCommand}"                                    
                         DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}"
@@ -211,12 +211,13 @@
                                     <Button 
                         Padding="20,10,20,10"
                         BorderThickness="0"
-                        mah:ButtonHelper.PreserveTextCase="True"
-                        Style="{StaticResource AccentedSquareButtonStyle}"
-                        Margin="20,0,0,0" Command="{Binding GoToResultView}"                                      
+                        mah:ControlsHelper.ContentCharacterCasing="Normal"
+                        
+                        Margin="20,0,0,0" Command="{Binding GoToResultView}" FontSize="14" Style="{StaticResource MahApps.Styles.Button.Flat}"                                
                                         >Results</Button>
-                                    
-                                    <!--IsEnabled="{Binding ElementName=runButton, Path=IsEnabled}"-->
+                                    <!--Style="{StaticResource 	MahApps.	MahApps.Styles.ToggleButton.Flat}"-->
+
+
 
                                 </WrapPanel>
                         </UniformGrid>
@@ -279,7 +280,7 @@
                             VerticalAlignment="Center"  
                             DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}"  
                             IsDefault="True" Command="{Binding SelectSomCommand}" 
-                            mah:ButtonHelper.PreserveTextCase="True"
+                            mah:ControlsHelper.ContentCharacterCasing="Normal"
                             MinWidth="80">
                                         <!-- Command="{Binding SelectFileCommand}" Tämä sit toteuttaa vielä-->
                                         <Button.ToolTip>

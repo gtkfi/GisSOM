@@ -18,15 +18,8 @@ import pickle
 #import time
 
 
-"""Parse command line arguments
-
-Arguments used:
-input_file - Input file in lrn-format
-output_file_geospace - File to be used to save SOM results
-output_file_somspace - File to be used to save SOM results
-som_x - X-size of the map.
-som_y - Y-size of the map.
-epochs - Number of rounds the training is performed.
+"""
+Parse command line arguments
 """
 def parse_command_line():
     parser = argparse.ArgumentParser(description='Script for generating self organizing maps')
@@ -109,187 +102,153 @@ def run_command_line(args):
         pickle.dump(som, som_dictionary_file) #save som object to file.
 
 
-"""Run SOM training using XML input, and save the results. Uses NxtSomCore package to do the actual work.
-:param args: Command line arguments passed to script
-:type args: args
-"""
-def run_xml(args):   
-    nxtsomcore = NxtSomCore()
+
+
+def read_xml_input(args):
     tree = ET.parse(args.xmlfile)
     root = tree.getroot()   
     som_files=root.find('som_files')
     som_params=root.find('som_parameters')
     kmeans= som_params.find('kMeans')
-    input=som_files.find('input')
-    output_folder=""
+    input_node=som_files.find('input')
     initial_codebook=None
     if(root.find('som_files') is None):
         raise Exception("XML file does not contain proper definition for input")
     if(som_files.find('input') is not None):
-        input_file=som_files.find('input').text
+        args.input_file=som_files.find('input').text
     else:
         raise Exception("Input file is missing")
     if(som_files.find('output_somspace') is not None):
-        output_file_somspace=som_files.find('output_somspace').text
+        args.output_file_somspace=som_files.find('output_somspace').text
     else:
-        output_file_somspace="C:/Temp/Nextsom/result_som.txt"   
+        args.output_file_somspace="C:/Temp/Nextsom/result_som.txt"   #Is this still relevant? Ask BEAK.
     if(som_files.find('output_geospace') is not None):               
-        output_file_geospace=som_files.find('output_geospace').text  
+        args.outgeofile=som_files.find('output_geospace').text  
     else:
-        output_file_geospace=None      
+        args.outgeofile=None      
     if(som_files.find('output_folder') is not None):
-        output_folder=som_files.find('output_folder').text
+        args.output_folder=som_files.find('output_folder').text
     input_list_text=[]
-    if(len(input.findall('geotiff'))>1):
-        input_list= input.findall('geotiff')
+    if(len(input_node.findall('geotiff'))>1):
+        input_list= input_node.findall('geotiff')
         for item in input_list:
             input_list_text.append(item.text)
-        input_file= ",".join(input_list_text)
-
-    header = nxtsomcore.load_data(input_file)
+        args.input_file= ",".join(input_list_text)
+        
 
     if(som_params.find('som_x') is not None):
-        som_x=int(som_params.find('som_x').text)
+        args.som_x=int(som_params.find('som_x').text)
     else:
-        som_x=10
+        args.som_x=10
 
     if(som_params.find('som_y') is not None):
-        som_y=int(som_params.find('som_y').text)
+        args.som_y=int(som_params.find('som_y').text)
     else:
-        som_y=10
+        args.som_y=10
 
     if(som_params.find('nEpoch') is not None):
-        epochs=int(som_params.find('nEpoch').text)
+        args.epochs=int(som_params.find('nEpoch').text)
     else:
-        epochs=10
+        args.epochs=10
 
     if(som_params.find('codebook') is not None):
         initial_codebook=som_params.find('codebook').text       
 
 
     if(som_params.find('initialization') is not None):
-        initialization=som_params.find('initialization').text        
+        args.initialization=som_params.find('initialization').text        
     else:
-        initialization='random'
+        args.initialization='random'
 
     if(som_params.find('mapType') is not None):     
-        maptype=som_params.find('mapType').text
+        args.maptype=som_params.find('mapType').text
     else:
-        maptype='toroid'
+        args.maptype='toroid'
 
     if(som_params.find('gridType') is not None):        
-        gridtype=som_params.find('gridType').text
+        args.gridtype=som_params.find('gridType').text
     else:
-        gridtype='rectangular'
+        args.gridtype='rectangular'
 
     if(som_params.find('neighborhood') is not None):        
-        neighborhood=som_params.find('neighborhood').text
+        args.neighborhood=som_params.find('neighborhood').text
     else:
-        neighborhood='gaussian'
+        args.neighborhood='gaussian'
 
     if(som_params.find('std_coeff') is not None):        
-        std_coeff=som_params.find('std_coeff').text
+        args.std_coeff=som_params.find('std_coeff').text
     else:
-        std_coeff=0.5
+        args.std_coeff=0.5
 
     if(som_params.find('radius0') is not None):
-        radius0=som_params.find('radius0').text       
+        args.radius0=som_params.find('radius0').text       
     else:
-        radius0=0
+        args.radius0=0
 
     if(som_params.find('radiusN') is not None):    
-        radiusN=som_params.find('radiusN').text
+        args.radiusN=som_params.find('radiusN').text
     else:
-        radiusN=1
+        args.radiusN=1
 
     if(som_params.find('radiuscooling') is not None):		
-        radiuscooling= som_params.find('radiuscooling').text
+        args.radiuscooling= som_params.find('radiuscooling').text
     else:
-        radiuscooling='linear'
+        args.radiuscooling='linear'
 
     if(som_params.find('scalecooling') is not None):
-        scalecooling=som_params.find('scalecooling').text
+        args.scalecooling=som_params.find('scalecooling').text
     else:
-        scalecooling='linear'
+        args.scalecooling='linear'
    
     if(som_params.find('scale0') is not None):
-        scale0=som_params.find('scale0').text
+        args.scale0=som_params.find('scale0').text
     else:
-        scale0=0.1
+        args.scale0=0.1
 
     if(som_params.find('scaleN') is not None):
-        scaleN=som_params.find('scaleN').text
+        args.scaleN=som_params.find('scaleN').text
     else:
-        scaleN=0.01      
+        args.scaleN=0.01      
 
     if(som_params.find('kMeans') is not None):   
         if(kmeans.find('number') is not None):
-            kmeans_init=kmeans.find('number').text
+            args.kmeans_init=int(kmeans.find('number').text)
         else:
-            kmeans_init=5
+            args.kmeans_init=5
         if(kmeans.find('number_min') is not None):
-            kmeans_min=kmeans.find('number_min').text
+            args.kmeans_min=int(kmeans.find('number_min').text)
         else:
-            kmeans_min=2
+            args.kmeans_min=2
         if(kmeans.find('number') is not None):
-            kmeans_max=kmeans.find('number_max').text
+            args.kmeans_max=int(kmeans.find('number_max').text)
         else:
-            kmeans_max=25
-
+            args.kmeans_max=25
 
         if(initial_codebook is not None and initial_codebook != ""):
             with open(initial_codebook, 'rb') as som_dictionary_file:
                 som_dictionary = pickle.load(som_dictionary_file)
-                initial_codebook=som_dictionary['codebook']
-                initialization=None
+                args.initial_codebook=som_dictionary['codebook']
+                args.initialization=None
         else:
-            initial_codebook=None
-    som = nxtsomcore.train(
-        header['data'],
-        som_x,
-        som_y,
-        epochs,
-        verbose=2,
-        neighborhood=neighborhood,
-        std_coeff=float(std_coeff),
-        maptype=maptype,
-        radiuscooling=radiuscooling,
-        radius0=float(radius0),
-        radiusN=float(radiusN),
-        scalecooling=scalecooling,
-        scale0=float(scale0),
-        scaleN=float(scaleN),
-        initialization=initialization,
-        initialcodebook=initial_codebook,
-        gridtype=gridtype
-        )
-    if(output_folder==""):
-        output_folder="C:/Temp/NextSom"
+            args.initial_codebook=None
 
-    with open(output_folder+"/som.dictionary", 'wb') as som_dictionary_file:
-        pickle.dump(som, som_dictionary_file) #save som object to file.
-               
-    if(som_params.find('kMeans') is not None):   
-        som['clusters']=nxtsomcore.clusters(som,int(kmeans_min),int(kmeans_max),int(kmeans_init),output_folder) 
-    if output_file_geospace is not None:
-        nxtsomcore.save_geospace_result(output_file_geospace, header, som, output_folder,input_file) 
-    nxtsomcore.save_somspace_result(output_file_somspace, header, som)
-
+    return(args)
 
 
 """
-Main entry point.
+main
     
 """
 def main():
     
     args = parse_command_line()
 
-    if(args.xmlfile=='none'):
-        run_command_line(args)
+    if(args.xmlfile!='none'):#is there a reason for this being a string?
+        args=read_xml_input(args)
 
-    else:
-        run_xml(args)
-
+    
+    run_command_line(args)
+        
+    
 if __name__ == "__main__":
     main()

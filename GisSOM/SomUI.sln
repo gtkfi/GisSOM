@@ -1,13 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29728.190
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32505.173
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SomUI", "SomUI\SomUI.csproj", "{2EEED364-B45C-46A4-A203-59B1648B6379}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "GisSOM_Setup", "GisSOM_Setup\GisSOM_Setup.vdproj", "{FFB5E328-78BD-4661-AE55-5FEF766F5698}"
-EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "GisSOM_Install", "GisSOM_Install\GisSOM_Install.vdproj", "{40CEB010-DA03-461D-A168-53FFD0D77C5A}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "GisSOM_Setup", "GisSOM_Setup\GisSOM_Setup.vdproj", "{9CB5E32C-E96E-4D23-A737-A851E3C31B19}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,30 +17,13 @@ Global
 		{2EEED364-B45C-46A4-A203-59B1648B6379}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2EEED364-B45C-46A4-A203-59B1648B6379}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2EEED364-B45C-46A4-A203-59B1648B6379}.Release|Any CPU.Build.0 = Release|Any CPU
-		{FFB5E328-78BD-4661-AE55-5FEF766F5698}.Debug|Any CPU.ActiveCfg = Debug
-		{FFB5E328-78BD-4661-AE55-5FEF766F5698}.Release|Any CPU.ActiveCfg = Release
-		{40CEB010-DA03-461D-A168-53FFD0D77C5A}.Debug|Any CPU.ActiveCfg = Debug
-		{40CEB010-DA03-461D-A168-53FFD0D77C5A}.Release|Any CPU.ActiveCfg = Release
+		{9CB5E32C-E96E-4D23-A737-A851E3C31B19}.Debug|Any CPU.ActiveCfg = Debug
+		{9CB5E32C-E96E-4D23-A737-A851E3C31B19}.Release|Any CPU.ActiveCfg = Release
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {BC4DC74B-B765-4E58-A494-58E2543547E3}
-	EndGlobalSection
-	GlobalSection(TeamFoundationVersionControl) = preSolution
-		SccNumberOfProjects = 4
-		SccEnterpriseProvider = {4CA58AB2-18FA-4F8D-95D4-32DDF27D184C}
-		SccTeamFoundationServer = https://gtkkoodit.visualstudio.com/
-		SccLocalPath0 = .
-		SccProjectUniqueName1 = SomUI\\SomUI.csproj
-		SccProjectName1 = SomUI
-		SccLocalPath1 = SomUI
-		SccProjectUniqueName2 = GisSOM_Setup\\GisSOM_Setup.vdproj
-		SccProjectName2 = GisSOM_Setup
-		SccLocalPath2 = GisSOM_Setup
-		SccProjectUniqueName3 = GisSOM_Install\\GisSOM_Install.vdproj
-		SccProjectName3 = GisSOM_Install
-		SccLocalPath3 = GisSOM_Install
 	EndGlobalSection
 EndGlobal

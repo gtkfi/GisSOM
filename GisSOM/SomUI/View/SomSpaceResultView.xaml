@@ -31,7 +31,7 @@
                 </Button>
             </WrapPanel>-->
             <mah:MetroProgressBar DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsIndeterminate="True" Width="400" Margin="40" Visibility="{Binding SomImageList.Count, Converter={StaticResource CollectionCountToVisibilityConverter}}"></mah:MetroProgressBar>
-            <Button FontSize="14" Content="Show results in filesystem" FontWeight="Normal" mah:ButtonHelper.PreserveTextCase="True" Background="LightGray" BorderBrush="Black"
+            <Button FontSize="14" Content="Show results in filesystem" FontWeight="Normal" mah:ControlsHelper.ContentCharacterCasing="Normal" Background="LightGray" BorderBrush="Black"
                                 Margin="5" Width="auto"  HorizontalAlignment="right" VerticalAlignment="Center"  DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Visibility="{Binding SomImageList.Count, Converter={StaticResource InverseCollectionCountToVisibilityConverter}}"
                                 Command="{Binding ShowResultsInFileSystemCommand}" CommandParameter="Som" IsDefault="True"/>
 

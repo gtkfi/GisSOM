@@ -29,8 +29,6 @@ import pickle
 import pandas as pd
 from matplotlib.offsetbox import AnchoredOffsetbox, TextArea, VPacker # HPacker,
 from matplotlib.ticker import FormatStrFormatter
-#from loadfile import read_header
-#from nextsomcore import loadfile
 import math
 from matplotlib.lines import Line2D
 from plotting_functions import plot_hexa
@@ -46,19 +44,14 @@ parser.add_argument('--som_x',nargs='?', help='som x dimension')
 parser.add_argument('--som_y',nargs='?', help='som y dimension')
 parser.add_argument('--input_file',nargs='?', help='Input file(*.lrn)')
 parser.add_argument('--dir',nargs='?', help='Input file(*.lrn)')
-parser.add_argument('--original_data_dir', default=None, dest="original_data_dir", help='location of input columns with original data')
 parser.add_argument('--grid_type',nargs='?', help='grid type (square or hexa)')
 parser.add_argument('--redraw',nargs='?', help=' #whether to draw all plots, or only those required for clustering (true: draw all. false:draw only for clustering).')
 parser.add_argument('--outgeofile', default=None, dest="outgeofile", help='#som geospace results txt file')
-parser.add_argument('--eastingIndex', default=None, dest="eastingIndex", help='index of easting column')
-parser.add_argument('--northingIndex', default=None, dest="northingIndex", help='index of northing column')
-parser.add_argument('--labelIndex', default=None, dest="labelIndex", help='index of label column')
 parser.add_argument('--dataType', default=None, dest="dataType", help='Data type (scatter or grid)')
 parser.add_argument('--noDataValue', default='NA', dest="noDataValue", help='noData value')
 args=parser.parse_args()
 
 outsomfile=args.outsomfile  #somspace results txt file
-original_data_dir=args.original_data_dir
 somx=int(args.som_x)        
 somy=int(args.som_y)        
 input_file=args.input_file  #original input file 
@@ -70,14 +63,8 @@ outgeofile=None
 eastingIndex=None
 northingIndex=None
 if args.outgeofile is not None:
-    outgeofile=args.outgeofile        #geospace results txt file 
-if args.eastingIndex is not None:
-    eastingIndex=args.eastingIndex    
-if args.northingIndex is not None:
-    northingIndex=args.northingIndex  
-if args.labelIndex is not None:
-    labelIndex=args.labelIndex
-
+    outgeofile=args.outgeofile      
+labelIndex="-2" #TODO: Now that labelIndex is no longer a parameter, this system should be removed.
     
 
 
@@ -110,14 +97,15 @@ cluster_hit_count=[]
 
 
 #labeling clusters in colorbar with format "cluster number:  number of data points in this cluster".
-for i in range (clusters,0,-1):
-    cluster_array=som_dict['clusters'].transpose()#TODO: figure out if this a problem elsewhere.
-    cluster_ticks.append(i-1)   
-    count=0
-    for bmu in som_dict['bmus']:
-        if (cluster_array[bmu[0]][bmu[1]])+1==i:
-            count+=1
-    cluster_tick_labels.append(str(i-1)+ "   " +str(count)) 
+if(clusters>1):
+    for i in range (clusters,0,-1):
+        cluster_array=som_dict['clusters'].transpose()#TODO: figure out if this a problem elsewhere.
+        cluster_ticks.append(i-1)   
+        count=0
+        for bmu in som_dict['bmus']:
+            if (cluster_array[bmu[0]][bmu[1]])+1==i:
+                count+=1
+        cluster_tick_labels.append(str(i-1)+ "   " +str(count)) 
         
 palette=sns.cubehelix_palette(n_colors=clusters, start=1,rot=4, gamma=1.0, hue=3, light=0.77, dark=0.15, reverse=False, as_cmap=False)
 formatted_palette=[]
@@ -160,7 +148,17 @@ if(grid_type.lower()=="hexagonal"): #if grid shape is hexagonal, initialize corr
 else:
     grid=None
     
-if (labelIndex!="-2"):
+    
+header_line=""#check if file has label column in it
+with open(input_file,encoding='utf-8-sig') as fh:
+    fh.readline() #skip first 3 rows
+    fh.readline() #skip first 3 rows
+    fh.readline() #skip first 3 rows
+    header_line = fh.readline()
+colnames=header_line.split("\t")
+if('label' in colnames):
+    labelIndex=colnames.index('label')
+#if (labelIndex!="-2"):#eli tän checkin sijaan pitäs kattoa onko input filessä 'label' nimistä columnia hedereissä.
     annot_strings={}
     annot_strings_for_dict={}
     annot_data=[]
@@ -182,7 +180,7 @@ if (labelIndex!="-2"):
     annot_ticks=np.empty([somx, somy], dtype="<U32")
     bmus=som_dict["bmus"]
     counter=1
-    for i in range(0,len(outfile)):   #AA. eli jos nonspatial: -2 kusee. luultavasti ainakin tän takia. veikkaanpa että spatiaalilla on ton takia 2:n ekan skippi.      # ticks are added to list. annot_strings_for_dict stores them in a list, so that they can be sorted and reliably checked for duplicates including ones that are in different order.
+    for i in range(0,len(outfile)):   #AA. eli jos nonspatial: -2 sekoittaa. luultavasti ainakin tän takia. veikkaanpa että spatiaalilla on ton takia 2:n ekan skippi.      # ticks are added to list. annot_strings_for_dict stores them in a list, so that they can be sorted and reliably checked for duplicates including ones that are in different order.
         tick=annot_ticks[bmus[i][0]][bmus[i][1]]
         if(outfile[i]!='' and outfile[i]!= "nan" and outfile[i]!='NA' and outfile[i]!='NULL' and outfile[i]!='Null' and outfile[i]!='NoData' and outfile[i]!=args.noDataValue):#tähän jonon jatkoksi vielä noDataValue
             if (tick==''): 
@@ -204,6 +202,9 @@ if (labelIndex!="-2"):
      
     for i in range(1, len(annot_strings_for_dict)+1): 
         annot_strings_for_dict[str(i)].sort()
+    
+    #add a step: merge duplicates within a labeling group. BUT the below result must also be kept...
+    #eli joku unique filtteri vaan vetää eka tähän, sit jatko saa mennä aivan samaan tapaan.
     #merge duplicates:         
     for i in range(1, len(annot_strings_for_dict)+1):
         for j in range(1, len(annot_strings_for_dict)+1):
@@ -411,7 +412,7 @@ def draw_som_results(som_data, som_table,grid, annot_ticks, som_headers):
             mpl.rcParams.update({'font.size': 30})
             ax = plot_hexa(somx,somy,clusters,grid, hits, annot_ticks,cluster_tick_labels,title=som_headers[j+1], ptype='grid')   
             mpl.rcParams.update({'font.size': 32})           
-            ax.set_title(som_headers[j-1]) 
+            ax.set_title(som_headers[j]) 
             mpl.rcParams.update({'font.size': 32})  
         ax.figure.savefig(working_dir+'/Som/somplot_' +str(j-1)+'.png',bbox_inches='tight')#Creating the folder is done in C# side of things.    
         plt.clf()
@@ -503,8 +504,13 @@ def draw_som_clusters(som_data, som_table, annot_ticks, som_headers):
             headers = ["label", "som", "datapoint"]
         else:
             headers = ["label", "som"]
-        df.to_csv(working_dir+'/labels.csv', index=False, header=headers)
-
+        df.to_csv(working_dir+'/labels_flat.csv', index=False, header=headers)   #so in addition to this there should be a list thats written out in the format of current label legend?
+        #list_grouped=list(annot_strings.items())
+        array_grouped=np.array(list(annot_strings.items()))#dict to list and list to np array
+        for i in range(0,len(array_grouped)):
+            array_grouped[i][1]= array_grouped[i][1][(array_grouped[i][1].find(":")+1):len(array_grouped[i][1])]      #  ": "+ ','.join(annot_strings[str(i)])
+        np.savetxt(working_dir+'/labels_grouped.csv', array_grouped, delimiter=',', fmt='%s')
+        #df_grouped.to_csv(working_dir+'/labels_grouped.csv', index=False, header=headers)
 
 """
 Plot geospace clusters, if there is more than 1 cluster and input type is grid
@@ -641,10 +647,10 @@ def draw_number_of_hits():
         mpl.rcParams.update({'font.size': 32})  
         if(somy/somx>1.5):
             mpl.rcParams.update({'font.size': int(48/(somy/somx))})  #scale header font down if plot is narrow (i.e. x<y). This was a problem only in this, because the title is so long compared to the others
-        ax.set_title("Number of hits per SOM cell")
+        #ax.set_title("Number of hits per SOM cell")
  
         mpl.rcParams.update({'font.size': 30})  
-    ax.figure.savefig(working_dir+'/Som/somplot_' +str(len(som_data[0])-2)+'.png',bbox_inches='tight')
+    #ax.figure.savefig(working_dir+'/Som/somplot_' +str(len(som_data[0])-2)+'.png',bbox_inches='tight')
     mpl.rcParams.update({'font.size': 12})
     plt.clf()
     plt.cla()
@@ -668,7 +674,7 @@ if outgeofile is not None: #if spatial, draw geo plots
         if(redraw!="false"):
             plot_geospace_results_grid(geo_data, geo_headers, som_data)
         print("GeoSpace plots finished")
-if(int(max(som_data[:,len(som_data[0])-1]))>0): #draw som cluster plot if there is more than 1 cluster
+if(clusters>1): #draw som cluster plot if there is more than 1 cluster
     draw_som_clusters(som_data, som_table, annot_ticks, som_headers)
 
 draw_umatrix(som_data, som_table,grid, annot_ticks, som_headers)

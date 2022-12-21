@@ -19,7 +19,7 @@
                 <Button Name="BindingHelperButton" Visibility="Collapsed" DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Command="{Binding OpenPlotCommand}"></Button>
                 <Grid DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Visibility="{Binding Model.IsSpatial, Converter={StaticResource BoolToCollapsedVisibilityConverter}}">
                 <mah:MetroProgressBar DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" IsIndeterminate="True" Width="400" Margin="40" Visibility="{Binding GeoSpaceImageList.Count, Converter={StaticResource CollectionCountToVisibilityConverter}}"></mah:MetroProgressBar>
-                    <Button FontSize="14" Content="Show results in filesystem" FontWeight="Normal" mah:ButtonHelper.PreserveTextCase="True" Background="LightGray" BorderBrush="Black"
+                    <Button FontSize="14" Content="Show results in filesystem" FontWeight="Normal" mah:ControlsHelper.ContentCharacterCasing="Normal" Background="LightGray" BorderBrush="Black"
                                 Margin="5" Width="auto"  HorizontalAlignment="right" VerticalAlignment="Center"  DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}" Visibility="{Binding GeoSpaceImageList.Count, Converter={StaticResource InverseCollectionCountToVisibilityConverter}}"
                                 Command="{Binding ShowResultsInFileSystemCommand}" CommandParameter="Geo" IsDefault="True"/>
                 </Grid>

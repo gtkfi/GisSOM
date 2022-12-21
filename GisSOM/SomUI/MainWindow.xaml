@@ -8,14 +8,14 @@
         xmlns:Dialog="clr-namespace:MahApps.Metro.Controls.Dialogs;assembly=MahApps.Metro"
         xmlns:Views="clr-namespace:SomUI.View"
         mc:Ignorable="d"
-        Title="GisSOM 1.2.4" Height="900" Width="1200"
-        GlowBrush="{DynamicResource AccentColorBrush}"
-        TitleCaps="False"
+        Title="GisSOM 1.3" Height="900" Width="1200"
+        GlowBrush="{DynamicResource AccentColorBrush}"         
+        TitleCharacterCasing="Normal"
         ResizeMode="CanResizeWithGrip" 
         FontSize="16"
         Closing="MainWindow_Closing"
-                 xmlns:i="clr-namespace:System.Windows.Interactivity;assembly=System.Windows.Interactivity"
-        DataContext="{Binding Source={StaticResource Locator}, Path=Main}" >
+        xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+        DataContext="{Binding Source={StaticResource Locator}, Path=Main}">
     <!--<i:Interaction.Triggers DataContext="{Binding Source={StaticResource Locator},Path=SomViewModel}">
         <i:EventTrigger EventName="Loaded" >
             <i:InvokeCommandAction Command="{Binding }" />

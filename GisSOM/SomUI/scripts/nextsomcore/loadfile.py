@@ -49,7 +49,7 @@ def read_data_columns(header):
         data=read_csv_data_columns(header)
         return data
     else:
-        data=read_geotiff_data_columns()
+        data=read_geotiff_data_columns(header)
         return data
 
 

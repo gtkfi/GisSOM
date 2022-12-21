@@ -105,6 +105,10 @@ for j in range (clusters,0,-1):
                         
 
 
+
+server = flask.Flask(__name__)
+app = dash.Dash(server=server)
+
 """
 Create hexa grid plot and web page
 """
@@ -275,12 +279,12 @@ def run_square():
 
 
     
-server = flask.Flask(__name__)
+
 cluster_ticks_text=[]
 for i in range (clusters,0,-1):
     cluster_ticks_text.append(i-1)
     
-app = dash.Dash(server=server)
+
 if(gridshape!="hexagonal"):
     run_square()
     
@@ -303,7 +307,6 @@ def convert_x_value_to_index(value):
         return (int(value))
                   
     
-
 def shutdown_server(): #define shutdown route and function
     http_server.stop()
 @server.route('/shutdown', methods=['POST'])

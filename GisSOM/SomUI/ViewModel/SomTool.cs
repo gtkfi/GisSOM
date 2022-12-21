@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-//using GalaSoft.MvvmLight;
-//using GalaSoft.MvvmLight.CommandWpf;
 using SomUI.Model;
 using SomUI.Service;
 using NLog;
@@ -12,40 +10,29 @@ using System.Net;
 using CommonServiceLocator;
 using GalaSoft.MvvmLight.Ioc;
 using System.ComponentModel;
-//using System.Windows.Controls;
 using System.IO;
 using System.Diagnostics;
 using System.Collections.ObjectModel;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
-//using Microsoft.Win32;
-//using System.Text.RegularExpressions;
-//using System.Windows;
-//using MahApps.Metro.Controls;
-//using MahApps.Metro.Controls.Dialogs;
-//using System.Threading;
 using System.Xml;
-//using System.Xml.Linq;
 
 namespace SomUI.ViewModel
 {
-    /// Python process executables are launched from this VM. Most of the UI bound properties and interaction logic is handled by SomViewModel.
+    /// Python process executables are launched from this VM. Most of the UI bound properties and interaction logic is handled by SomViewModel. NOTE: This really shouldn't be a 
+    //ViewModel by definition? More of a model, or a "Tool" class separate from MVVM? at least not a ViewModel.   
     public class SomTool //: ViewModelBase, INotifyPropertyChanged
     {
-        //public int runningProcessCount = 0;
-        //public string flyOutText = "";
-        //public bool statusFlyOutOpen = false;
-        private string pythonLogText = "";
-        private readonly IDialogService dialogService;
-        //public string browserToolTip = ""; 
-        private ImageSource dataHistogram;
-        private bool isBusy = false;
         private readonly ILogger logger = NLog.LogManager.GetCurrentClassLogger();
-        private string pythonPath = "C:/Users/shautala/AppData/Local/Programs/Python/Python39/pythonw.exe"; // used for debugging.
+        private string pythonPath = "C:/Path/To/Your/Python/Python39/python.exe"; // used for debugging.
         private bool usePyExes = true;//for switching running of scripts between packed python executables and full python installation. used for debugging.
         private ObservableCollection<Process> PythonProcesses = new ObservableCollection<Process>();
 
         private event PropertyChangedEventHandler PropertyChanged;
+
+        /// <summary>
+        /// Initialize new instance of SomTool class
+        /// </summary>
         public SomTool()
         {
             this.logger = NLog.LogManager.GetCurrentClassLogger();
@@ -54,205 +41,27 @@ namespace SomUI.ViewModel
                 pythonPath = File.ReadAllText(Path.Combine(System.IO.Path.GetTempPath(), "GisSOM", "settingsFile.txt"));
             }
         }
-        public async Task SplitLrnFile(SomModel Model, Action<Process> ScriptOutput, Action<Process> ScriptError) 
-        {
-                
-                //PythonLogText = "";
+       
 
-                var scriptPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "scripts", "split_to_columns.py");
-                var executablepath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "scripts", "executables", "split_to_columns.exe");
-
-                ProcessStartInfo myProcessStartInfo;
-                if (usePyExes)
-                    myProcessStartInfo = new ProcessStartInfo(executablepath);
-                else
-                    myProcessStartInfo = new ProcessStartInfo(pythonPath);
-
-
-                myProcessStartInfo.UseShellExecute = false;
-                myProcessStartInfo.CreateNoWindow = true;
-                myProcessStartInfo.RedirectStandardOutput = true;
-                myProcessStartInfo.RedirectStandardError = true;                                                                          
-                if (usePyExes)
-                    myProcessStartInfo.Arguments = "\"" + Model.InputFile + "\"" + " " + "\"" + Model.Output_Folder + "\"";
-                else
-                    myProcessStartInfo.Arguments = "\"" + scriptPath + "\"" + " " + "\"" + Model.InputFile + "\"" + " " + "\"" + Model.Output_Folder + "\"";
-                myProcessStartInfo.Arguments = myProcessStartInfo.Arguments.Replace("\\", "/");
-                using (var myProcess = new Process())
-                {
-                    myProcess.StartInfo = myProcessStartInfo;
-                    ScriptOutput(myProcess);
-                    ScriptError(myProcess);
-                    myProcess.Start();
-                myProcess.BeginErrorReadLine();
-                myProcess.BeginOutputReadLine();
-                myProcess.WaitForExit();
-                    myProcess.Close();
-
-                };
-                var SomViewModel = ServiceLocator.Current.GetInstance<SomViewModel>();
-                SomViewModel.SelectedColumnIndex = -1;
-                SomViewModel.SelectedColumnIndex = 2;
-                
-          
-            
-        }
 
         /// <summary>
-        /// Draw histogram of the data column selected in the GUI data preparation stage.
+        /// Launch interactive Data Preparation page
         /// </summary>
-        public async Task<ImageSource> DrawHistogram(SomModel Model, int SelectedColumnIndex, bool IsSelectedNorthing, bool IsSelectedEasting) 
+        /// <param name="Model">SomModel</param>
+        /// <param name="ScriptOutput"></param>
+        /// <param name="ScriptError"></param>
+        public async Task DataPreparationInteractive(SomModel Model, Action<Process> ScriptOutput, Action<Process> ScriptError)
         {
-
-            if (SelectedColumnIndex > -1)
+            await Task.Run(async () =>
             {
-                var BitMapPath = string.Empty;
-                var scriptPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "scripts", "draw_histogram.py");
-                var executablepath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "scripts", "executables", "draw_histogram.exe");
-                string inputFile;
-                var dataPrepFolder = Path.Combine(Model.Output_Folder, "DataPreparation");
-
-                if (File.Exists(Path.Combine(dataPrepFolder, ("outfile" + SelectedColumnIndex + "_edited.npy")))) 
-                {
-                    inputFile = Path.Combine(dataPrepFolder, ("outfile" + SelectedColumnIndex + "_edited.npy"));
-                }
-                else
-                    inputFile = Path.Combine(dataPrepFolder, ("outfile" + SelectedColumnIndex + ".npy"));
-
-                //if (!File.Exists(scriptPath))
-                //  dialogService.ShowNotification("Python script not found", "Error");
-
-                if (!File.Exists(inputFile))
-                    inputFile = Path.Combine(dataPrepFolder, "outfile2.npy"); //defaults to column index 2 (usually "first data column")                                                                        
-                if (!File.Exists(inputFile))
-                {
-                    //PythonLogText += "Input file not found";
-                    logger.Error("Input file not found");
-                    logger.Trace("Input file not found");
-                }
-                    //dialogService.ShowNotification("Input file not found", "Error");
-              
+                //HttpPost("http://localhost:8051/shutdown", "message=shuts down interactive data preparation"); //Task t = 
+                      
+                //var dataPrepFolder = Path.Combine(Model.Output_Folder, "DataPreparation"); //Folder to save edited input file into                             
+                
                 ProcessStartInfo myProcessStartInfo;
-                if (usePyExes)
-                    myProcessStartInfo = new ProcessStartInfo(executablepath);
-                else
-                    myProcessStartInfo = new ProcessStartInfo(pythonPath);
+                var scriptPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "scripts", "data_preparation_interactive.py");         
+                var executablePath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "scripts", "executables", "data_preparation_interactive.exe");
 
-                myProcessStartInfo.UseShellExecute = false;
-                myProcessStartInfo.CreateNoWindow = true;
-                myProcessStartInfo.RedirectStandardOutput = true;
-                myProcessStartInfo.RedirectStandardError = true;
-                if (usePyExes)
-                    myProcessStartInfo.Arguments = "\"" + inputFile + "\"" + " " + "\"" + Model.Output_Folder + "\"" + " " + Model.NoDataValue; //inputFile or Model.InputFile?  keep it consistent.
-                else
-                    myProcessStartInfo.Arguments = "\"" + scriptPath + "\"" + " " + inputFile + " " + Model.Output_Folder + " " + Model.NoDataValue;
-
-                myProcessStartInfo.Arguments = myProcessStartInfo.Arguments.Replace("\\", "/");
-
-                using (var myProcess = new Process())
-                {
-                    myProcess.StartInfo = myProcessStartInfo;
-                    myProcess.Start();
-                    StreamReader myStreamReader = myProcess.StandardOutput;
-                    StreamReader errorReader = myProcess.StandardError;
-                    string errors = errorReader.ReadToEnd();
-                    string returnValue = myStreamReader.ReadLine();
-                    myProcess.WaitForExit();
-                    myProcess.Close();
-                    if (errors != "" && !errors.Contains("Warning")) //Make a more robust solution later
-                    {
-                        //PythonLogText += errors + "\r\n";
-                        //dialogService.ShowNotification("Failed to draw histogram. See the log file for details", "Error");   
-                        logger.Error(errors);
-                        return null;
-                    }
-                    returnValue = returnValue.Replace("(", "");
-                    returnValue = returnValue.Replace(")", "");
-                    returnValue = returnValue.Replace("'", "");
-                    Console.WriteLine("Value received from script: " + returnValue);  //returnvalue gives the parameters (col type, winsorize, log transformed...) saved in the column that was drawn.
-                    //Return value is saved to the model, and UI updates accordingly
-                    string[] processed_value = (returnValue.Split(new string[] { ", " }, StringSplitOptions.None));
-                    if (processed_value.Length < 2)
-                        processed_value = (returnValue.Split(new string[] { " " }, StringSplitOptions.None));
-                    Model.IsWinsorized = processed_value[0];
-                    Model.WinsorMin = processed_value[1];
-                    Model.WinsorMax = processed_value[2];
-                    Model.IsLogTransformed = processed_value[3];
-                    //Model.IsExcluded = processed_value[4];
-                };
-
-                ServiceLocator.SetLocatorProvider(() => SimpleIoc.Default); 
-                var SomViewModel = ServiceLocator.Current.GetInstance<SomViewModel>();
-                //if (SelectedColumnIndex == Model.EastingColumnIndex)
-                //    SomViewModel.IsSelectedEasting = true;
-                //else
-                //    SomViewModel.IsSelectedEasting = false;
-
-                //if (SelectedColumnIndex == Model.NorthingColumnIndex)
-                //    SomViewModel.IsSelectedNorthing = true;
-                //else
-                //    SomViewModel.IsSelectedNorthing = false;
-
-                    dataHistogram = null;
-                    BitMapPath = string.Empty;
-                    BitMapPath = Path.Combine(Model.Output_Folder, "SomHistogramTest.png");
-                    ImageSource imageSrc = BitmapFromUri(new Uri(BitMapPath));
-                    dataHistogram = imageSrc;
-                    return imageSrc;
-            }
-            return dataHistogram;
-            //});
-        }
-
-        /// <summary>
-        /// Function to edit data columns in the preparation stage: applying log transform, winsoring, excluding a column, selecting x and y columns.
-        /// Proper column is loaded according to SelectedColumnIndex parameter, and the respective data operations are passed on as parameters (User selects these in the UI and they are bound to Model).
-        /// </summary>
-        public void EditColumn(SomModel Model, int SelectedColumnIndex, bool IsSelectedNorthing, bool IsSelectedEasting, bool IsSelectedLabel, Action<Process> ScriptOutput, Action<Process> ScriptError) 
-        {
-            if (SelectedColumnIndex > -1)
-            {
-                //if (SelectedColumnIndex == Model.NorthingColumnIndex)
-                //{
-                //    if (IsSelectedNorthing == true)
-                //        Model.NorthingColumnIndex = SelectedColumnIndex;
-                //    else //Northing checkbox was unchecked(and this was the case where this column was marked as northing col)
-                //        Model.NorthingColumnIndex = -1;//set as -1 ("not selected")
-                //}
-                //else
-                //{
-                //    if (IsSelectedNorthing == true)
-                //        Model.NorthingColumnIndex = SelectedColumnIndex;
-                //}
-                //if (SelectedColumnIndex == Model.EastingColumnIndex)
-                //{
-                //    if (IsSelectedEasting == true)
-                //        Model.EastingColumnIndex = SelectedColumnIndex; 
-                //    else 
-                //        Model.EastingColumnIndex = -1;
-                //}
-                //else if (IsSelectedEasting == true)
-                //{
-                //    Model.EastingColumnIndex = SelectedColumnIndex;
-                //}
-                //if (SelectedColumnIndex == Model.LabelColumnIndex)
-                //{
-                //    if (IsSelectedLabel == true)
-                //        Model.LabelColumnIndex = SelectedColumnIndex; 
-                //    else 
-                //        Model.LabelColumnIndex = -1;
-                //}
-                //else if (IsSelectedLabel == true)
-                //{
-                //    Model.LabelColumnIndex = SelectedColumnIndex;
-                //}
-                //if (IsSelectedNorthing || IsSelectedEasting)
-                //    Model.IsExcluded = "0";   //if selected was set to northing or easting, force it to be excluded. --should removal of northing/easting remove exclusion as well? currently it does not.
-                var scriptPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "scripts", "edit_column.py");
-                var executablePath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "scripts", "Executables", "edit_column.exe");
-                string outfile = "outfile" + SelectedColumnIndex + ".npy";
-                var inputFile = Path.Combine(Model.Output_Folder, "DataPreparation", outfile);
-                ProcessStartInfo myProcessStartInfo;
                 if (usePyExes)
                     myProcessStartInfo = new ProcessStartInfo(executablePath);
                 else
@@ -262,131 +71,33 @@ namespace SomUI.ViewModel
                 myProcessStartInfo.CreateNoWindow = true;
                 myProcessStartInfo.RedirectStandardOutput = true;
                 myProcessStartInfo.RedirectStandardError = true;
-                if (usePyExes)
-                    myProcessStartInfo.Arguments = "\"" + inputFile + "\"" + " " + Model.IsWinsorized + " " + Model.WinsorMin + " " + Model.WinsorMax + " " + Model.IsLogTransformed + " " + Model.IsExcluded + " " + Model.NoDataValue;
-                else
-                    myProcessStartInfo.Arguments = "\"" + scriptPath + "\"" + " " + inputFile + " " + Model.IsWinsorized + " " + Model.WinsorMin + " " + Model.WinsorMax + " " + Model.IsLogTransformed + " " + Model.IsExcluded + " " + Model.NoDataValue;
 
+          
+                if (usePyExes)
+                    myProcessStartInfo.Arguments ="--input_file="+"\"" + Model.InputFile + "\"" + " " + "--output_folder="+ "\"" + Model.Output_Folder + "\"" + " " + "--data_shape="+"\"" + Model.DataShape + "\"";
+                else
+                    myProcessStartInfo.Arguments = "-u" + " " +"\"" + scriptPath + "\""+" "+ "--input_file="+"\"" + Model.InputFile + "\"" + " " + "--output_folder="+ "\"" + Model.Output_Folder + "\"" + " " + "--data_shape="+"\"" + Model.DataShape + "\"";
                 myProcessStartInfo.Arguments = myProcessStartInfo.Arguments.Replace("\\", "/");
+                Console.WriteLine(myProcessStartInfo.Arguments);
                 using (var myProcess = new Process())
                 {
+                    PythonProcesses.Add(myProcess);
                     myProcess.StartInfo = myProcessStartInfo;
                     ScriptOutput(myProcess);
                     ScriptError(myProcess);
                     myProcess.Start();
-                    myProcess.BeginErrorReadLine();
                     myProcess.BeginOutputReadLine();
-                    myProcess.WaitForExit();
+                    myProcess.BeginErrorReadLine();
                     myProcess.Close();
+                    PythonProcesses.Remove(myProcess);
                 };
-                try { 
-                Model.ColumnDataList[SelectedColumnIndex].LogTransformed=bool.Parse(Model.IsLogTransformed);
-                Model.ColumnDataList[SelectedColumnIndex].IsWinsorized = bool.Parse(Model.IsWinsorized);
-                Model.ColumnDataList[SelectedColumnIndex].WinsorMin = float.Parse(Model.WinsorMin);
-                Model.ColumnDataList[SelectedColumnIndex].WinsorMax = float.Parse(Model.WinsorMax);
-                }
-                catch (Exception) { }
 
-            }
+
+
+            });
         }
 
-        /// <summary>
-        /// Function to save the changes made in data preparation stage to the data file. Saves the data as EditedData.lrn
-        /// </summary>
-        public void SaveChanges(SomModel Model, int SelectedColumnIndex, bool IsSelectedNorthing, bool IsSelectedEasting, bool IsSelectedLabel, Action<Process> ScriptOutput, Action<Process> ScriptError)
-        {
-                   
-            //Model.ColumnDataList;
-            for (int i=0; i < Model.ColumnDataList.Count; i++)
-            {
-                if (Model.ColumnDataList[i].IsEasting == true)
-                {
-                    Model.EastingColumnIndex = i;
-                    Model.ColumnDataList[i].IsExcluded = true;
-                }
-                   
-                if (Model.ColumnDataList[i].IsNorthing == true)
-                {
-                    Model.NorthingColumnIndex = i;
-                    Model.ColumnDataList[i].IsExcluded = true;
-                }
-                    
-                if (Model.ColumnDataList[i].IsLabel == true)
-                {
-                    Model.LabelColumnIndex = i;
-                    Model.ColumnDataList[i].IsExcluded = true;
-                }
-                   
-            }
-            var scriptPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "scripts", "combine_to_lrn_file.py");
-            var executablePath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "scripts", "executables", "combine_to_lrn_file.exe");
-            ProcessStartInfo myProcessStartInfo;
-            if (usePyExes)
-                myProcessStartInfo = new ProcessStartInfo(executablePath);
-            else
-                myProcessStartInfo = new ProcessStartInfo(pythonPath);
 
-            myProcessStartInfo.UseShellExecute = false;
-            myProcessStartInfo.CreateNoWindow = true;
-            myProcessStartInfo.RedirectStandardOutput = true;
-            myProcessStartInfo.RedirectStandardError = true;
-
-            if (usePyExes)
-                myProcessStartInfo.Arguments = "--input_file=" + "\"" + Model.InputFile + "\"" + " " + "--output_folder=" + "\"" + Model.Output_Folder + "\"";  //in the case of geoTiff input file, northing and easting can be ignored (they are locked in to the file structure).
-            else
-                myProcessStartInfo.Arguments = "\"" + scriptPath + "\"" + " " + "--input_file=" + "\"" + Model.InputFile + "\"" + " " + "--output_folder=" + "\"" + Model.Output_Folder + "\"";
-
-            if (Model.IsSpatial)
-            {
-                myProcessStartInfo.Arguments += " " + "--eastingIndex=" + "\"" + Model.EastingColumnIndex + "\"";
-                myProcessStartInfo.Arguments += " " + "--northingIndex=" + "\"" + Model.NorthingColumnIndex + "\"";
-            }
-            if (Model.NoDataValue.Length > 0)
-            {
-                myProcessStartInfo.Arguments += " " + "--na_value=" + "\"" + Model.NoDataValue + "\"";
-            }
-            if (Model.IsNormalized)
-            {
-                myProcessStartInfo.Arguments += " " + "--normalized=" + "\"true\""+" "+"--min_N="+ "\""+Model.NormalizationMin+ "\"" + " " +"--max_N="+ "\"" + Model.NormalizationMax+"\"" ;
-            }
-            var excludeList =new List<string>();
-            var scaleMinList = new List<double>();
-            var scaleMaxList = new List<double>(); //this is not an elegant solution, needs reworking.
-            var logTransformList = new List<string>();
-            var winsorList = new List<string>();
-            var winsorMinList = new List<float>();
-            var winsorMaxList = new List<float>();
-            for (int i=0; i < Model.ColumnDataList.Count(); i++)
-            {
-                excludeList.Add(Model.ColumnDataList[i].IsExcluded.ToString());
-                scaleMinList.Add(Model.ColumnDataList[i].NormalizationMin);
-                scaleMaxList.Add(Model.ColumnDataList[i].NormalizationMax);
-                logTransformList.Add(Model.ColumnDataList[i].LogTransformed.ToString());
-                winsorList.Add(Model.ColumnDataList[i].IsWinsorized.ToString());
-                winsorMinList.Add(Model.ColumnDataList[i].WinsorMin);
-                winsorMaxList.Add(Model.ColumnDataList[i].WinsorMax);
-            }
-             
-            myProcessStartInfo.Arguments += " " + "--exclude_list=" + string.Join(",", excludeList) + " " + "--scale_min_list=" + string.Join(",", scaleMinList) + " " + "--scale_max_list=" + string.Join(",", scaleMaxList) + " " + "--log_transform_list=" + string.Join(",", logTransformList) + " " +"--winsor_list="+string.Join(",",winsorList)+" "+ "--winsor_min_list="+string.Join(",",winsorMinList)+" "+"--winsor_max_list="+string.Join(",",winsorMinList);
-            myProcessStartInfo.Arguments += " " + "--label_index=" + "\"" + Model.LabelColumnIndex + "\"";
-            //Model.ColumnDataList
-            myProcessStartInfo.Arguments = myProcessStartInfo.Arguments.Replace("\\", "/");
-            using (var myProcess = new Process())
-            {
-                myProcess.StartInfo = myProcessStartInfo;
-                ScriptOutput(myProcess);
-                ScriptError(myProcess);
-                myProcess.Start();
-                myProcess.BeginErrorReadLine();
-                myProcess.BeginOutputReadLine();
-                myProcess.WaitForExit();
-                myProcess.Close();
-            };
-            ServiceLocator.SetLocatorProvider(() => SimpleIoc.Default);
-            var main = ServiceLocator.Current.GetInstance<MainViewModel>();
-            main.ChangeToSomParameterView();
-
-        }
 
         /// <summary>
         /// Main somoclu run
@@ -396,7 +107,9 @@ namespace SomUI.ViewModel
         /// <param name="GeoSpaceImageList"></param>
         /// <param name="BoxPlotList"></param>
         /// <param name="ScatterPlotList"></param>
-        /// <param name="PlotList"></param>
+        /// <param name="ClusterPlotList"></param>
+        /// <param name="ScriptOutput"></param>
+        /// <param name="ScriptError"></param>
         public async Task RunTool(SomModel Model, ObservableCollection<ImageSource> SomImageList, ObservableCollection<ImageSource> GeoSpaceImageList, ObservableCollection<ImageSource> BoxPlotList, ObservableCollection<ImageSource> ScatterPlotList, ObservableCollection<ImageSource> ClusterPlotList, Action<Process> ScriptOutput, Action<Process> ScriptError)//kopiona model?
         {
             await Task.Run(() =>
@@ -418,6 +131,26 @@ namespace SomUI.ViewModel
                 //    Model.Output_file_geospace = Model.OutputFolderTimestamped + "/result_geo.txt";
                 //else
                 //    Model.Output_file_geospace = "";
+
+
+                XmlDocument doc = new XmlDocument();
+                
+                var dataStatsFilePath = Path.Combine(Model.OutputFolderTimestamped, "DataStats.xml");
+                try
+                {
+                    doc.Load(dataStatsFilePath);
+                    XmlNode root = doc.DocumentElement;
+                    XmlNode scaledNode = root.SelectSingleNode("descendant::" + "isScaled");
+                    Model.IsNormalized = bool.Parse(scaledNode.InnerText); //
+                    XmlNode spatialNode = root.SelectSingleNode("descendant::" + "isSpatial");
+                    Model.IsSpatial = bool.Parse(spatialNode.InnerText); //
+                }
+                catch(Exception ex)
+                {
+                    logger.Error(ex, "Failed to read parameters from DataStats.txt -file. Data will be assumed to be non-spatial and non-scaled");
+                    Model.IsNormalized = false;
+                    Model.IsSpatial = false;
+                }
                 Model.Output_file_geospace = Model.OutputFolderTimestamped + "/result_geo.txt";//Change it so that even when the run is nonspatial a dummy file is written
                 string inputFile;
                 if (File.Exists(editedData))
@@ -474,18 +207,18 @@ namespace SomUI.ViewModel
 
 
 
-                var scaleMinList = new List<double>();
-                var scaleMaxList = new List<double>(); //this is not an elegant solution, needs reworking.
+                //var scaleMinList = new List<double>();
+                //var scaleMaxList = new List<double>(); //this is not an elegant solution, needs reworking.
 
-                for (int i = 0; i < Model.ColumnDataList.Count(); i++)//in this case exclusion and inclusion is already handed on the data side of things, so take only included cols.
-                {
-                    if (Model.ColumnDataList[i].IsExcluded == false)
-                    {
-                        scaleMinList.Add(Model.ColumnDataList[i].NormalizationMin);
-                        scaleMaxList.Add(Model.ColumnDataList[i].NormalizationMax);
-                    }
+                //for (int i = 0; i < Model.ColumnDataList.Count(); i++)//in this case exclusion and inclusion is already handed on the data side of things, so take only included cols.
+                //{
+                //    if (Model.ColumnDataList[i].IsExcluded == false)
+                //    {
+                //        scaleMinList.Add(Model.ColumnDataList[i].NormalizationMin);
+                //        scaleMaxList.Add(Model.ColumnDataList[i].NormalizationMax);
+                //    }
 
-                }
+                //}
 
 
                 ProcessStartInfo myProcessStartInfo;
@@ -576,6 +309,8 @@ namespace SomUI.ViewModel
         /// <param name="GeoSpaceImageList"></param>
         /// <param name="BoxPlotList"></param>
         /// <param name="ScatterPlotList"></param>
+        /// <param name="ScriptOutput"></param>
+        /// <param name="ScriptError"></param>
         public async Task DrawResults(string redraw, SomModel Model, ObservableCollection<ImageSource> SomImageList, ObservableCollection<ImageSource> GeoSpaceImageList, ObservableCollection<ImageSource> BoxPlotList, ObservableCollection<ImageSource> ScatterPlotList, Action<Process> ScriptOutput, Action<Process> ScriptError)
         {
             
@@ -616,19 +351,44 @@ namespace SomUI.ViewModel
                 myProcessStartInfo.RedirectStandardError = true;
 
 
+
+                XmlDocument doc = new XmlDocument();
+
+                var dataStatsFilePath = Path.Combine(Model.OutputFolderTimestamped, "DataStats.xml");
+                try
+                {
+                    doc.Load(dataStatsFilePath);
+                    XmlNode root = doc.DocumentElement;
+                    XmlNode scaledNode = root.SelectSingleNode("descendant::" + "isScaled");
+                    Model.IsNormalized = bool.Parse(scaledNode.InnerText); //
+                    XmlNode spatialNode = root.SelectSingleNode("descendant::" + "isSpatial");
+                    Model.IsSpatial = bool.Parse(spatialNode.InnerText); //
+                    XmlNode nodataNode = root.SelectSingleNode("descendant::" + "noDataValue");
+                    Model.NoDataValue = nodataNode.InnerText;
+                }
+                catch (Exception ex)
+                {
+                    logger.Error(ex, "Failed to read parameters from DataStats.txt -file. This may affect plotting results.");
+                    Model.IsNormalized = false;
+                    Model.IsSpatial = false;
+                    Model.NoDataValue = "";
+                }
+
+
+
                 if (usePyExes)
                     myProcessStartInfo.Arguments =  " "+"--outsomfile=" + "\"" + Model.Output_file_somspace + "\"" + " " + "--som_x=" + Model.Som_x + " " + "--som_y=" + Model.Som_y + " " + "\"" + "--input_file=" + inputFile + "\"" + " " + "\"" + "--dir=" + Model.OutputFolderTimestamped + "\"" + " " + "--grid_type=" + Model.GridShape + " --noDataValue=\"" + Model.NoDataValue + "\"";
                 else
                     myProcessStartInfo.Arguments = "-u" + " " + "\"" + somPlotScriptPath + "\"" + " " + "--outsomfile=" + "\"" + Model.Output_file_somspace + "\"" + " " + "--som_x=" + Model.Som_x + " " + "--som_y=" + Model.Som_y + " " + "--input_file=" + "\"" + inputFile + "\"" + " " + "--dir=" + "\"" + Model.OutputFolderTimestamped + "\"" + " " + "--grid_type=" + Model.GridShape + " --noDataValue=\"" + Model.NoDataValue + "\"";
 
-                myProcessStartInfo.Arguments += " " + "--labelIndex=" + "\"" + Model.LabelColumnIndex + "\"";
-                myProcessStartInfo.Arguments += " " + "--original_data_dir=" + "\"" + Model.Output_Folder + "\"";
+                //myProcessStartInfo.Arguments += " " + "--labelIndex=" + "\"" + Model.LabelColumnIndex + "\"";
+                //myProcessStartInfo.Arguments += " " + "--original_data_dir=" + "\"" + Model.Output_Folder + "\"";
                 myProcessStartInfo.Arguments += " " + "--dataType=" + "\"" + Model.DataShape + "\"";
                 if(Model.IsSpatial==true)
                 {
                     myProcessStartInfo.Arguments += " " + "--outgeofile=" + "\"" + Model.Output_file_geospace + "\"";
-                    myProcessStartInfo.Arguments += " " + "--eastingIndex=" + "\"" + Model.EastingColumnIndex + "\"";
-                    myProcessStartInfo.Arguments += " " + "--northingIndex=" + "\"" + Model.NorthingColumnIndex + "\"";                   
+                    //myProcessStartInfo.Arguments += " " + "--eastingIndex=" + "\"" + Model.EastingColumnIndex + "\"";
+                    //myProcessStartInfo.Arguments += " " + "--northingIndex=" + "\"" + Model.NorthingColumnIndex + "\"";                   
                 }
               myProcessStartInfo.Arguments = myProcessStartInfo.Arguments.Replace("\\", "/");
                 using (var myProcess = new Process())
@@ -646,6 +406,14 @@ namespace SomUI.ViewModel
                 };               
             });          
         }
+
+        /// <summary>
+        /// Add new label data to an already existing som result
+        /// </summary>
+        /// <param name="Model"></param>
+        /// <param name="ScriptOutput"></param>
+        /// <param name="ScriptError"></param>
+        /// <returns></returns>
         public async Task NewLabelData(SomModel Model, Action<Process> ScriptOutput, Action<Process> ScriptError)
         {
             await Task.Run(() =>
@@ -678,9 +446,7 @@ namespace SomUI.ViewModel
                     myProcess.BeginOutputReadLine();
                     myProcess.WaitForExit();
                     myProcess.Close();
-                };
-                //does i gots to put this inside the await or not? for it to execute after.
-                dataHistogram = null;                
+                };            
 
                 var BitMapPath = Path.Combine(Model.OutputFolderTimestamped,"Som", "cluster_new.png");
                 ImageSource imageSrc = BitmapFromUri(new Uri(BitMapPath));
@@ -691,6 +457,14 @@ namespace SomUI.ViewModel
                 Model.NewLabelLegend = imageSrc;                
             });
         }
+
+        /// <summary>
+        /// Draw scatterplots from som results
+        /// </summary>
+        /// <param name="Model"></param>
+        /// <param name="ScriptOutput"></param>
+        /// <param name="ScriptError"></param>
+        /// <returns></returns>
         public async Task DrawScatterPlots(SomModel Model, Action<Process> ScriptOutput, Action<Process> ScriptError)
         {
 
@@ -759,11 +533,13 @@ namespace SomUI.ViewModel
         /// Draw interactive plots
         /// </summary>
         /// <param name="Model">SomModel</param>
+        /// <param name="ScriptOutput"></param>
+        /// <param name="ScriptError"></param>
         public async Task DrawResultsInteractive(SomModel Model, Action<Process> ScriptOutput, Action<Process> ScriptError)
         {
             await Task.Run(async () =>
             {
-                HttpPost("http://localhost:8050/shutdown", "message=shuts down interactive plots"); //Task t = 
+                HttpPost("http://localhost:8050/shutdown");//, "message=shuts down interactive plots"); //Task t = 
                 //await t;
 
 
@@ -839,7 +615,7 @@ namespace SomUI.ViewModel
             await Task.Run(() =>
             {
                 
-                
+               
                 var scriptPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "scripts", "cluster_wrap.py");
                 var executablePath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "scripts", "executables", "cluster_wrap.exe");
                 var som = Path.Combine(Model.OutputFolderTimestamped, "som.dictionary");
@@ -929,6 +705,8 @@ namespace SomUI.ViewModel
         /// </summary>
         /// <param name="Model"></param>
         /// <param name="ClusterPlotList"></param>
+        /// <param name="ScriptOutput"></param>
+        /// <param name="ScriptError"></param>
         public async void DrawClusters(SomModel Model, ObservableCollection<ImageSource> ClusterPlotList, Action<Process> ScriptOutput, Action<Process> ScriptError)
         {
             await Task.Run(() =>
@@ -1109,81 +887,25 @@ namespace SomUI.ViewModel
                     PythonProcesses.Remove(myProcess);
                 };
 
-                //re-draw results with new clustering
             });
             
         }
+        
 
-        /// <summary>
-        /// Function to draw selected cluster
-        /// 
-        /// DEPRECATED
-        /// 
-        /// </summary>
-        public void RunDashDraw(SomModel Model, Action<Process> ScriptOutput, Action<Process> ScriptError)
-        {
-            string scriptPath;
-            string executablePath;
-            if (Model.DataShape == "grid")
-            {
-                scriptPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "scripts", "nextsom_plot_dash_draw.py");
-                executablePath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "scripts", "executables", "nextsom_plot_dash_draw.exe");
-            }
-            else
-            {
-                scriptPath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "scripts", "nextsom_plot_dash_draw_scatter.py");
-                executablePath = Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "scripts", "executables", "nextsom_plot_dash_draw_scatter.exe");
-            }
-            ProcessStartInfo myProcessStartInfo;
-            if (usePyExes)
-                myProcessStartInfo = new ProcessStartInfo(executablePath);
-            else
-                myProcessStartInfo = new ProcessStartInfo(pythonPath);
-            myProcessStartInfo.UseShellExecute = false;
-            myProcessStartInfo.CreateNoWindow = true;
-            myProcessStartInfo.RedirectStandardOutput = true;
-            myProcessStartInfo.RedirectStandardError = true;
-
-            //if (usePyExes)
-            //    myProcessStartInfo.Arguments = "\"" + Model.Output_file_somspace + "\"" + " " + Model.Som_x + " " + Model.Som_y + " " + "\"" + Model.Output_file_geospace + "\"" + " " + "\"" + Model.InputFile + "\"" + " " + "\"" + Model.OutputFolderTimestamped + "\"" + " " + "\"" + Model.InteractiveType + "\"" + " " + "\"" + Model.SelectedInteractiveColumn + "\"";
-            //else
-            //    myProcessStartInfo.Arguments = "\"" + scriptPath + "\"" + " " + "\"" + Model.Output_file_somspace + "\"" + " " + Model.Som_x + " " + Model.Som_y + " " + "\"" + Model.Output_file_geospace + "\"" + " " + "\"" + Model.InputFile + "\"" + " " + "\"" + Model.OutputFolderTimestamped + "\"" + " " + "\"" + Model.InteractiveType + "\"" + " "+ "\"" + Model.SelectedInteractiveColumn + "\"";//vikan interactivetypen tilalle joku uusi selectedInteractiveColumn
-
-            if (usePyExes)
-                myProcessStartInfo.Arguments = " " + "--outsomfile=" + "\"" + Model.Output_file_somspace + "\"" + " " + "--som_x=" + Model.Som_x + " " + "--som_y=" + Model.Som_y + " " +"--outgeofile=" + "\"" + Model.Output_file_geospace + "\""+" "+ "--input_file=" + "\""+ Model.InputFile + "\"" + " " + "\"" + "--dir=" + Model.OutputFolderTimestamped + "\"" + " " + "--interactive_type="+ "\"" + Model.InteractiveType + "\"" + " "+ "--selected_column=" + "\"" + Model.SelectedInteractiveColumn + "\"";
-            else
-                myProcessStartInfo.Arguments = "-u" + " " + "\"" + scriptPath + "\"" + " " + "--outsomfile=" + "\"" + Model.Output_file_somspace + "\"" + " " + "--som_x=" + Model.Som_x + " " + "--som_y=" + Model.Som_y + " " + "--outgeofile=" + "\"" + Model.Output_file_geospace + "\"" +" "+ "--input_file=" + "\"" + Model.InputFile + "\"" + " " + "--dir=" + "\"" + Model.OutputFolderTimestamped + "\"" + " " + "--interactive_type=" + "\"" + Model.InteractiveType + "\"" + " "+ "--selected_column=" + "\"" + Model.SelectedInteractiveColumn + "\"";
-
-
-            myProcessStartInfo.Arguments = myProcessStartInfo.Arguments.Replace("\\", "/");
-
-            using (var myProcess = new Process())
-            {
-                PythonProcesses.Add(myProcess);
-                myProcess.StartInfo = myProcessStartInfo;
-                ScriptOutput(myProcess);
-                ScriptError(myProcess);
-                myProcess.Start();
-                myProcess.BeginErrorReadLine();
-                myProcess.BeginOutputReadLine();
-                myProcess.WaitForExit();
-                myProcess.Close();
-                PythonProcesses.Remove(myProcess);
-            };
-        }
-
+        //This is running synchronosly atm. fix or remove altogether. is this really necessary?
         public async void AsyncHttpPost(string Uri, string Parameters)
         {
             Task.Run(async () =>
             {
-                HttpPost(Uri, Parameters);
+                HttpPost(Uri);//, Parameters);
             });
         }
-        //For sending the shutdown message to the interactive plot.
-        public void HttpPost(string URI, string Parameters)
+        /// <summary>
+        /// For sending the shutdown message to the interactive plots.
+        /// </summary>
+        /// <param name="URI"></param>
+        public void HttpPost(string URI)// string Parameters, string method = "POST")
         {
-            //await Task.Run(async () =>
-            //{ HttpWebResponse httpWebResponse
                 try
                 {
                     System.Net.WebRequest req = System.Net.WebRequest.Create(URI);
@@ -1191,28 +913,29 @@ namespace SomUI.ViewModel
                     req.Timeout = 10000;
                     req.ContentType = "application/x-www-form-urlencoded";
                     req.Method = "POST";
-                    byte[] bytes = System.Text.Encoding.ASCII.GetBytes(Parameters);
-                    req.ContentLength = bytes.Length;
-                    System.IO.Stream os = req.GetRequestStream();
-                    os.Write(bytes, 0, bytes.Length);
-                    os.Close();
-
-
-
                     using (HttpWebResponse httpWebResponse = (HttpWebResponse)req.GetResponse())
                     {
                     if (httpWebResponse.StatusDescription == "OK")
                     {
                         Debug.Write("Ok");
-                        logger.Trace("Shutting down interactive plot");
+                        //logger.Trace("Shutting down interactive plot");
 
                     }
+                    //os.Close();
                 }         
             }
                 catch (Exception e)
-                {             
+                {
+                if(!e.Message.ToLower().Contains("unable to connect")) //this isn't really cool, but spamming error messages to the log isn't good either. <- This would not be necessary if lifetime of interactive plots was managed in some other way than httpposts (proper binding to main process lifetime)
+                    logger.Error(e);
             }
         }
+
+        /// <summary>
+        /// Create bitmap from uri
+        /// </summary>
+        /// <param name="source"></param>
+        /// <returns></returns>
         public static ImageSource BitmapFromUri(Uri source)
         {
 
@@ -1226,73 +949,13 @@ namespace SomUI.ViewModel
             return bitmap;
         }
 
-        
-        public static ImageSource BitmapWithCacheFromUri(Uri source)
-        {
-            var bitmap = new BitmapImage();
-            bitmap.BeginInit();
-            bitmap.UriSource = source;
-            //bitmap.CreateOptions = BitmapCreateOptions.IgnoreImageCache; //Image cache must be ignored, to be able to update the images
-            //bitmap.CacheOption = BitmapCacheOption.OnLoad;
-            bitmap.EndInit();
-            bitmap.Freeze(); //Bitmap must be freezable, so it can be accessed from other threads.
-            return bitmap;
-        }
-        /// <summary>
-        /// Hacky solution for refreshing browser (for interactive plot)
-        /// </summary>
-        //public string BrowserToolTip
-        //{
-        //    get
-        //    {
-        //        return "";
-        //    }
-        //    set
-        //    {
-        //        OnPropertyChanged();
-        //        RaisePropertyChanged("BrowserToolTip");
-        //    }
-        //}
 
+        //Generic WPF MVVM OnPropertyChanged method. Not sure why this exists though, there is probably some reason.
         protected virtual void OnPropertyChanged([CallerMemberName] string propertyName = null)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
-
-        //public string PythonLogText
-        //{
-        //    get { return pythonLogText; }
-        //    set
-        //    {
-        //        if (pythonLogText == value) return;
-        //        pythonLogText = value;
-        //        OnPropertyChanged(); 
-        //    }
-        //}
-
-        //public string FlyOutText
-        //{
-        //    get { return flyOutText; }
-        //    set
-        //    {
-        //        if (flyOutText == value) return;
-        //        flyOutText = value;
-        //        OnPropertyChanged();
-        //    }
-        //}
-
-        //public bool StatusFlyOutOpen
-        //{
-        //    get { return statusFlyOutOpen; }
-        //    set
-        //    {
-        //        if (statusFlyOutOpen == value) return;
-        //        statusFlyOutOpen = value;
-        //        OnPropertyChanged();
-        //    }
-        //}
-
-
+    
 
         private void ClearFolder(string folderPath)
         {
@@ -1313,60 +976,8 @@ namespace SomUI.ViewModel
             }
         }
 
-        //private void AddToImageCollection(ObservableCollection<ImageSource> ImageCollection, string PlotDirectory)
-        //{ 
-        //    ImageSource imageSrc;
-        //    DirectoryInfo d;
-        //    FileInfo[] Files;
-        //    string fullPath;
-        //    try
-        //    {
-        //        App.Current.Dispatcher.Invoke((Action)delegate         //delegate to access different thread
-        //        {
-        //            ImageCollection.Clear();
-        //        });
-        //        d = new DirectoryInfo(PlotDirectory);
-        //        Files = d.GetFiles("*.png").OrderBy(p => p.CreationTime).ToArray(); //Getting png files
-        //        foreach (FileInfo file in Files)
-        //        {
-        //            fullPath = Path.Combine(PlotDirectory, file.Name);
-        //            imageSrc = BitmapFromUri(new Uri(fullPath)); 
-        //            App.Current.Dispatcher.Invoke((Action)delegate
-        //            {
-        //                ImageCollection.Add(imageSrc);
-        //            });
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        logger.Error(ex, "Failed to show output images");
-        //    }
-        //}
 
-        /// <summary>
-        /// /
-        /// </summary>
-        public async Task KillRunningPythonProcesses()
-        {
-
-            await Task.Run(() =>
-            {
-                foreach (Process p in PythonProcesses)
-                {
-                    try { 
-                    p.Kill();
-                    }
-                    catch(Exception e)
-                    {
-                        logger.Trace("Could not kill python process:"+e);
-                    }
-                }
-                HttpPost("http://localhost:8050/shutdown", "message=shuts down interactive plots");
-            });
-                
-            
-
-        }
+        ///Method for editing RunStats.xml document, currently used only for adding q-error after som run? might become deprecated in future versions.
         private void EditRunStatsXml( string xmlPath, string elementName, string elementText)
         {
             XmlDocument doc = new XmlDocument();
@@ -1376,14 +987,20 @@ namespace SomUI.ViewModel
             myNode.InnerText = elementText;//
             doc.Save(xmlPath);
         }
+
+        /// <summary>
+        /// Method for writing som run parameters and statistics into xml file.
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="xmlPath"></param>
         private void WriteRunStatsXml(SomModel model, string xmlPath) 
         {
             XmlWriter xmlWriter = XmlWriter.Create(xmlPath);
 
-            xmlWriter.WriteStartDocument();
+            xmlWriter.WriteStartDocument(); 
             xmlWriter.WriteStartElement("som");
 
-            xmlWriter.WriteStartElement("som_x");
+            xmlWriter.WriteStartElement("som_x"); //convenience method for writing xml element? xmlwriter, element name and content as parameters? is it necessary?
             xmlWriter.WriteString(model.Som_x.ToString());
             xmlWriter.WriteEndElement();
 

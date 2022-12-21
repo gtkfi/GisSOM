@@ -20,6 +20,9 @@ namespace SomUI.View
     /// </summary>
     public partial class ClusterView : UserControl
     {
+        /// <summary>
+        /// Initalizes a new instance of ClusterView class
+        /// </summary>
         public ClusterView()
         {
             InitializeComponent();

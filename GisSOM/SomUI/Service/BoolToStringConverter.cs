@@ -8,6 +8,9 @@ using System.Windows.Data;
 
 namespace SomUI.Service
 {
+    /// <summary>
+    /// Valueconverter for converting Bool to  string
+    /// </summary>
     public class BoolToStringConverter : IValueConverter
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
@@ -26,6 +29,9 @@ namespace SomUI.Service
             return null;
         }
 
+        /// <summary>
+        /// Valueconverter for converting a string back to bool
+        /// </summary>
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
         {
             //throw new NotImplementedException();

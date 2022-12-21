@@ -98,7 +98,7 @@
             <!--<Slider Width="400" HorizontalAlignment="Center" Minimum="2" Maximum="25" TickPlacement="BottomRight" TickFrequency="1" IsSnapToTickEnabled="True" /> --><!--Jos tässä ois aina accurate numba of clustahs niin tää vois olla ihan legit kontrolli.-->
             <WrapPanel Width="400">
                 <TextBlock>Select number of clusters to use:</TextBlock>
-                <mah:NumericUpDown DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}"  Width="100" Margin="20,0,0,0" HasDecimals="False" Minimum="{Binding Model.KMeans_min_last_calculation}"  Value="{Binding SelectedClusterIndex, Mode=TwoWay}"></mah:NumericUpDown>
+                <mah:NumericUpDown DataContext="{Binding Source={StaticResource Locator}, Path=SomViewModel}"  Width="100" Margin="20,0,0,0" NumericInputMode="Numbers" Minimum="{Binding Model.KMeans_min_last_calculation}"  Value="{Binding SelectedClusterIndex, Mode=TwoWay}"></mah:NumericUpDown>
                 <!--Min ja max bindiin-->
                 <!--Maximum="{Binding Model.KMeans_max_last_calculation}"--><!--This is disabled, until RunStats.txt or some other place reliably provides the current kmeans min and max
                 , and these are read also when doing clustering on Older results loaded in.-->
