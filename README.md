@@ -59,6 +59,10 @@ private bool usePyExes = false;
 If you want to contribute to GisSOM, you can just fork the repository, and submit a pull request with your changes.  
   
 ## History
+21.12.2022 GisSOM version 1.3.0  
+-Rework data preparation stage  
+-Add more informative errors on bad input data  
+
 15.03.2022 GisSOM version 1.2.4 release  
 NOTE: There's a known issue when using .TIF input,the software will give warnings on proj.db and PROJ installation. The software can still be used despite these warnings.  
 -Added Cancel button for som calculation  
