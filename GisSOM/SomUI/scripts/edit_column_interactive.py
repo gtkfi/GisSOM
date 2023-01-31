@@ -18,9 +18,9 @@ def edit_column(column, isWinsorized,winsorMin,winsorMax,isLogTransformed,Column
         #Logarithm
         columnValues=column[8:]
         columnValues=columnValues[(columnValues!=noDataValue)]   
-        if(isLogTransformed=='true' or isLogTransformed=='True'):    
-            column[3]='true'
-            min_value=(min(columnValues.astype(float))).astype(float)  # select min value for normalizing data:
+        if(isLogTransformed=='true' or isLogTransformed=='True'):
+            min_value=np.nanmin(columnValues.astype(np.float64)) # select min value for normalizing data
+            column[3]='true' 
             for x in range(8, len(column)): 
                 if(column[x]!=noDataValue):
                     column[x]=(float(column[x])-float(min_value))+1 #normalize data before log transform so that all values >=1
@@ -43,8 +43,8 @@ def edit_column(column, isWinsorized,winsorMin,winsorMax,isLogTransformed,Column
     #input doesn't contain nodata value:
     else:
         columnValues=column[8:]
-        if(isLogTransformed=='true' or isLogTransformed=='True'): 
-            min_value=(min(columnValues.astype(float))).astype(float)#take min value for normalizing log data
+        if(isLogTransformed=='true' or isLogTransformed=='True'):
+            min_value=np.nanmin(columnValues.astype(np.float64)) # select min value for normalizing data            
             column[3]='true'
             for x in range(8, len(column)):
                 column[x]=(float(column[x])-float(min_value))+1 #Normalize data for log transform, so that all values >=1
