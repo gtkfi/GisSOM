@@ -37,6 +37,8 @@ Interactive plot:
 
 To download the installer for GisSOM, go to the Releases-section (<https://github.com/gtkfi/GisSOM/releases>), and download the GisSOM_Release.zip -file, which contains the installer along with the user manual and license information.
 
+If you wish to use an upgraded version of GisSOM for non-commercial purposes, please contact johanna.pesonen@gtk.fi. The current version (1.6) is not publicly available, but it is significantly more stable and fluent than the version (1.3) available on this GitHub site. New features have also been added. The upgrade was done by the Geological Survey of Finland in the EIT Raw Materials DroneSOM project.
+
 ## About the code
 
 GisSOM is implemented in C# and XAML using the Windows Presentation Foundation (WPF) framework, according to the Model-View-ViewModel (MVVM) design model. Computational tasks related to data preprocessing, som calculation and visualization of the results are handled by Python scripts. The software uses Python version 3.7, and the Python scripts and the python environment are bundled into executables using PyInstaller.
