@@ -6,9 +6,11 @@
 
 GisSOM performs unsupervised self-organizing maps (SOM) clustering to a given dataset. Results are presented in the SOM coordinates, and also spatial coordinates if given. Also scatter and boxplots are used to visualize the per cluster data distribution.  
 
-<img src="/Screenshots/som_2.png" width="800" height="400">
-  
-<sup>Som results plotted in somspace</sup>
+## Installation
+
+To download the installer for GisSOM, go to the Releases-section (<https://github.com/gtkfi/GisSOM/releases>), and download the GisSOM_Release.zip -file, which contains the installer along with the user manual and license information.
+
+If you wish to use an upgraded version of GisSOM for non-commercial purposes, please contact johanna.pesonen@gtk.fi. The current version (1.6) is not publicly available, but it is significantly more stable and fluent than the version (1.3) available on this GitHub site. New features have also been added. The upgrade was done by the Geological Survey of Finland in the EIT Raw Materials DroneSOM project.
 
 ## Features
 
@@ -22,6 +24,10 @@ Results in SOM and geographic coordinates
 * Easy installation
   * Built-in Python scripts
 
+<img src="/Screenshots/som_2.png" width="800" height="400">
+  
+<sup>Som results plotted in somspace</sup>
+
 ## Screenshots
 
 Data preparation:  
@@ -32,12 +38,6 @@ Results in Geospace:
   
 Interactive plot:  
 <img src="/Screenshots/Interactive_plot.gif" width="800" height="400">  
-
-## Installation
-
-To download the installer for GisSOM, go to the Releases-section (<https://github.com/gtkfi/GisSOM/releases>), and download the GisSOM_Release.zip -file, which contains the installer along with the user manual and license information.
-
-If you wish to use an upgraded version of GisSOM for non-commercial purposes, please contact johanna.pesonen@gtk.fi. The current version (1.6) is not publicly available, but it is significantly more stable and fluent than the version (1.3) available on this GitHub site. New features have also been added. The upgrade was done by the Geological Survey of Finland in the EIT Raw Materials DroneSOM project.
 
 ## About the code
 
